@@ -1,0 +1,792 @@
+import * as vscode from "vscode"
+import * as path from "path"
+import { promises as fs } from "fs"
+import pMap from "p-map"
+import { GitWatcher, GitWatcherEvent } from "../../../shared/GitWatcher"
+import { getCurrentBranch, isGitRepository } from "./git-utils"
+import { normalizeProjectId } from "../../../utils/kilo-config-file"
+import { getGitRepositoryInfo } from "../../../utils/git"
+import { getServerManifest, searchCode, upsertChunks, deleteFiles, getProfile } from "./api-client"
+import {
+	MAX_FILE_SIZE_BYTES
+} from "../constants"
+import { ServerManifest } from "./types"
+import { scannerExtensions } from "../shared/supported-extensions"
+import { VectorStoreSearchResult } from "../interfaces/vector-store"
+import { ClineProvider } from "../../../core/webview/ClineProvider"
+import { RooIgnoreController } from "../../../core/ignore/RooIgnoreController"
+import { ICodeParser } from "../interfaces"
+import { CodeParser } from "../processors"
+import { ContextProxy } from "../../../core/config/ContextProxy"
+import { ProfileData } from "../../../shared/WebviewMessage"
+
+interface ManagedIndexerConfig {
+	gptChatByApiKey: string | null,
+	gptChatProfileHasSubscription: boolean | null,
+}
+
+/**
+ * Serializable error information for managed indexing operations
+ */
+interface ManagedIndexerError {
+	/** Error type for categorization */
+	type: "setup" | "scan" | "file-upsert" | "git" | "manifest" | "config"
+	/** Human-readable error message */
+	message: string
+	/** ISO timestamp when error occurred */
+	timestamp: string
+	/** Optional context about what was being attempted */
+	context?: {
+		filePath?: string
+		branch?: string
+		operation?: string
+	}
+	/** Original error details if available */
+	details?: string
+}
+
+interface ManagedIndexerWorkspaceFolderState {
+	workspaceFolder: vscode.WorkspaceFolder
+	gitBranch: string | null
+	projectId: string | null
+	manifest: ServerManifest | null
+	isIndexing: boolean
+	watcher: GitWatcher | null
+	repositoryUrl?: string
+	error?: ManagedIndexerError
+	/** In-flight manifest fetch promise - reused if already fetching */
+	manifestFetchPromise: Promise<ServerManifest> | null
+	/** AbortController for the current indexing operation */
+	currentAbortController?: AbortController
+	ignoreController: RooIgnoreController | null
+}
+
+function logGitEvent(event: GitWatcherEvent) {
+	// Handle different event types
+	switch (event.type) {
+		case "branch-changed": {
+			console.info(`[ManagedIndexer] Branch changed from ${event.previousBranch} to ${event.newBranch}`)
+			break
+		}
+
+		case "commit": {
+			console.info(`[ManagedIndexer] Commit detected from ${event.previousCommit} to ${event.newCommit}`)
+			break
+		}
+
+		case "start": {
+			console.info(
+				`[ManagedIndexer] Watcher started on branch ${event.branch} ${event.isBaseBranch ? `(base)` : `(feature)`} - doing initial indexing`
+			)
+			break
+		}
+	}
+}
+
+/**
+ * Serialize workspace folder state to a plain object for communication
+ * @param state The workspace folder state to serialize
+ * @returns A serializable object representation of the state
+ */
+function serializeWorkspaceFolderState(state: ManagedIndexerWorkspaceFolderState) {
+	return {
+		workspaceFolderPath: state.workspaceFolder.uri.fsPath,
+		workspaceFolderName: state.workspaceFolder.name,
+		gitBranch: state.gitBranch,
+		projectId: state.projectId,
+		repositoryUrl: state.repositoryUrl,
+		isIndexing: state.isIndexing,
+		hasManifest: !!state.manifest,
+		manifestFileCount: state.manifest ? Object.keys(state.manifest.files).length : 0,
+		hasWatcher: !!state.watcher,
+		error: state.error
+			? {
+				type: state.error.type,
+				message: state.error.message,
+				timestamp: state.error.timestamp,
+				context: state.error.context
+			}
+			: undefined
+	}
+}
+
+export class ManagedIndexer implements vscode.Disposable {
+	static prevInstance: ManagedIndexer
+
+	static getInstance(): ManagedIndexer {
+		if (!ManagedIndexer.prevInstance) {
+			throw new Error("[ManagedIndexer.getInstance()] no available instance")
+		}
+
+		return ManagedIndexer.prevInstance
+	}
+
+	// Handle changes to vscode workspace folder changes
+	workspaceFoldersListener: vscode.Disposable | null = null
+	// kilocode_change: Listen to configuration changes from ContextProxy
+	configChangeListener: vscode.Disposable | undefined | null = null
+	config: ManagedIndexerConfig | null = null
+	profile: ProfileData | null = null
+	isActive = false
+
+	/**
+	 * Tracks state that depends on workspace folders
+	 */
+	workspaceFolderState: ManagedIndexerWorkspaceFolderState[] = []
+
+	private readonly codeParser: ICodeParser = new CodeParser()
+
+	constructor(public contextProxy: ContextProxy) {
+		ManagedIndexer.prevInstance = this
+	}
+
+	private async onConfigurationChange(config: ManagedIndexerConfig): Promise<void> {
+		console.info("[ManagedIndexer] Configuration changed, restarting...", {
+			hasToken: !!config.gptChatByApiKey
+		})
+		this.config = config
+		this.dispose()
+		await this.start()
+		// Send updated state after restart
+		this.sendStateToWebview()
+	}
+
+	async fetchConfig(): Promise<ManagedIndexerConfig> {
+		const gptChatByApiKey = this.contextProxy.getSecret("gptChatByApiKey")
+		this.profile = await getProfile(gptChatByApiKey)
+		const gptChatProfileHasSubscription = this.contextProxy.getValue("gptChatProfileHasSubscription")
+
+		this.config = {
+			gptChatByApiKey: gptChatByApiKey ?? null,
+			gptChatProfileHasSubscription: gptChatProfileHasSubscription ?? false
+		}
+
+		return this.config
+	}
+
+	isEnabled(): boolean {
+		return this.profile?.hasSubscription === true &&
+			this.profile.indexingType === 'server';
+	}
+
+	/**
+	 * Send the complete managed indexer state to the webview
+	 */
+	sendStateToWebview(stateOverride?: ManagedIndexerWorkspaceFolderState, fileCount?: number) {
+		const state = {
+			isEnabled: this.isEnabled(),
+			isActive: this.isActive,
+			workspaceFolders: this.workspaceFolderState.map(serializeWorkspaceFolderState)
+		}
+		if (stateOverride && fileCount) {
+			const index = this.workspaceFolderState.indexOf(stateOverride)
+			if (index > -1) {
+				const folderState = state.workspaceFolders[index]
+				if (folderState) {
+					folderState.manifestFileCount = fileCount
+				}
+			}
+		}
+		const provider = ClineProvider.getVisibleInstance()
+		if (provider) {
+			provider.postMessageToWebview({
+				type: "managedIndexerState",
+				managedIndexerEnabled: state.isEnabled,
+				managedIndexerState: state.workspaceFolders
+			})
+		}
+	}
+
+	async start() {
+		console.log("[ManagedIndexer] Starting ManagedIndexer")
+
+		this.configChangeListener = this.contextProxy.onManagedIndexerConfigChange(
+			this.onConfigurationChange.bind(this)
+		)
+
+		vscode.workspace.onDidChangeWorkspaceFolders(this.onDidChangeWorkspaceFolders.bind(this))
+
+		const workspaceFolderCount = vscode.workspace.workspaceFolders?.length ?? 0
+
+		if (!workspaceFolderCount) {
+			return
+		}
+
+		await this.fetchConfig()
+
+		this.sendStateToWebview()
+
+		if (!this.isEnabled()) {
+			return
+		}
+
+		this.isActive = true
+
+		if (!vscode.workspace.workspaceFolders) {
+			return
+		}
+
+		// Build workspaceFolderState for each workspace folder
+		const states = await Promise.all(
+			vscode.workspace.workspaceFolders.map(async (workspaceFolder) => {
+				const cwd = workspaceFolder.uri.fsPath
+
+				// Initialize state with workspace folder
+				const state: ManagedIndexerWorkspaceFolderState = {
+					workspaceFolder,
+					gitBranch: null,
+					projectId: null,
+					manifest: null,
+					isIndexing: false,
+					watcher: null,
+					repositoryUrl: undefined,
+					manifestFetchPromise: null,
+					ignoreController: null
+				}
+
+				// Check if it's a git repository
+				if (!(await isGitRepository(cwd))) {
+					return null
+				}
+
+				// Step 1: Get git information
+				try {
+					const [{ repositoryUrl }, gitBranch] = await Promise.all([
+						getGitRepositoryInfo(cwd),
+						getCurrentBranch(cwd)
+					])
+					state.gitBranch = gitBranch
+					state.repositoryUrl = repositoryUrl
+
+					// Step 2: Get project configuration
+					const projectId = normalizeProjectId(repositoryUrl)
+
+					if (!projectId) {
+						console.log("[ManagedIndexer] No project ID found for workspace folder", cwd)
+						return null
+					}
+					state.projectId = projectId
+
+					// Step 3: Fetch server manifest
+					try {
+						if (!this.config?.gptChatByApiKey) {
+							throw new Error("Missing required configuration for manifest fetch")
+						}
+
+						state.manifest = await getServerManifest(
+							projectId,
+							gitBranch,
+							this.config?.gptChatByApiKey,
+							state.currentAbortController?.signal
+						)
+					} catch (error) {
+						const errorMessage = error instanceof Error ? error.message : String(error)
+						console.error(`[ManagedIndexer] Failed to fetch manifest for ${cwd}: ${errorMessage}`)
+						state.error = {
+							type: "manifest",
+							message: `Failed to fetch server manifest: ${errorMessage}`,
+							timestamp: new Date().toISOString(),
+							context: {
+								operation: "fetch-manifest",
+								branch: gitBranch
+							},
+							details: error instanceof Error ? error.stack : undefined
+						}
+						return state
+					}
+
+					// Step 4: Create git watcher
+					try {
+						const watcher = new GitWatcher({ cwd })
+						state.watcher = watcher
+						const ignoreController = new RooIgnoreController(cwd)
+						await ignoreController.initialize()
+						state.ignoreController = ignoreController
+
+						// Register event handler
+						watcher.onEvent(this.onEvent.bind(this))
+					} catch (error) {
+						const errorMessage = error instanceof Error ? error.message : String(error)
+						console.error(`[ManagedIndexer] Failed to start watcher for ${cwd}: ${errorMessage}`)
+						state.error = {
+							type: "scan",
+							message: `Failed to start file watcher: ${errorMessage}`,
+							timestamp: new Date().toISOString(),
+							context: {
+								operation: "start-watcher",
+								branch: gitBranch
+							},
+							details: error instanceof Error ? error.stack : undefined
+						}
+						return state
+					}
+
+					return state
+				} catch (error) {
+					const errorMessage = error instanceof Error ? error.message : String(error)
+					console.error(`[ManagedIndexer] Failed to get git info for ${cwd}: ${errorMessage}`)
+					state.error = {
+						type: "git",
+						message: `Failed to get git information: ${errorMessage}`,
+						timestamp: new Date().toISOString(),
+						context: {
+							operation: "get-git-info"
+						},
+						details: error instanceof Error ? error.stack : undefined
+					}
+					return state
+				}
+			})
+		)
+
+		// @ts-ignore
+		this.workspaceFolderState = states.filter((s) => s !== null)
+
+		// Start watchers
+		await Promise.all(
+			this.workspaceFolderState.map(async (state) => {
+				await state.watcher?.start()
+			})
+		)
+
+		// Send initial state after setup
+		this.sendStateToWebview()
+	}
+
+	dispose() {
+		this.configChangeListener?.dispose()
+		this.configChangeListener = null
+
+		this.workspaceFoldersListener?.dispose()
+		this.workspaceFoldersListener = null
+
+		// Dispose all watchers from workspaceFolderState
+		this.workspaceFolderState.forEach((state) => {
+			state.watcher?.dispose()
+			state.ignoreController?.dispose()
+		})
+		this.workspaceFolderState = []
+
+		this.isActive = false
+	}
+
+	/**
+	 * Get or fetch the manifest for a workspace state.
+	 * If a fetch is already in progress, returns the same promise.
+	 * This prevents duplicate fetches and ensures all callers wait for the same result.
+	 */
+	private async getManifest(
+		state: ManagedIndexerWorkspaceFolderState,
+		branch: string,
+		force = false
+	): Promise<ServerManifest> {
+		// If we're already fetching for this branch, return the existing promise
+		if (state.manifestFetchPromise && state.gitBranch === branch && !force) {
+			console.info(`[ManagedIndexer] Reusing in-flight manifest fetch for branch ${branch}`)
+			return state.manifestFetchPromise
+		}
+
+		// Update branch BEFORE starting fetch so concurrent calls know we're fetching for this branch
+		state.gitBranch = branch
+
+		// Start a new fetch and cache the promise
+		state.manifestFetchPromise = (async () => {
+			try {
+				const projectId = normalizeProjectId(state.repositoryUrl)
+
+				if (!projectId) {
+					throw new Error(`No project ID found for workspace folder ${state.workspaceFolder.uri.fsPath}`)
+				}
+				state.projectId = projectId
+
+				// Ensure we have the necessary configuration
+				if (!this.config?.gptChatByApiKey) {
+					throw new Error("Missing required configuration for manifest fetch")
+				}
+
+				const manifest = await getServerManifest(
+					state.projectId,
+					branch,
+					this.config?.gptChatByApiKey
+				)
+
+				state.manifest = manifest
+				console.info(
+					`[ManagedIndexer] Successfully fetched manifest for branch ${branch} (${Object.keys(manifest.files).length} files)`
+				)
+
+				// Clear any previous manifest errors
+				if (state.error?.type === "manifest") {
+					state.error = undefined
+				}
+
+				// Send state update after successful manifest fetch
+				this.sendStateToWebview()
+
+				return manifest
+			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : String(error)
+				console.error(`[ManagedIndexer] Failed to fetch manifest for branch ${branch}: ${errorMessage}`)
+
+				state.error = {
+					type: "manifest",
+					message: `Failed to fetch manifest: ${errorMessage}`,
+					timestamp: new Date().toISOString(),
+					context: {
+						operation: "fetch-manifest",
+						branch
+					},
+					details: error instanceof Error ? error.stack : undefined
+				}
+
+				// Send state update after error
+				this.sendStateToWebview()
+
+				throw error
+			} finally {
+				// Clear the promise cache after completion (success or failure)
+				state.manifestFetchPromise = null
+			}
+		})()
+
+		return state.manifestFetchPromise
+	}
+
+	async onEvent(event: GitWatcherEvent): Promise<void> {
+		if (!this.isActive) {
+			return
+		}
+
+		const state = this.workspaceFolderState.find((s) => s.watcher === event.watcher)
+
+		if (!state || !state.watcher) {
+			console.warn("[ManagedIndexer] Received event for unknown watcher")
+			return
+		}
+
+		// Skip processing if state is not fully initialized
+		if (!state.projectId || !state.gitBranch) {
+			console.warn("[ManagedIndexer] Received event for incompletely initialized workspace folder")
+			return
+		}
+
+		// Cancel any previous indexing operation
+		if (state.currentAbortController) {
+			console.info("[ManagedIndexer] Aborting previous indexing operation")
+			state.currentAbortController.abort()
+		}
+
+		// Create new AbortController for this operation
+		const controller = new AbortController()
+		state.currentAbortController = controller
+
+		logGitEvent(event)
+
+		try {
+			await this.processFiles(state, event, controller.signal)
+		} catch (error) {
+			// Check if this was an abort
+			if (error instanceof Error && (error.name === "AbortError" || error.message === "AbortError")) {
+				console.info("[ManagedIndexer] Indexing operation was aborted")
+				return
+			}
+			// Re-throw other errors
+			throw error
+		}
+	}
+
+	/**
+	 * Process files from an event's async iterable
+	 */
+	private async processFiles(
+		state: ManagedIndexerWorkspaceFolderState,
+		event: GitWatcherEvent,
+		signal: AbortSignal
+	): Promise<void> {
+		// Set indexing state
+		state.isIndexing = true
+		state.error = undefined
+		this.sendStateToWebview()
+
+		try {
+			// Ensure we have the manifest (wait if it's being fetched)
+			let manifest: ServerManifest
+			try {
+				manifest = await this.getManifest(state, event.branch)
+			} catch (error) {
+				console.warn(`[ManagedIndexer] Cannot process files without manifest, skipping`)
+				state.isIndexing = false
+				return
+			}
+
+			if (!this.config?.gptChatByApiKey || !state.projectId) {
+				console.warn("[ManagedIndexer] Missing token, project ID, skipping file upsert")
+				return
+			}
+
+			// Start with all files from manifest - we'll remove entries as we encounter them in git
+			const manifestFilesToCheck = new Set<string>(Object.values(manifest.files))
+			const filesToDelete: string[] = []
+			let upsertCount = Object.keys(manifest.files).length
+			let errorCount = 0
+
+			// === STEP 1: Collect eligible files for upsert (skip deleted, unsupported, ignored) ===
+			const fileUpsertJobs: Array<{
+				filePath: string
+				blocks: any[]
+				absoluteFilePath: string
+				relativeFilePath: string
+				fileHash: string
+			}> = []
+
+			for await (const file of event.files) {
+				if (signal.aborted) throw new Error("AbortError")
+				
+				// If file is in git event, it's not "missing" from manifest
+				manifestFilesToCheck.delete(file.filePath)
+
+				if (file.type === "file-deleted") {
+					filesToDelete.push(file.filePath)
+					continue
+				}
+
+				const ext = path.extname(file.filePath).toLowerCase()
+				if (!scannerExtensions.includes(ext)) continue
+
+				if (manifest.files[file.fileHash] === file.filePath) continue // already indexed
+
+				const absoluteFilePath = path.isAbsolute(file.filePath)
+					? file.filePath
+					: path.join(event.watcher.config.cwd, file.filePath)
+
+				try {
+					const stats = await fs.stat(absoluteFilePath)
+					if (stats.size > MAX_FILE_SIZE_BYTES) continue
+				} catch {
+					continue
+				}
+
+				const relativeFilePath = path.relative(event.watcher.config.cwd, absoluteFilePath)
+				const ignore = state.ignoreController
+				if (ignore && !ignore.validateAccess(relativeFilePath)) continue
+
+				try {
+					const content = await fs.readFile(absoluteFilePath).then(buf => buf.toString("utf-8"))
+					const blocks = await this.codeParser.parseFile(file.filePath, { content, fileHash: file.fileHash })
+					fileUpsertJobs.push({
+						filePath: file.filePath,
+						blocks,
+						absoluteFilePath,
+						relativeFilePath,
+						fileHash: file.fileHash
+					})
+				} catch (err) {
+					errorCount++
+					const errorMessage = err instanceof Error ? err.message : String(err)
+					console.error(`[ManagedIndexer] Failed to parse ${file.filePath}: ${errorMessage}`)
+					if (errorCount > 2) this.dispose()
+					continue
+				}
+			}
+
+			// === STEP 2: Batch file upsert jobs into groups of 30 ===
+			const BATCH_SIZE = 30
+			const batches: (typeof fileUpsertJobs)[] = []
+			for (let i = 0; i < fileUpsertJobs.length; i += BATCH_SIZE) {
+				batches.push(fileUpsertJobs.slice(i, i + BATCH_SIZE))
+			}
+
+			// === STEP 3: Process each batch with 3s delay between ===
+			for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+				if (signal.aborted) throw new Error("AbortError")
+
+				const batch = batches[batchIndex]
+				console.info(`[ManagedIndexer] Starting upsert batch #${batchIndex + 1} (${batch.length} files)`)
+
+				// Run upserts in this batch with concurrency=3
+				await pMap(
+					batch,
+					async (job) => {
+						if (signal.aborted) throw new Error("AbortError")
+						if (!this.config?.gptChatByApiKey || !state.projectId) return
+
+						try {
+							await upsertChunks(
+								state.projectId,
+								event.branch,
+								event.isBaseBranch,
+								job.blocks,
+								this.config.gptChatByApiKey,
+								signal
+							)
+							upsertCount++
+							this.sendStateToWebview(state, upsertCount)
+							// Clear file-upsert error on success
+							if (state.error?.type === "file-upsert") {
+								state.error = undefined
+								this.sendStateToWebview()
+							}
+						} catch (error) {
+							if (error instanceof Error && error.message === "AbortError") throw error
+							errorCount++
+							const errorMessage = error instanceof Error ? error.message : String(error)
+							console.error(`[ManagedIndexer] Failed to upsert ${job.filePath}: ${errorMessage}`)
+							state.error = {
+								type: "file-upsert",
+								message: `Failed to upsert file: ${errorMessage}`,
+								timestamp: new Date().toISOString(),
+								context: { filePath: job.filePath, branch: event.branch, operation: "file-upsert" },
+								details: error instanceof Error ? error.stack : undefined
+							}
+							this.sendStateToWebview()
+							if (errorCount > 2) this.dispose()
+						}
+					},
+					{ concurrency: 3 }
+				)
+
+				// Delay before next batch (unless last batch)
+				if (batchIndex < batches.length - 1) {
+					console.info(`[ManagedIndexer] Waiting 3 seconds before next batch...`)
+					await this.delay(3000, signal)
+				}
+			}
+
+			// === STEP 4: Handle deletions (unchanged) ===
+			for (const manifestFile of manifestFilesToCheck) {
+				filesToDelete.push(manifestFile)
+			}
+
+			if (filesToDelete.length > 0 && this.isActive) {
+				console.info(`[ManagedIndexer] Deleting ${filesToDelete.length} files from manifest`)
+				try {
+					await deleteFiles(
+						filesToDelete,
+						event.branch,
+						state.projectId,
+						this.config.gptChatByApiKey,
+						signal
+					)
+					console.info(`[ManagedIndexer] Successfully deleted ${filesToDelete.length} files`)
+				} catch (error) {
+					if (error instanceof Error && error.message === "AbortError") throw error
+					const errorMessage = error instanceof Error ? error.message : String(error)
+					console.error(`[ManagedIndexer] Failed to delete files: ${errorMessage}`)
+					state.error = {
+						type: "file-upsert",
+						message: `Failed to delete files: ${errorMessage}`,
+						timestamp: new Date().toISOString(),
+						context: { branch: event.branch, operation: "file-delete" },
+						details: error instanceof Error ? error.stack : undefined
+					}
+					this.sendStateToWebview()
+				}
+			}
+
+			// === STEP 5: Poll manifest (unchanged) ===
+			manifest = await this.getManifest(state, event.branch, true)
+			if (manifest.inProgress) {
+				console.info(`[ManagedIndexer] Manifest is in progress for branch ${event.branch}, starting polling...`)
+				const POLLING_INTERVAL_MS = 10_000
+				let pollCount = 0
+				while (manifest.inProgress && !signal.aborted) {
+					try {
+						await new Promise((resolve, reject) => {
+							const timeoutId = setTimeout(resolve, POLLING_INTERVAL_MS)
+							signal.addEventListener("abort", () => {
+								clearTimeout(timeoutId)
+								reject(new Error("AbortError"))
+							})
+						})
+						manifest = await this.getManifest(state, event.branch, true)
+						pollCount++
+						console.info(`[ManagedIndexer] Polling manifest (${pollCount}) - inProgress: ${manifest.inProgress}`)
+						this.sendStateToWebview()
+					} catch (error) {
+						if (error instanceof Error && error.message === "AbortError") {
+							console.info("[ManagedIndexer] Polling aborted due to signal")
+							throw error
+						}
+						console.error(`[ManagedIndexer] Error during manifest polling:`, error)
+						state.error = {
+							type: "manifest",
+							message: `Polling failed: ${error instanceof Error ? error.message : String(error)}`,
+							timestamp: new Date().toISOString(),
+							context: { branch: event.branch, operation: "poll-manifest" },
+							details: error instanceof Error ? error.stack : undefined
+						}
+						this.sendStateToWebview()
+						break
+					}
+				}
+				if (!manifest.inProgress) {
+					console.info(`[ManagedIndexer] Manifest is now complete after ${pollCount} polls`)
+				}
+			}
+		} finally {
+			// Always clear indexing state when done
+			state.isIndexing = false
+			console.log("[ManagedIndexer] Indexing complete")
+			this.sendStateToWebview()
+		}
+	}
+
+	async onDidChangeWorkspaceFolders(e: vscode.WorkspaceFoldersChangeEvent) {
+		// TODO we could more intelligently handle this instead of going scorched earth
+		this.dispose()
+		await this.start()
+		this.sendStateToWebview()
+	}
+
+	public async search(query: string, directoryPrefix?: string): Promise<VectorStoreSearchResult[]> {
+		const { gptChatByApiKey } = this.config ?? {}
+
+		if (!gptChatByApiKey) {
+			throw new Error("Gtp Chat token are required for managed index search")
+		}
+
+		const results = await Promise.all(
+			this.workspaceFolderState.map(async (state) => {
+				if (!state.projectId || !state.gitBranch) {
+					return []
+				}
+
+				return await searchCode(
+					{
+						query,
+						projectId: state.projectId,
+						excludeFiles: []
+					},
+					gptChatByApiKey
+				)
+			})
+		)
+
+		return results
+			.flat()
+			.map((result) => ({
+				id: result.id,
+				score: result.score,
+				payload: {
+					filePath: result.filePath,
+					codeChunk: result.codeChunk,
+					startLine: result.startLine,
+					endLine: result.endLine
+				}
+			}))
+			.sort((a, b) => b.score - a.score)
+	}
+
+	/**
+	 * Utility delay function
+	 */
+	private async delay(ms: number, signal?: AbortSignal): Promise<void> {
+		return new Promise((resolve, reject) => {
+			const timeoutId = setTimeout(resolve, ms)
+			signal?.addEventListener("abort", () => {
+				clearTimeout(timeoutId)
+				reject(new Error("AbortError"))
+			})
+		})
+	}
+}

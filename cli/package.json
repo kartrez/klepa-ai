@@ -131,7 +131,7 @@
 		"uri-js": "^4.4.1",
 		"uuid": "^13.0.0",
 		"vscode-material-icons": "^0.1.1",
-		"web-tree-sitter": "^0.26.3",
+		"web-tree-sitter": "^0.26.5",
 		"workerpool": "^10.0.1",
 		"xlsx": "^0.18.5",
 		"yaml": "^2.8.2",

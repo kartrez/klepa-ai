@@ -642,6 +642,7 @@ export type ExtensionState = Pick<
 	profileThresholds: Record<string, number>
 	hasOpenedModeSelector: boolean
 	hasCompletedOnboarding?: boolean // kilocode_change: Track if user has completed onboarding flow
+	gptChatByApiKey?: string
 	openRouterImageApiKey?: string
 	kiloCodeImageApiKey?: string
 	openRouterUseMiddleOutTransform?: boolean

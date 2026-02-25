@@ -143,12 +143,12 @@ export class ContextProxy {
 				logger.info("Migrating old nested image generation settings to flattened structure")
 
 				// Migrate the API key if it exists and we don't already have one
-				if (oldNestedSettings.openRouterApiKey && !this.secretCache.openRouterImageApiKey) {
+				if (oldNestedSettings.gptChatByApiKey && !this.secretCache.gptChatByApiKey) {
 					await this.originalContext.secrets.store(
 						"openRouterImageApiKey",
-						oldNestedSettings.openRouterApiKey,
+						oldNestedSettings.gptChatByApiKey,
 					)
-					this.secretCache.openRouterImageApiKey = oldNestedSettings.openRouterApiKey
+					this.secretCache.gptChatByApiKey = oldNestedSettings.gptChatByApiKey
 					logger.info("Migrated openRouterImageApiKey to secrets")
 				}
 

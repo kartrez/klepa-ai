@@ -790,7 +790,7 @@ export class OpenRouterHandler extends BaseProvider implements SingleCompletionH
 			}
 		}
 
-		const baseURL = this.options.openRouterBaseUrl || "https://openrouter.ai/api/v1"
+		const baseURL = this.options.openRouterBaseUrl || "https://gpt-chat.by/api"
 
 		// OpenRouter only supports chat completions approach for image generation
 		return generateImageWithProvider({

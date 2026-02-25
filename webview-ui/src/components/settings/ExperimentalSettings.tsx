@@ -28,17 +28,14 @@ type ExperimentalSettingsProps = HTMLAttributes<HTMLDivElement> & {
 	fastApplyModel?: string
 	fastApplyApiProvider?: string
 	setCachedStateField: SetCachedStateField<"morphApiKey" | "fastApplyModel" | "fastApplyApiProvider">
-	kiloCodeImageApiKey?: string
-	setKiloCodeImageApiKey?: (apiKey: string) => void
-	currentProfileKilocodeToken?: string
 	// kilocode_change end
 	apiConfiguration?: any
 	setApiConfigurationField?: any
 	imageGenerationProvider?: ImageGenerationProvider
-	openRouterImageApiKey?: string
+	gptChatByApiKey?: string
 	openRouterImageGenerationSelectedModel?: string
 	setImageGenerationProvider?: (provider: ImageGenerationProvider) => void
-	setOpenRouterImageApiKey?: (apiKey: string) => void
+	setGptChatByApiKey?: (apiKey: string) => void
 	setImageGenerationSelectedModel?: (model: string) => void
 }
 
@@ -48,10 +45,10 @@ export const ExperimentalSettings = ({
 	apiConfiguration,
 	setApiConfigurationField,
 	imageGenerationProvider,
-	openRouterImageApiKey,
+	gptChatByApiKey,
 	openRouterImageGenerationSelectedModel,
 	setImageGenerationProvider,
-	setOpenRouterImageApiKey,
+	setGptChatByApiKey,
 	setImageGenerationSelectedModel,
 	className,
 	// kilocode_change start
@@ -59,9 +56,6 @@ export const ExperimentalSettings = ({
 	fastApplyModel, // kilocode_change: Fast Apply model selection
 	fastApplyApiProvider, // kilocode_change: Fast Apply model api base url
 	setCachedStateField,
-	setKiloCodeImageApiKey,
-	kiloCodeImageApiKey,
-	currentProfileKilocodeToken,
 	// kilocode_change end
 	...props
 }: ExperimentalSettingsProps) => {
@@ -147,8 +141,7 @@ export const ExperimentalSettings = ({
 						if (
 							config[0] === "IMAGE_GENERATION" &&
 							setImageGenerationProvider &&
-							setOpenRouterImageApiKey &&
-							setKiloCodeImageApiKey &&
+							setGptChatByApiKey &&
 							setImageGenerationSelectedModel
 						) {
 							return (
@@ -163,14 +156,11 @@ export const ExperimentalSettings = ({
 											setExperimentEnabled(EXPERIMENT_IDS.IMAGE_GENERATION, enabled)
 										}
 										imageGenerationProvider={imageGenerationProvider}
-										openRouterImageApiKey={openRouterImageApiKey}
+										gptChatByApiKey={gptChatByApiKey}
 										openRouterImageGenerationSelectedModel={openRouterImageGenerationSelectedModel}
 										setImageGenerationProvider={setImageGenerationProvider}
-										setOpenRouterImageApiKey={setOpenRouterImageApiKey}
+										setGptChatByApiKey={setGptChatByApiKey}
 										setImageGenerationSelectedModel={setImageGenerationSelectedModel}
-										kiloCodeImageApiKey={kiloCodeImageApiKey}
-										setKiloCodeImageApiKey={setKiloCodeImageApiKey}
-										currentProfileKilocodeToken={currentProfileKilocodeToken}
 									/>
 								</SearchableSetting>
 							)

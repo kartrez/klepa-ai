@@ -257,7 +257,6 @@ const SettingsView = forwardRef<SettingsViewRef, SettingsViewProps>((props, ref)
 		includeTaskHistoryInEnhance,
 		imageGenerationProvider,
 		openRouterImageApiKey,
-		gptChatByApiKey,
 		kiloCodeImageApiKey,
 		openRouterImageGenerationSelectedModel,
 		reasoningBlockCollapsed,
@@ -323,7 +322,7 @@ const SettingsView = forwardRef<SettingsViewRef, SettingsViewProps>((props, ref)
 
 	// Temporary way of making sure that the Settings view updates its local state properly when receiving
 	// api keys from providers that support url callbacks. This whole Settings View needs proper with this local state thing later
-	const { kilocodeToken, openRouterApiKey, glamaApiKey, requestyApiKey } = extensionState.apiConfiguration ?? {}
+	const { kilocodeToken, openRouterApiKey, glamaApiKey, requestyApiKey, gptChatByApiKey } = extensionState.apiConfiguration ?? {}
 	useEffect(() => {
 		setCachedState((prevCachedState) => ({
 			...prevCachedState,
@@ -332,12 +331,13 @@ const SettingsView = forwardRef<SettingsViewRef, SettingsViewProps>((props, ref)
 				// Only set specific tokens/keys instead of spreading the entire
 				// `prevCachedState.apiConfiguration` since it may contain unsaved changes
 				kilocodeToken,
+				gptChatByApiKey,
 				openRouterApiKey,
 				glamaApiKey,
 				requestyApiKey,
 			},
 		}))
-	}, [kilocodeToken, openRouterApiKey, glamaApiKey, requestyApiKey])
+	}, [kilocodeToken, openRouterApiKey, glamaApiKey, requestyApiKey, gptChatByApiKey])
 
 	useEffect(() => {
 		// Only update if we're not already detecting changes
@@ -493,13 +493,6 @@ const SettingsView = forwardRef<SettingsViewRef, SettingsViewProps>((props, ref)
 			}
 
 			return { ...prevState, gptChatByApiKey: apiKey }
-		})
-	}, [])
-
-	const setKiloCodeImageApiKey = useCallback((apiKey: string) => {
-		setCachedState((prevState) => {
-			setChangeDetected(true)
-			return { ...prevState, kiloCodeImageApiKey: apiKey }
 		})
 	}, [])
 
@@ -1293,16 +1286,13 @@ const SettingsView = forwardRef<SettingsViewRef, SettingsViewProps>((props, ref)
 								apiConfiguration={apiConfiguration}
 								setApiConfigurationField={setApiConfigurationField}
 								imageGenerationProvider={imageGenerationProvider}
-								openRouterImageApiKey={gptChatByApiKey as string | undefined}
-								kiloCodeImageApiKey={kiloCodeImageApiKey}
+								gptChatByApiKey={gptChatByApiKey as string | undefined}
 								openRouterImageGenerationSelectedModel={
 									openRouterImageGenerationSelectedModel as string | undefined
 								}
 								setImageGenerationProvider={setImageGenerationProvider}
-								setOpenRouterImageApiKey={setGptChatByApiKey}
-								setKiloCodeImageApiKey={setKiloCodeImageApiKey}
+								setGptChatByApiKey={setGptChatByApiKey}
 								setImageGenerationSelectedModel={setImageGenerationSelectedModel}
-								currentProfileKilocodeToken={apiConfiguration.kilocodeToken}
 							/>
 						)}
 

@@ -8,32 +8,22 @@ interface ImageGenerationSettingsProps {
 	enabled: boolean
 	onChange: (enabled: boolean) => void
 	imageGenerationProvider?: ImageGenerationProvider
-	openRouterImageApiKey?: string
+	gptChatByApiKey?: string
 	openRouterImageGenerationSelectedModel?: string
 	setImageGenerationProvider: (provider: ImageGenerationProvider) => void
-	setOpenRouterImageApiKey: (apiKey: string) => void
+	setGptChatByApiKey: (apiKey: string) => void
 	setImageGenerationSelectedModel: (model: string) => void
-	// kilocode_change start
-	kiloCodeImageApiKey?: string
-	setKiloCodeImageApiKey: (apiKey: string) => void
-	currentProfileKilocodeToken?: string
-	// kilocode_change end
 }
 
 export const ImageGenerationSettings = ({
 	enabled,
 	onChange,
 	imageGenerationProvider,
-	openRouterImageApiKey,
+	gptChatByApiKey,
 	openRouterImageGenerationSelectedModel,
 	setImageGenerationProvider,
-	setOpenRouterImageApiKey,
+	setGptChatByApiKey,
 	setImageGenerationSelectedModel,
-	// kilocode_change start
-	kiloCodeImageApiKey,
-	setKiloCodeImageApiKey,
-	currentProfileKilocodeToken,
-	// kilocode_change end
 }: ImageGenerationSettingsProps) => {
 	const { t } = useAppTranslation()
 
@@ -48,10 +38,10 @@ export const ImageGenerationSettings = ({
 		if (!enabled) {
 			return
 		}
-		if (currentProvider !== "gpt-chat-by" && openRouterImageApiKey) {
-			setOpenRouterImageApiKey("")
+		if (currentProvider !== "gpt-chat-by") {
+			setGptChatByApiKey("")
 		}
-	}, [enabled, currentProvider, openRouterImageApiKey, setOpenRouterImageApiKey])
+	}, [enabled, currentProvider, gptChatByApiKey, setGptChatByApiKey])
 	// kilocode_change end
 
 	const availableModels = useMemo(() => {
@@ -102,11 +92,7 @@ export const ImageGenerationSettings = ({
 
 	// Handle API key changes
 	const handleApiKeyChange = (value: string) => {
-		setOpenRouterImageApiKey(value)
-	}
-
-	const handleKiloApiKeyChange = (value: string) => {
-		setKiloCodeImageApiKey(value)
+		setGptChatByApiKey(value)
 	}
 
 	// Handle model selection changes
@@ -114,7 +100,7 @@ export const ImageGenerationSettings = ({
 		setImageGenerationSelectedModel(value)
 	}
 
-	const isConfigured = currentProvider === "gpt-chat-by" ? openRouterImageApiKey : kiloCodeImageApiKey // kilocode_change
+	const isConfigured = !!gptChatByApiKey // kilocode_change
 
 	return (
 		<div className="space-y-4">
@@ -132,7 +118,7 @@ export const ImageGenerationSettings = ({
 			{enabled && (
 				<div className="ml-2 space-y-3">
 					{/* Provider Selection */}
-					<div>
+					{/*<div>
 						<label className="block font-medium mb-1">
 							{t("settings:experimental.IMAGE_GENERATION.providerLabel")}
 						</label>
@@ -143,14 +129,14 @@ export const ImageGenerationSettings = ({
 							<VSCodeOption value="kilocode" className="py-2 px-3">
 								Kilo Gateway
 							</VSCodeOption>
-							<VSCodeOption value="openrouter" className="py-2 px-3">
-								OpenRouter
+							<VSCodeOption value="gpt-chat-by" className="py-2 px-3">
+								gpt-chat.by
 							</VSCodeOption>
 						</VSCodeDropdown>
 						<p className="text-vscode-descriptionForeground text-xs mt-1">
 							{t("settings:experimental.IMAGE_GENERATION.providerDescription")}
 						</p>
-					</div>
+					</div>*/}
 
 					{/* {
 						// kilocode_change start
@@ -215,27 +201,20 @@ export const ImageGenerationSettings = ({
 					}*/}
 
 					{/* API Key Configuration (only for OpenRouter) */}
-					{currentProvider === "gpt-chat-by" && (
+					{!isConfigured && (
 						<div>
 							<label className="block font-medium mb-1">
 								{t("settings:experimental.IMAGE_GENERATION.openRouterApiKeyLabel")}
 							</label>
 							<VSCodeTextField
-								value={openRouterImageApiKey || ""}
+								value={gptChatByApiKey || ""}
 								onInput={(e: any) => handleApiKeyChange(e.target.value)}
 								placeholder={t("settings:experimental.IMAGE_GENERATION.openRouterApiKeyPlaceholder")}
 								className="w-full"
 								type="password"
 							/>
 							<p className="text-vscode-descriptionForeground text-xs mt-1">
-								{t("settings:experimental.IMAGE_GENERATION.getApiKeyText")}{" "}
-								<a
-									href="https://gpt-chat.by/doc-api"
-									target="_blank"
-									rel="noopener noreferrer"
-									className="text-vscode-textLink-foreground hover:text-vscode-textLink-activeForeground">
-									openrouter.ai/keys
-								</a>
+								{t("settings:experimental.IMAGE_GENERATION.getApiKeyText")}
 							</p>
 						</div>
 					)}

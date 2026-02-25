@@ -13,7 +13,6 @@ vi.mock("@/i18n/TranslationContext", () => ({
 describe.skip("ImageGenerationSettings", () => {
 	const mockSetImageGenerationProvider = vi.fn()
 	const mockSetOpenRouterImageApiKey = vi.fn()
-	const mockSetKiloCodeImageApiKey = vi.fn()
 	const mockSetImageGenerationSelectedModel = vi.fn()
 	const mockOnChange = vi.fn()
 
@@ -21,12 +20,10 @@ describe.skip("ImageGenerationSettings", () => {
 		enabled: false,
 		onChange: mockOnChange,
 		imageGenerationProvider: undefined,
-		openRouterImageApiKey: undefined,
-		kiloCodeImageApiKey: undefined,
+		gptChatByApiKey: undefined,
 		openRouterImageGenerationSelectedModel: undefined,
 		setImageGenerationProvider: mockSetImageGenerationProvider,
-		setOpenRouterImageApiKey: mockSetOpenRouterImageApiKey,
-		setKiloCodeImageApiKey: mockSetKiloCodeImageApiKey,
+		setGptChatByApiKey: mockSetOpenRouterImageApiKey,
 		setImageGenerationSelectedModel: mockSetImageGenerationSelectedModel,
 	}
 
@@ -48,7 +45,7 @@ describe.skip("ImageGenerationSettings", () => {
 			render(
 				<ImageGenerationSettings
 					{...defaultProps}
-					openRouterImageApiKey="existing-key"
+					gptChatByApiKey="existing-key"
 					openRouterImageGenerationSelectedModel="google/gemini-2.5-flash-image"
 				/>,
 			)
@@ -75,7 +72,7 @@ describe.skip("ImageGenerationSettings", () => {
 			fireEvent.input(apiKeyInput, { target: { value: "new-api-key" } })
 
 			// Should call setimageGenerationSettings
-			expect(defaultProps.setOpenRouterImageApiKey).toHaveBeenCalledWith("new-api-key")
+			expect(defaultProps.gptChatByApiKey).toHaveBeenCalledWith("new-api-key")
 		})
 
 		// Note: Testing VSCode dropdown components is complex due to their custom nature

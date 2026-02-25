@@ -1015,7 +1015,7 @@
 			"getApiKeyText": "Получите ваш API-ключ от",
 			"modelSelectionLabel": "Модель генерации изображений",
 			"modelSelectionDescription": "Выберите модель для генерации изображений",
-			"warningMissingKey": "⚠️ API-ключ необходим для генерации изображений, настройте его выше.",
+			"warningMissingKey": "⚠️ Необходим авторизироваться через Telegram для генерации изображений.",
 			"successConfigured": "✓ Генерация изображений настроена и готова к использованию"
 		},
 		"INLINE_ASSIST": {

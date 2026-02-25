@@ -1,19 +1,19 @@
 ---
 title: "About Plans"
-description: "Overview of Kilo Code plans and pricing"
+description: "Overview of Klepa AI plans and pricing"
 ---
 
 # About Plans
 
-Kilo Code accelerates development with AI-driven code generation and task automation. You can use Kilo Code as an open source extension in VS Code or JetBrains IDEs.
+Klepa AI accelerates development with AI-driven code generation and task automation. You can use Klepa AI as an open source extension in VS Code or JetBrains IDEs.
 
 Organizations adopting AI accelerated coding at scale often want a better way to monitor, manage, and collaborate on their AI-drive practices.
 
-Kilo Code's paid plans, Teams and Enterprise, are the solution for these organizations.
+Klepa AI's paid plans, Teams and Enterprise, are the solution for these organizations.
 
 {% callout type="note" %}
 
-Purchases of Kilo Code's paid plans are separate from model provider credits.
+Purchases of Klepa AI's paid plans are separate from model provider credits.
 
 No credits are included with a Teams or Enterprise plan purchase.
 

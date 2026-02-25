@@ -1,5 +1,5 @@
 {
-	"greeting": "Was kann Kilo Code für dich tun?",
+	"greeting": "Was kann Klepa AI für dich tun?",
 	"task": {
 		"title": "Aufgabe",
 		"expand": "Aufgabe erweitern",
@@ -22,7 +22,7 @@
 		"sharePublicly": "Öffentlich teilen",
 		"sharePubliclyDescription": "Jeder mit dem Link kann zugreifen",
 		"connectToCloud": "Mit Cloud verbinden",
-		"connectToCloudDescription": "Melde dich bei Kilo Code Cloud an, um Aufgaben zu teilen",
+		"connectToCloudDescription": "Melde dich bei Klepa AI Cloud an, um Aufgaben zu teilen",
 		"sharingDisabledByOrganization": "Freigabe von der Organisation deaktiviert",
 		"shareSuccessOrganization": "Organisationslink in die Zwischenablage kopiert",
 		"shareSuccessPublic": "Öffentlicher Link in die Zwischenablage kopiert",
@@ -101,7 +101,7 @@
 	"scrollToBottom": "Zum Chat-Ende scrollen",
 	"about": "Generiere, überarbeite und debugge Code mit KI-Unterstützung. Schau dir unsere <DocsLink>Dokumentation</DocsLink> an, um mehr zu erfahren.",
 	"docs": "Schau in unsere <DocsLink>Dokumentation</DocsLink>, um mehr zu erfahren.",
-	"onboarding": "<strong>Deine Aufgabenliste in diesem Arbeitsbereich ist leer.</strong> Beginne mit der Eingabe einer Aufgabe unten. Du bist dir nicht sicher, wie du anfangen sollst? Lies mehr darüber, was Kilo Code für dich tun kann, in <DocsLink>den Dokumenten</DocsLink>.",
+	"onboarding": "<strong>Deine Aufgabenliste in diesem Arbeitsbereich ist leer.</strong> Beginne mit der Eingabe einer Aufgabe unten. Du bist dir nicht sicher, wie du anfangen sollst? Lies mehr darüber, was Klepa AI für dich tun kann, in <DocsLink>den Dokumenten</DocsLink>.",
 	"rooTips": {
 		"customizableModes": {
 			"title": "Anpassbare Modi",
@@ -130,7 +130,7 @@
 		"title": "Modi",
 		"marketplace": "Modus-Marketplace",
 		"settings": "Modus-Einstellungen",
-		"description": "Spezialisierte Personas, die Kilo Codes Verhalten anpassen.",
+		"description": "Spezialisierte Personas, die Klepa AIs Verhalten anpassen.",
 		"searchPlaceholder": "Modi suchen...",
 		"noResults": "Keine Ergebnisse gefunden",
 		"organizationModes": "Organisations-Modi"
@@ -145,7 +145,7 @@
 	"diffError": {
 		"title": "Bearbeitung fehlgeschlagen"
 	},
-	"troubleMessage": "Kilo Code hat Probleme...",
+	"troubleMessage": "Klepa AI hat Probleme...",
 	"apiRequest": {
 		"title": "API-Anfrage",
 		"failed": "API-Anfrage fehlgeschlagen",
@@ -188,48 +188,48 @@
 		"current": "Aktuell"
 	},
 	"instructions": {
-		"wantsToFetch": "Kilo Code möchte detaillierte Anweisungen abrufen, um bei der aktuellen Aufgabe zu helfen"
+		"wantsToFetch": "Klepa AI möchte detaillierte Anweisungen abrufen, um bei der aktuellen Aufgabe zu helfen"
 	},
 	"fileOperations": {
-		"wantsToRead": "Kilo Code möchte diese Datei lesen",
-		"wantsToReadAndXMore": "Kilo Code möchte diese Datei und {{count}} weitere lesen",
-		"wantsToReadOutsideWorkspace": "Kilo Code möchte diese Datei außerhalb des Arbeitsbereichs lesen",
-		"didRead": "Kilo Code hat diese Datei gelesen",
-		"wantsToEdit": "Kilo Code möchte diese Datei bearbeiten",
-		"wantsToEditOutsideWorkspace": "Kilo Code möchte diese Datei außerhalb des Arbeitsbereichs bearbeiten",
-		"wantsToEditProtected": "Kilo Code möchte eine geschützte Konfigurationsdatei bearbeiten",
-		"wantsToCreate": "Kilo Code möchte eine neue Datei erstellen",
-		"wantsToSearchReplace": "Kilo Code möchte in dieser Datei suchen und ersetzen",
-		"didSearchReplace": "Kilo Code hat Suchen und Ersetzen in dieser Datei durchgeführt",
-		"wantsToInsert": "Kilo Code möchte Inhalte in diese Datei einfügen",
-		"wantsToInsertWithLineNumber": "Kilo Code möchte Inhalte in diese Datei in Zeile {{lineNumber}} einfügen",
-		"wantsToInsertAtEnd": "Kilo Code möchte Inhalte am Ende dieser Datei anhängen",
-		"wantsToReadMultiple": "Kilo Code möchte mehrere Dateien lesen",
-		"wantsToApplyBatchChanges": "Kilo Code möchte Änderungen an mehreren Dateien vornehmen",
-		"wantsToGenerateImage": "Kilo Code möchte ein Bild generieren",
-		"wantsToGenerateImageOutsideWorkspace": "Kilo Code möchte ein Bild außerhalb des Arbeitsbereichs generieren",
-		"wantsToGenerateImageProtected": "Kilo Code möchte ein Bild an einem geschützten Ort generieren",
-		"didGenerateImage": "Kilo Code hat ein Bild generiert",
-		"wantsToDelete": "Kilo Code möchte diese Datei löschen",
-		"wantsToDeleteDirectory": "Kilo Code möchte dieses Verzeichnis löschen"
+		"wantsToRead": "Klepa AI möchte diese Datei lesen",
+		"wantsToReadAndXMore": "Klepa AI möchte diese Datei und {{count}} weitere lesen",
+		"wantsToReadOutsideWorkspace": "Klepa AI möchte diese Datei außerhalb des Arbeitsbereichs lesen",
+		"didRead": "Klepa AI hat diese Datei gelesen",
+		"wantsToEdit": "Klepa AI möchte diese Datei bearbeiten",
+		"wantsToEditOutsideWorkspace": "Klepa AI möchte diese Datei außerhalb des Arbeitsbereichs bearbeiten",
+		"wantsToEditProtected": "Klepa AI möchte eine geschützte Konfigurationsdatei bearbeiten",
+		"wantsToCreate": "Klepa AI möchte eine neue Datei erstellen",
+		"wantsToSearchReplace": "Klepa AI möchte in dieser Datei suchen und ersetzen",
+		"didSearchReplace": "Klepa AI hat Suchen und Ersetzen in dieser Datei durchgeführt",
+		"wantsToInsert": "Klepa AI möchte Inhalte in diese Datei einfügen",
+		"wantsToInsertWithLineNumber": "Klepa AI möchte Inhalte in diese Datei in Zeile {{lineNumber}} einfügen",
+		"wantsToInsertAtEnd": "Klepa AI möchte Inhalte am Ende dieser Datei anhängen",
+		"wantsToReadMultiple": "Klepa AI möchte mehrere Dateien lesen",
+		"wantsToApplyBatchChanges": "Klepa AI möchte Änderungen an mehreren Dateien vornehmen",
+		"wantsToGenerateImage": "Klepa AI möchte ein Bild generieren",
+		"wantsToGenerateImageOutsideWorkspace": "Klepa AI möchte ein Bild außerhalb des Arbeitsbereichs generieren",
+		"wantsToGenerateImageProtected": "Klepa AI möchte ein Bild an einem geschützten Ort generieren",
+		"didGenerateImage": "Klepa AI hat ein Bild generiert",
+		"wantsToDelete": "Klepa AI möchte diese Datei löschen",
+		"wantsToDeleteDirectory": "Klepa AI möchte dieses Verzeichnis löschen"
 	},
 	"directoryOperations": {
-		"wantsToViewTopLevel": "Kilo Code möchte die Dateien auf oberster Ebene in diesem Verzeichnis anzeigen",
-		"didViewTopLevel": "Kilo Code hat die Dateien auf oberster Ebene in diesem Verzeichnis angezeigt",
-		"wantsToViewRecursive": "Kilo Code möchte rekursiv alle Dateien in diesem Verzeichnis anzeigen",
-		"didViewRecursive": "Kilo Code hat rekursiv alle Dateien in diesem Verzeichnis angezeigt",
-		"wantsToViewDefinitions": "Kilo Code möchte Quellcode-Definitionsnamen in diesem Verzeichnis anzeigen",
-		"didViewDefinitions": "Kilo Code hat Quellcode-Definitionsnamen in diesem Verzeichnis angezeigt",
-		"wantsToSearch": "Kilo Code möchte dieses Verzeichnis nach <code>{{regex}}</code> durchsuchen",
-		"didSearch": "Kilo Code hat dieses Verzeichnis nach <code>{{regex}}</code> durchsucht",
-		"wantsToSearchOutsideWorkspace": "Kilo Code möchte dieses Verzeichnis (außerhalb des Arbeitsbereichs) nach <code>{{regex}}</code> durchsuchen",
-		"didSearchOutsideWorkspace": "Kilo Code hat dieses Verzeichnis (außerhalb des Arbeitsbereichs) nach <code>{{regex}}</code> durchsucht",
-		"wantsToViewTopLevelOutsideWorkspace": "Kilo Code möchte die Dateien auf oberster Ebene in diesem Verzeichnis (außerhalb des Arbeitsbereichs) anzeigen",
-		"didViewTopLevelOutsideWorkspace": "Kilo Code hat die Dateien auf oberster Ebene in diesem Verzeichnis (außerhalb des Arbeitsbereichs) angezeigt",
-		"wantsToViewRecursiveOutsideWorkspace": "Kilo Code möchte rekursiv alle Dateien in diesem Verzeichnis (außerhalb des Arbeitsbereichs) anzeigen",
-		"didViewRecursiveOutsideWorkspace": "Kilo Code hat rekursiv alle Dateien in diesem Verzeichnis (außerhalb des Arbeitsbereichs) angezeigt",
-		"wantsToViewDefinitionsOutsideWorkspace": "Kilo Code möchte Quellcode-Definitionsnamen in diesem Verzeichnis (außerhalb des Arbeitsbereichs) anzeigen",
-		"didViewDefinitionsOutsideWorkspace": "Kilo Code hat Quellcode-Definitionsnamen in diesem Verzeichnis (außerhalb des Arbeitsbereichs) angezeigt"
+		"wantsToViewTopLevel": "Klepa AI möchte die Dateien auf oberster Ebene in diesem Verzeichnis anzeigen",
+		"didViewTopLevel": "Klepa AI hat die Dateien auf oberster Ebene in diesem Verzeichnis angezeigt",
+		"wantsToViewRecursive": "Klepa AI möchte rekursiv alle Dateien in diesem Verzeichnis anzeigen",
+		"didViewRecursive": "Klepa AI hat rekursiv alle Dateien in diesem Verzeichnis angezeigt",
+		"wantsToViewDefinitions": "Klepa AI möchte Quellcode-Definitionsnamen in diesem Verzeichnis anzeigen",
+		"didViewDefinitions": "Klepa AI hat Quellcode-Definitionsnamen in diesem Verzeichnis angezeigt",
+		"wantsToSearch": "Klepa AI möchte dieses Verzeichnis nach <code>{{regex}}</code> durchsuchen",
+		"didSearch": "Klepa AI hat dieses Verzeichnis nach <code>{{regex}}</code> durchsucht",
+		"wantsToSearchOutsideWorkspace": "Klepa AI möchte dieses Verzeichnis (außerhalb des Arbeitsbereichs) nach <code>{{regex}}</code> durchsuchen",
+		"didSearchOutsideWorkspace": "Klepa AI hat dieses Verzeichnis (außerhalb des Arbeitsbereichs) nach <code>{{regex}}</code> durchsucht",
+		"wantsToViewTopLevelOutsideWorkspace": "Klepa AI möchte die Dateien auf oberster Ebene in diesem Verzeichnis (außerhalb des Arbeitsbereichs) anzeigen",
+		"didViewTopLevelOutsideWorkspace": "Klepa AI hat die Dateien auf oberster Ebene in diesem Verzeichnis (außerhalb des Arbeitsbereichs) angezeigt",
+		"wantsToViewRecursiveOutsideWorkspace": "Klepa AI möchte rekursiv alle Dateien in diesem Verzeichnis (außerhalb des Arbeitsbereichs) anzeigen",
+		"didViewRecursiveOutsideWorkspace": "Klepa AI hat rekursiv alle Dateien in diesem Verzeichnis (außerhalb des Arbeitsbereichs) angezeigt",
+		"wantsToViewDefinitionsOutsideWorkspace": "Klepa AI möchte Quellcode-Definitionsnamen in diesem Verzeichnis (außerhalb des Arbeitsbereichs) anzeigen",
+		"didViewDefinitionsOutsideWorkspace": "Klepa AI hat Quellcode-Definitionsnamen in diesem Verzeichnis (außerhalb des Arbeitsbereichs) angezeigt"
 	},
 	"commandOutput": "Befehlsausgabe",
 	"commandExecution": {
@@ -257,18 +257,18 @@
 		"youSaid": "Du hast gesagt"
 	},
 	"mcp": {
-		"wantsToUseTool": "Kilo Code möchte ein Tool auf dem {{serverName}} MCP-Server verwenden",
-		"wantsToAccessResource": "Kilo Code möchte auf eine Ressource auf dem {{serverName}} MCP-Server zugreifen"
+		"wantsToUseTool": "Klepa AI möchte ein Tool auf dem {{serverName}} MCP-Server verwenden",
+		"wantsToAccessResource": "Klepa AI möchte auf eine Ressource auf dem {{serverName}} MCP-Server zugreifen"
 	},
 	"modes": {
-		"wantsToSwitch": "Kilo Code möchte zum <code>{{mode}}</code>-Modus wechseln",
-		"wantsToSwitchWithReason": "Kilo Code möchte zum <code>{{mode}}</code>-Modus wechseln, weil: {{reason}}",
-		"didSwitch": "Kilo Code hat zum <code>{{mode}}</code>-Modus gewechselt",
-		"didSwitchWithReason": "Kilo Code hat zum <code>{{mode}}</code>-Modus gewechselt, weil: {{reason}}"
+		"wantsToSwitch": "Klepa AI möchte zum <code>{{mode}}</code>-Modus wechseln",
+		"wantsToSwitchWithReason": "Klepa AI möchte zum <code>{{mode}}</code>-Modus wechseln, weil: {{reason}}",
+		"didSwitch": "Klepa AI hat zum <code>{{mode}}</code>-Modus gewechselt",
+		"didSwitchWithReason": "Klepa AI hat zum <code>{{mode}}</code>-Modus gewechselt, weil: {{reason}}"
 	},
 	"subtasks": {
-		"wantsToCreate": "Kilo Code möchte eine neue Teilaufgabe im <code>{{mode}}</code>-Modus erstellen",
-		"wantsToFinish": "Kilo Code möchte diese Teilaufgabe abschließen",
+		"wantsToCreate": "Klepa AI möchte eine neue Teilaufgabe im <code>{{mode}}</code>-Modus erstellen",
+		"wantsToFinish": "Klepa AI möchte diese Teilaufgabe abschließen",
 		"newTaskContent": "Teilaufgabenanweisungen",
 		"completionContent": "Teilaufgabe abgeschlossen",
 		"resultContent": "Teilaufgabenergebnisse",
@@ -276,7 +276,7 @@
 		"completionInstructions": "Teilaufgabe abgeschlossen! Du kannst die Ergebnisse überprüfen und Korrekturen oder nächste Schritte vorschlagen. Wenn alles gut aussieht, bestätige, um das Ergebnis an die übergeordnete Aufgabe zurückzugeben."
 	},
 	"questions": {
-		"hasQuestion": "Kilo Code hat eine Frage"
+		"hasQuestion": "Klepa AI hat eine Frage"
 	},
 	"taskCompleted": "Aufgabe abgeschlossen",
 	"modelResponseIncomplete": "Modellantwort unvollständig",
@@ -371,7 +371,7 @@
 	"browser": {
 		"session": "Browser-Sitzung",
 		"active": "Aktiv",
-		"rooWantsToUse": "Kilo Code möchte den Browser verwenden",
+		"rooWantsToUse": "Klepa AI möchte den Browser verwenden",
 		"consoleLogs": "Konsolenprotokolle",
 		"noNewLogs": "(Keine neuen Protokolle)",
 		"screenshot": "Browser-Screenshot",
@@ -419,24 +419,24 @@
 	"profileViolationWarning": "Das aktuelle Profil ist nicht kompatibel mit den Einstellungen deiner Organisation",
 	"shellIntegration": {
 		"title": "Befehlsausführungswarnung",
-		"description": "Dein Befehl wird ohne VSCode Terminal-Shell-Integration ausgeführt. Um diese Warnung zu unterdrücken, kannst du die Shell-Integration im Abschnitt <strong>Terminal</strong> der <settingsLink>Kilo Code Einstellungen</settingsLink> deaktivieren oder die VSCode Terminal-Integration mit dem Link unten beheben.",
+		"description": "Dein Befehl wird ohne VSCode Terminal-Shell-Integration ausgeführt. Um diese Warnung zu unterdrücken, kannst du die Shell-Integration im Abschnitt <strong>Terminal</strong> der <settingsLink>Klepa AI Einstellungen</settingsLink> deaktivieren oder die VSCode Terminal-Integration mit dem Link unten beheben.",
 		"troubleshooting": "Klicke hier für die Shell-Integrationsdokumentation."
 	},
 	"ask": {
 		"autoApprovedRequestLimitReached": {
 			"title": "Limit für automatisch genehmigte Anfragen erreicht",
-			"description": "Kilo Code hat das automatisch genehmigte Limit von {{count}} API-Anfrage(n) erreicht. Möchtest du den Zähler zurücksetzen und mit der Aufgabe fortfahren?",
+			"description": "Klepa AI hat das automatisch genehmigte Limit von {{count}} API-Anfrage(n) erreicht. Möchtest du den Zähler zurücksetzen und mit der Aufgabe fortfahren?",
 			"button": "Zurücksetzen und fortfahren"
 		},
 		"autoApprovedCostLimitReached": {
-			"description": "Kilo Code hat das automatisch genehmigte Kostenlimit von ${{count}} erreicht. Möchtest du die Kosten zurücksetzen und mit der Aufgabe fortfahren?",
+			"description": "Klepa AI hat das automatisch genehmigte Kostenlimit von ${{count}} erreicht. Möchtest du die Kosten zurücksetzen und mit der Aufgabe fortfahren?",
 			"title": "Kostengrenze für automatische Genehmigung erreicht",
 			"button": "Zurücksetzen und Fortfahren"
 		}
 	},
 	"codebaseSearch": {
-		"wantsToSearch": "Kilo Code möchte den Codebase nach <code>{{query}}</code> durchsuchen",
-		"wantsToSearchWithPath": "Kilo Code möchte den Codebase nach <code>{{query}}</code> in <code>{{path}}</code> durchsuchen",
+		"wantsToSearch": "Klepa AI möchte den Codebase nach <code>{{query}}</code> durchsuchen",
+		"wantsToSearchWithPath": "Klepa AI möchte den Codebase nach <code>{{query}}</code> in <code>{{path}}</code> durchsuchen",
 		"didSearch_one": "1 Ergebnis gefunden",
 		"didSearch_other": "{{count}} Ergebnisse gefunden",
 		"resultTooltip": "Ähnlichkeitswert: {{score}} (klicken zum Öffnen der Datei)"
@@ -501,8 +501,8 @@
 		"clickToEdit": "Klicken zum Bearbeiten der Nachricht"
 	},
 	"slashCommand": {
-		"wantsToRun": "Kilo Code möchte einen Slash-Befehl ausführen",
-		"didRun": "Kilo Code hat einen Slash-Befehl ausgeführt"
+		"wantsToRun": "Klepa AI möchte einen Slash-Befehl ausführen",
+		"didRun": "Klepa AI hat einen Slash-Befehl ausgeführt"
 	},
 	"todo": {
 		"partial": "{{completed}} von {{total}} To-Dos erledigt",

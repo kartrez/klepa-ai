@@ -245,7 +245,7 @@ class RooToolWindowFactory : ToolWindowFactory {
             }
 
             return buildString {
-                append("Kilo Code Initialization\n")
+                append("Klepa AI Initialization\n")
                 append("========================\n")
                 append("Status: $initStateText\n")
                 append("\n")

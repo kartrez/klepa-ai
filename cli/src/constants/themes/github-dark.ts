@@ -1,5 +1,5 @@
 /**
- * GitHub Dark theme for Kilo Code CLI
+ * GitHub Dark theme for Klepa AI CLI
  *
  * Based on the GitHub Dark color scheme
  */

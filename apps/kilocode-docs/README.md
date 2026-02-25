@@ -1,4 +1,4 @@
-# Kilo Code Docs
+# Klepa AI Docs
 
 This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator, and lives at https://gpt-chat.by/docs
 

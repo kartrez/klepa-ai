@@ -319,7 +319,7 @@
 			},
 			"noCredits": {
 				"title": "No credits in your account",
-				"description": "Your Kilo Code account has no credits. To use autocomplete, please add credits to your account.",
+				"description": "Your Klepa AI account has no credits. To use autocomplete, please add credits to your account.",
 				"buyCredits": "Buy credits →"
 			},
 			"configureAutocompleteProfile": "Use any model by going to profiles and configuring a Profile of the Profile Type Autocomplete."

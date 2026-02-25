@@ -1,4 +1,4 @@
-Bring Kilo Code directly into your team's Slack workspace.
+Bring Klepa AI directly into your team's Slack workspace.
 
 ### Install the Slack App
 

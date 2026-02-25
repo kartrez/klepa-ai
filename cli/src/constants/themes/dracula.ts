@@ -1,5 +1,5 @@
 /**
- * Dracula theme for Kilo Code CLI
+ * Dracula theme for Klepa AI CLI
  *
  * Based on the popular Dracula color scheme
  */

@@ -1,4 +1,4 @@
-Use Kilo Code directly from your terminal for maximum flexibility.
+Use Klepa AI directly from your terminal for maximum flexibility.
 
 ### Install via npm
 

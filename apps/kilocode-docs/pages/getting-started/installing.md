@@ -1,11 +1,11 @@
 ---
 title: "Installation"
-description: "How to install Kilo Code on your system"
+description: "How to install Klepa AI on your system"
 ---
 
 # Installation
 
-Get started with Kilo Code by installing it on your preferred platform. Choose your development environment below:
+Get started with Klepa AI by installing it on your preferred platform. Choose your development environment below:
 
 ## Choose Your Platform
 
@@ -51,13 +51,13 @@ Get started with Kilo Code by installing it on your preferred platform. Choose y
 
 [Open VSX Registry](https://open-vsx.org/) is an open-source alternative to the VS Code Marketplace for VS Code-compatible editors that cannot access the official marketplace due to licensing restrictions.
 
-For VS Code-compatible editors like VSCodium, Gitpod, Eclipse Theia, and Windsurf, you can browse and install directly from the [Kilo Code page on Open VSX Registry](https://open-vsx.org/extension/kilocode/Kilo-Code).
+For VS Code-compatible editors like VSCodium, Gitpod, Eclipse Theia, and Windsurf, you can browse and install directly from the [Klepa AI page on Open VSX Registry](https://open-vsx.org/extension/kilocode/Kilo-Code).
 
 1. Open your editor
 2. Access the Extensions view (Side Bar icon or `Ctrl+Shift+X` / `Cmd+Shift+X`)
 3. Your editor should be pre-configured to use Open VSX Registry
-4. Search for "Kilo Code"
-5. Select "Kilo Code" and click **Install**
+4. Search for "Klepa AI"
+5. Select "Klepa AI" and click **Install**
 6. Reload the editor if prompted
 
 {% callout type="note" %}
@@ -70,7 +70,7 @@ If you prefer to download and install the VSIX file directly:
 
 1. **Download the VSIX file:**
 
-    - Find official releases on the [Kilo Code GitHub Releases page](https://github.com/Kilo-Org/kilocode/releases)
+    - Find official releases on the [Klepa AI GitHub Releases page](https://github.com/Kilo-Org/kilocode/releases)
     - Download the `.vsix` file from the [latest release](https://github.com/Kilo-Org/kilocode/releases/latest)
 
 2. **Install in VS Code:**
@@ -80,16 +80,16 @@ If you prefer to download and install the VSIX file directly:
     - Select "Install from VSIX..."
     - Browse to and select your downloaded `.vsix` file
 
-{% image src="/docs/img/installing-vsix.png" alt="Installing Kilo Code using VS Code's Install from VSIX dialog" width="600px" caption="Installing Kilo Code using VS Code's \"Install from VSIX\" dialog" /%}
+{% image src="/docs/img/installing-vsix.png" alt="Installing Klepa AI using VS Code's Install from VSIX dialog" width="600px" caption="Installing Klepa AI using VS Code's \"Install from VSIX\" dialog" /%}
 
 ## Troubleshooting
 
 **Extension Not Visible**
 
 - Restart VS Code
-- Verify Kilo Code is listed and enabled in Extensions
+- Verify Klepa AI is listed and enabled in Extensions
 - Try disabling and re-enabling the extension in Extensions
-- Check Output panel for errors (View → Output, select "Kilo Code")
+- Check Output panel for errors (View → Output, select "Klepa AI")
 
 **Installation Problems**
 
@@ -111,7 +111,7 @@ After installation, check out these resources to get started:
 
 - [Quickstart Guide](/docs/getting-started/quickstart) - Get up and running in minutes
 - [Setting Up Authentication](/docs/getting-started/setup-authentication) - Configure your AI provider
-- [Your First Task](/docs/code-with-ai/agents/chat-interface) - Learn the basics of working with Kilo Code
+- [Your First Task](/docs/code-with-ai/agents/chat-interface) - Learn the basics of working with Klepa AI
 
 ## Getting Support
 

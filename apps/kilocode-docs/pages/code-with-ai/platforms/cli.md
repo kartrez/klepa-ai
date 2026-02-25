@@ -1,6 +1,6 @@
 ---
 title: "Kilo CLI"
-description: "Using Kilo Code from the command line"
+description: "Using Klepa AI from the command line"
 ---
 
 {% callout type="warning" title="Version Notice" %}
@@ -11,7 +11,7 @@ This documentation applies only to Kilo version 1.0 and later. Users running ver
 
 Orchestrate agents from your terminal. Plan, debug, and code fast with keyboard-first navigation on the command line.
 
-The Kilo Code CLI uses the same underlying technology that powers the IDE extensions, so you can expect the same workflow to handle agentic coding tasks from start to finish.
+The Klepa AI CLI uses the same underlying technology that powers the IDE extensions, so you can expect the same workflow to handle agentic coding tasks from start to finish.
 
 ## Getting Started
 
@@ -46,7 +46,7 @@ Or use npm:
 
 `npm update -g @kilocode/cli`
 
-## What you can do with Kilo Code CLI
+## What you can do with Klepa AI CLI
 
 - **Plan and execute code changes without leaving your terminal.** Use your command line to make edits to your project without opening your IDE.
 - **Switch between hundreds of LLMs without constraints.** Other CLI tools only work with one model or curate opinionated lists. With Kilo, you can switch models without booting up another tool.
@@ -170,7 +170,7 @@ Configuration is managed through:
 
 ## Permissions
 
-Kilo Code uses the permission config to decide whether a given action should run automatically, prompt you, or be blocked.
+Klepa AI uses the permission config to decide whether a given action should run automatically, prompt you, or be blocked.
 
 ### Actions
 
@@ -379,9 +379,9 @@ Use pattern matching for commands with arguments. `"grep *"` allows `grep patter
 
 ## Interactive Mode
 
-Interactive mode is the default mode when running Kilo Code without the `--auto` flag, designed to work interactively with a user through the console.
+Interactive mode is the default mode when running Klepa AI without the `--auto` flag, designed to work interactively with a user through the console.
 
-In interactive mode Kilo Code will request approval for operations which have not been auto-approved, allowing the user to review and approve operations before they are executed, and optionally add them to the auto-approval list.
+In interactive mode Klepa AI will request approval for operations which have not been auto-approved, allowing the user to review and approve operations before they are executed, and optionally add them to the auto-approval list.
 
 ### Interactive Command Approval
 
@@ -406,7 +406,7 @@ This allows you to progressively build your auto-approval rules without manually
 
 ## Autonomous Mode (Non-Interactive)
 
-Autonomous mode allows Kilo Code to run in automated environments like CI/CD pipelines without requiring user interaction.
+Autonomous mode allows Klepa AI to run in automated environments like CI/CD pipelines without requiring user interaction.
 
 ```bash
 # Run in autonomous mode with a message
@@ -444,7 +444,7 @@ This instructs the AI to proceed without user input.
 
 ```yaml
 # GitHub Actions example
-- name: Run Kilo Code
+- name: Run Klepa AI
   run: |
       kilo run "Implement the new feature" --auto
 ```

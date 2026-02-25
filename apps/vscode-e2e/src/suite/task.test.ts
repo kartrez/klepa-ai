@@ -5,7 +5,7 @@ import { RooCodeEventName, type ClineMessage } from "@roo-code/types"
 import { waitUntilCompleted } from "./utils"
 import { setDefaultSuiteTimeout } from "./test-utils"
 
-suite("Kilo Code Task", function () {
+suite("Klepa AI Task", function () {
 	setDefaultSuiteTimeout(this)
 
 	test("Should handle prompt and response correctly", async () => {

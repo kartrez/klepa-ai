@@ -1,19 +1,19 @@
 ---
 title: "Setup & Authentication"
-description: "Configure Kilo Code and connect to your AI providers"
+description: "Configure Klepa AI and connect to your AI providers"
 ---
 
 # Setup & Authentication
 
-When you install Kilo Code, you'll be prompted to sign in or create a free account. This automatically configures everything you need to get started.
+When you install Klepa AI, you'll be prompted to sign in or create a free account. This automatically configures everything you need to get started.
 
 ## Quick Start with Kilo Account
 
-1. Click **"Try Kilo Code for Free"** in the extension
+1. Click **"Try Klepa AI for Free"** in the extension
 2. Sign in with your Google account
 3. Allow VS Code to open the authorization URL
 
-{% image src="/docs/img/signupflow.gif" alt="Sign up and registration flow with Kilo Code" /%}
+{% image src="/docs/img/signupflow.gif" alt="Sign up and registration flow with Klepa AI" /%}
 
 That's it! You're ready to [start your first task](/docs/getting-started/quickstart).
 
@@ -23,7 +23,7 @@ That's it! You're ready to [start your first task](/docs/getting-started/quickst
 
 ## Using Another API Provider
 
-If you prefer to use your own API key or existing subscription, Kilo Code supports **over 30 providers**. Here are some popular options to get started:
+If you prefer to use your own API key or existing subscription, Klepa AI supports **over 30 providers**. Here are some popular options to get started:
 
 | Provider                                                       | Best For                            | API Key Required |
 | -------------------------------------------------------------- | ----------------------------------- | ---------------- |
@@ -33,12 +33,12 @@ If you prefer to use your own API key or existing subscription, Kilo Code suppor
 | [OpenAI](/docs/ai-providers/openai)                            | Access to GPT models                | Yes              |
 
 {% callout type="info" title="Many More Providers Available" %}
-These are just a few examples! Kilo Code supports many more providers including Google Gemini, DeepSeek, Mistral, Ollama (for local models), AWS Bedrock, Google Vertex, and more. See the complete list at [AI Providers](/docs/ai-providers/).
+These are just a few examples! Klepa AI supports many more providers including Google Gemini, DeepSeek, Mistral, Ollama (for local models), AWS Bedrock, Google Vertex, and more. See the complete list at [AI Providers](/docs/ai-providers/).
 {% /callout %}
 
 ### ChatGPT Plus/Pro Subscription
 
-Already have a ChatGPT subscription? You can use it with Kilo Code through the [OpenAI ChatGPT provider](/docs/providers/openai-chatgpt-plus-pro)—no API key needed.
+Already have a ChatGPT subscription? You can use it with Klepa AI through the [OpenAI ChatGPT provider](/docs/providers/openai-chatgpt-plus-pro)—no API key needed.
 
 ### OpenRouter
 

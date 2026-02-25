@@ -75,7 +75,7 @@ describe("detectInputState", () => {
 								},
 								{
 									value: "kilo-code",
-									description: "Kilo Code team",
+									description: "Klepa AI team",
 									matchScore: 1,
 									highlightedValue: "kilo-code",
 								},

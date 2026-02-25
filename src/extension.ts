@@ -427,7 +427,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		)
 	}
 
-	// kilocode_change start: Fetch Kilo Code notifications on startup
+	// kilocode_change start: Fetch Klepa AI notifications on startup
 	try {
 		void fetchKilocodeNotificationsOnStartup(contextProxy, outputChannel.appendLine.bind(outputChannel))
 	} catch (error) {
@@ -513,7 +513,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		}),
 	)
 
-	// kilocode_change start - Kilo Code specific registrations
+	// kilocode_change start - Klepa AI specific registrations
 	const { kiloCodeWrapped, kiloCodeWrapperCode } = getKiloCodeWrapperProperties()
 	if (kiloCodeWrapped) {
 		// Only foward logs in Jetbrains
@@ -524,7 +524,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		registerAutocompleteProvider(context, provider)
 	}
 	registerCommitMessageProvider(context, outputChannel) // kilocode_change
-	// kilocode_change end - Kilo Code specific registrations
+	// kilocode_change end - Klepa AI specific registrations
 
 	registerCodeActions(context)
 	registerTerminalActions(context)

@@ -1,5 +1,5 @@
 /**
- * Atom One Dark theme for Kilo Code CLI
+ * Atom One Dark theme for Klepa AI CLI
  *
  * Based on the Atom One Dark color scheme
  */

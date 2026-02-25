@@ -1,5 +1,5 @@
 /**
- * ANSI theme for Kilo Code CLI
+ * ANSI theme for Klepa AI CLI
  *
  * Based on the ANSI color scheme using standard terminal colors
  */

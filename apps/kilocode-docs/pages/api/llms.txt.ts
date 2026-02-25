@@ -52,10 +52,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		const sections: string[] = []
 
 		// Add header
-		sections.push("# Kilo Code Documentation")
+		sections.push("# Klepa AI Documentation")
 		sections.push("")
 		sections.push(
-			"This file contains the complete documentation for Kilo Code, the leading open source agentic engineering platform.",
+			"This file contains the complete documentation for Klepa AI, the leading open source agentic engineering platform.",
 		)
 		sections.push("")
 		sections.push("---")

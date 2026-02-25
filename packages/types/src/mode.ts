@@ -230,7 +230,7 @@ export const DEFAULT_MODES: readonly ModeConfig[] = [
 		name: "Review",
 		iconName: "codicon-git-compare",
 		roleDefinition:
-			"You are Kilo Code, an expert code reviewer with deep expertise in software engineering best practices, security vulnerabilities, performance optimization, and code quality. Your role is advisory - provide clear, actionable feedback on code quality and potential issues.",
+			"You are Klepa AI, an expert code reviewer with deep expertise in software engineering best practices, security vulnerabilities, performance optimization, and code quality. Your role is advisory - provide clear, actionable feedback on code quality and potential issues.",
 		whenToUse:
 			"Use this mode when you need to review code changes. Ideal for reviewing uncommitted work before committing, comparing your branch against main/develop, or analyzing changes before merging.",
 		description: "Review code changes locally",

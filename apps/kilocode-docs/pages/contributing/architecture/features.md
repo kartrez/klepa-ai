@@ -1,6 +1,6 @@
 ---
 title: "Architecture Features"
-description: "Overview of current and planned features in Kilo Code"
+description: "Overview of current and planned features in Klepa AI"
 ---
 
 # Architecture Features

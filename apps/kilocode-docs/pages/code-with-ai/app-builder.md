@@ -1,6 +1,6 @@
 ---
 title: "App Builder"
-description: "Build complete applications with Kilo Code"
+description: "Build complete applications with Klepa AI"
 ---
 
 # App Builder
@@ -23,14 +23,14 @@ Kilo's **App Builder** lets you create end-to-end applications through natural l
 
 Before using App Builder:
 
-- **Active Kilo Code account**  
+- **Active Klepa AI account**  
   Sign up or log in at [app.gpt-chat.by](https://app.gpt-chat.by)
 
 ---
 
 ## Cost
 
-- You pay only for the AI model usage via Kilo Code credits
+- You pay only for the AI model usage via Klepa AI credits
 - Credit consumption varies based on app complexity and number of iterations
 - Deployment hosting is included during limited launch period
 

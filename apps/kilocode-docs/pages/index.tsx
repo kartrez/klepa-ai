@@ -5,7 +5,7 @@ import Link from "next/link"
 const terminalContent = {
 	installation: (
 		<>
-			<span className="terminal-comment"># Install Kilo Code VS Code Extension</span>
+			<span className="terminal-comment"># Install Klepa AI VS Code Extension</span>
 			{"\n"}
 			<span className="terminal-prompt">$</span> code --install-extension kilocode.kilo-code
 			{"\n"}
@@ -17,7 +17,7 @@ const terminalContent = {
 	),
 	firstTask: (
 		<>
-			<span className="terminal-comment"># Start a new task with Kilo Code</span>
+			<span className="terminal-comment"># Start a new task with Klepa AI</span>
 			{"\n"}
 			<span className="terminal-prompt">$</span> kilo "Create a React component for a user profile"
 			{"\n"}
@@ -59,7 +59,7 @@ const terminalContent = {
 const categories = [
 	{
 		title: "Get Started",
-		description: "Install Kilo Code and get up and running in minutes",
+		description: "Install Klepa AI and get up and running in minutes",
 		href: "/getting-started",
 		icon: (
 			<svg className="category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -74,7 +74,7 @@ const categories = [
 	},
 	{
 		title: "Code with AI",
-		description: "Learn how to use Kilo Code to write, edit, and understand code",
+		description: "Learn how to use Klepa AI to write, edit, and understand code",
 		href: "/code-with-ai",
 		icon: (
 			<svg className="category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -143,7 +143,7 @@ const categories = [
 	},
 	{
 		title: "Contributing",
-		description: "Help improve Kilo Code and learn about its architecture",
+		description: "Help improve Klepa AI and learn about its architecture",
 		href: "/contributing",
 		icon: (
 			<svg className="category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -173,14 +173,14 @@ export default function HomePage() {
 			{/* Hero Section */}
 			<section className="hero">
 				<div className="hero-content">
-					<h1 className="hero-title">Kilo Code Documentation</h1>
+					<h1 className="hero-title">Klepa AI Documentation</h1>
 					<p className="hero-subtitle">
-						Explore our guides and examples to build with Kilo Code, the most popular open source coding
+						Explore our guides and examples to build with Klepa AI, the most popular open source coding
 						agent.
 					</p>
 					<div className="hero-buttons">
 						<Link href="/getting-started" className="btn btn-primary">
-							Get started with Kilo Code →
+							Get started with Klepa AI →
 						</Link>
 						<Link href="/code-with-ai" className="btn btn-secondary">
 							Explore all features
@@ -262,7 +262,7 @@ export default function HomePage() {
 			<section className="terminal-section">
 				<div className="terminal-intro">
 					<h2 className="section-title">Try it out</h2>
-					<p className="terminal-description">Get started quickly with common Kilo Code commands</p>
+					<p className="terminal-description">Get started quickly with common Klepa AI commands</p>
 				</div>
 				<div className="terminal-container">
 					<div className="terminal-tabs">

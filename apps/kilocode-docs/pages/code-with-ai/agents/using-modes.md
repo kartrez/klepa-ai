@@ -1,11 +1,11 @@
 ---
 title: "Using Modes"
-description: "Understanding and using different modes in Kilo Code"
+description: "Understanding and using different modes in Klepa AI"
 ---
 
 # Using Modes
 
-Modes in Kilo Code are specialized personas that tailor the assistant's behavior to your current task. Each mode offers different capabilities, expertise, and access levels to help you accomplish specific goals.
+Modes in Klepa AI are specialized personas that tailor the assistant's behavior to your current task. Each mode offers different capabilities, expertise, and access levels to help you accomplish specific goals.
 
 ## Why Use Different Modes?
 
@@ -14,7 +14,7 @@ Modes in Kilo Code are specialized personas that tailor the assistant's behavior
 - **Focused interactions:** Receive responses optimized for your current activity
 - **Workflow optimization:** Seamlessly transition between planning, implementing, debugging, and learning
 
-{% youtube url="https://youtu.be/cS4vQfX528w" caption="Explaining the different modes in Kilo Code" /%}
+{% youtube url="https://youtu.be/cS4vQfX528w" caption="Explaining the different modes in Klepa AI" /%}
 
 ## Switching Between Modes
 
@@ -36,9 +36,9 @@ Four ways to switch modes:
     | Windows          | Ctrl + . |
     | Linux            | Ctrl + . |
 
-4. **Accept suggestions:** Click on mode switch suggestions that Kilo Code offers when appropriate
+4. **Accept suggestions:** Click on mode switch suggestions that Klepa AI offers when appropriate
 
-    {% image src="/docs/img/modes/modes-2.png" alt="Accepting a mode switch suggestion from Kilo Code" width="400" /%}
+    {% image src="/docs/img/modes/modes-2.png" alt="Accepting a mode switch suggestion from Klepa AI" width="400" /%}
 
 ## Built-in Modes
 

@@ -1,6 +1,6 @@
 ## Project Overview
 
-This is the Kilo Code documentation site. Kilo Code is the leading open source agentic engineering platform.
+This is the Klepa AI documentation site. Klepa AI is the leading open source agentic engineering platform.
 
 ## Dev Server
 

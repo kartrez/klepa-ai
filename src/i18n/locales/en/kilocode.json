@@ -3,8 +3,8 @@
 		"settings_imported": "Settings imported successfully."
 	},
 	"configDiscovery": {
-		"added": "Kilo Code: Added {{source}} {{configType}}: {{name}}{{modeStr}}",
-		"removed": "Kilo Code: Removed {{source}} {{configType}}: {{name}}{{modeStr}}"
+		"added": "Klepa AI: Added {{source}} {{configType}}: {{name}}{{modeStr}}",
+		"removed": "Klepa AI: Removed {{source}} {{configType}}: {{name}}{{modeStr}}"
 	},
 	"userFeedback": {
 		"message_update_failed": "Failed to update message",
@@ -109,7 +109,7 @@
 			"tooltip": {
 				"basic": "Klepa AI Autocomplete",
 				"disabled": "Klepa AI Autocomplete (disabled)",
-				"noCredits": "**No credits in your account**\n\nYour Kilo Code account has no credits. To use autocomplete, please add credits to your account.\n\n[Open Settings](command:kilo-code.settingsButtonClicked)",
+				"noCredits": "**No credits in your account**\n\nYour Klepa AI account has no credits. To use autocomplete, please add credits to your account.\n\n[Open Settings](command:kilo-code.settingsButtonClicked)",
 				"noUsableProvider": "**No autocomplete model configured**\n\nTo enable autocomplete, add a profile with one of these supported providers: {{providers}}.\n\n[Open Settings](command:kilo-code.settingsButtonClicked)",
 				"sessionTotal": "Session total cost:",
 				"provider": "Provider:",

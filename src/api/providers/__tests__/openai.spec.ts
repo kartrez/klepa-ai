@@ -112,7 +112,7 @@ describe("OpenAiHandler", () => {
 				apiKey: expect.any(String),
 				defaultHeaders: {
 					"HTTP-Referer": "https://gpt-chat.by",
-					"X-Title": "Kilo Code",
+					"X-Title": "Klepa AI",
 					"X-KiloCode-Version": Package.version,
 					"User-Agent": `Kilo-Code/${Package.version}`,
 				},

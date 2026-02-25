@@ -1,5 +1,5 @@
 /**
- * Ayu Dark theme for Kilo Code CLI
+ * Ayu Dark theme for Klepa AI CLI
  *
  * Based on the Ayu Dark color scheme
  */

@@ -1,5 +1,5 @@
 /**
- * Google Code theme for Kilo Code CLI
+ * Google Code theme for Klepa AI CLI
  *
  * Based on the Google Code color scheme
  */

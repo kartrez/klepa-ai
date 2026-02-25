@@ -175,7 +175,7 @@ describe("URL functions", () => {
 			// Use a token that looks like JWT but has invalid JSON payload
 			const result = getKiloUrlFromToken("https://gpt-chat.by/api/test", "header.invalid-json.signature")
 			expect(result).toBe("https://gpt-chat.by/api/test")
-			expect(consoleSpy).toHaveBeenCalledWith("Failed to get base URL from Kilo Code token")
+			expect(consoleSpy).toHaveBeenCalledWith("Failed to get base URL from Klepa AI token")
 			consoleSpy.mockRestore()
 		})
 	})

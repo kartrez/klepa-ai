@@ -1,6 +1,6 @@
 # Provider Configuration Guide
 
-This guide provides detailed information on how to configure each provider in Kilo Code CLI. Each provider has specific configuration requirements and optional settings that can be customized to suit your needs.
+This guide provides detailed information on how to configure each provider in Klepa AI CLI. Each provider has specific configuration requirements and optional settings that can be customized to suit your needs.
 
 ## Table of Contents
 
@@ -8,7 +8,7 @@ This guide provides detailed information on how to configure each provider in Ki
 - [Configuration Methods](#configuration-methods)
 - [Common Parameters](#common-parameters)
 - [Provider Details](#provider-details)
-    - [Kilo Code](#kilocode)
+    - [Klepa AI](#kilocode)
     - [Anthropic](#anthropic)
     - [OpenAI Native](#openai-native)
     - [OpenRouter](#openrouter)
@@ -52,7 +52,7 @@ This guide provides detailed information on how to configure each provider in Ki
 
 ## Introduction
 
-Kilo Code CLI supports multiple AI providers, each with their own configuration requirements. This document details the configuration fields for each provider, including required and optional parameters.
+Klepa AI CLI supports multiple AI providers, each with their own configuration requirements. This document details the configuration fields for each provider, including required and optional parameters.
 
 ## Configuration Methods
 
@@ -79,13 +79,13 @@ You can configure providers using:
 
 ### kilocode
 
-The official Kilo Code provider for accessing Kilo Code's managed AI services.
+The official Klepa AI provider for accessing Klepa AI's managed AI services.
 
-**Description**: Access Kilo Code's managed AI infrastructure with support for multiple models and organizations.
+**Description**: Access Klepa AI's managed AI infrastructure with support for multiple models and organizations.
 
 **Required Fields**:
 
-- `kilocodeToken` (password): Your Kilo Code authentication token
+- `kilocodeToken` (password): Your Klepa AI authentication token
 - `kilocodeModel` (text): The model to use (default: `anthropic/claude-sonnet-4.5`)
 
 **Optional Fields**:
@@ -1714,7 +1714,7 @@ MiniMax AI platform.
 
 ## Additional Resources
 
-- [Kilo Code Documentation](https://docs.kilocode.com/)
+- [Klepa AI Documentation](https://docs.kilocode.com/)
 - [Configuration Schema](../src/config/schema.json)
 
 ## Support

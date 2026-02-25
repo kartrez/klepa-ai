@@ -1,5 +1,5 @@
 {
-	"greeting": "Kilo Code สามารถทำอะไรให้คุณได้บ้าง?",
+	"greeting": "Klepa AI สามารถทำอะไรให้คุณได้บ้าง?",
 	"costs": {
 		"totalWithSubtasks": "ค่าใช้จ่ายรวม (รวมงานย่อย): ${{cost}}",
 		"total": "ค่าใช้จ่ายรวม: ${{cost}}",
@@ -25,7 +25,7 @@
 		"sharePublicly": "แชร์แบบสาธารณะ",
 		"sharePubliclyDescription": "ทุกคนที่มีลิงก์สามารถเข้าถึงได้",
 		"connectToCloud": "เชื่อมต่อกับ Cloud",
-		"connectToCloudDescription": "เข้าสู่ระบบ Kilo Code Cloud เพื่อแชร์งาน",
+		"connectToCloudDescription": "เข้าสู่ระบบ Klepa AI Cloud เพื่อแชร์งาน",
 		"sharingDisabledByOrganization": "การแชร์ถูกปิดใช้งานโดยองค์กร",
 		"shareSuccessOrganization": "คัดลอกลิงก์องค์กรไปยังคลิปบอร์ดแล้ว",
 		"shareSuccessPublic": "คัดลอกลิงก์สาธารณะไปยังคลิปบอร์ดแล้ว",
@@ -148,7 +148,7 @@
 		"title": "โหมด",
 		"marketplace": "ตลาดโหมด",
 		"settings": "การตั้งค่าโหมด",
-		"description": "บุคลิกพิเศษที่ปรับแต่งพฤติกรรมของ Kilo Code",
+		"description": "บุคลิกพิเศษที่ปรับแต่งพฤติกรรมของ Klepa AI",
 		"searchPlaceholder": "ค้นหาโหมด...",
 		"noResults": "ไม่พบผลลัพธ์",
 		"organizationModes": "โหมดขององค์กร"
@@ -238,52 +238,52 @@
 		"tokens": "โทเค็น"
 	},
 	"instructions": {
-		"wantsToFetch": "Kilo Code ต้องการดึงคำแนะนำโดยละเอียดเพื่อช่วยในงานปัจจุบัน"
+		"wantsToFetch": "Klepa AI ต้องการดึงคำแนะนำโดยละเอียดเพื่อช่วยในงานปัจจุบัน"
 	},
 	"fileOperations": {
-		"wantsToRead": "Kilo Code ต้องการอ่านไฟล์นี้:",
-		"wantsToReadMultiple": "Kilo Code ต้องการอ่านหลายไฟล์:",
-		"wantsToReadAndXMore": "Kilo Code ต้องการอ่านไฟล์นี้และอีก {{count}} ไฟล์:",
-		"wantsToReadOutsideWorkspace": "Kilo Code ต้องการอ่านไฟล์นี้นอกเวิร์กสเปซ:",
-		"didRead": "Kilo Code อ่านไฟล์นี้:",
-		"wantsToEdit": "Kilo Code ต้องการแก้ไขไฟล์นี้:",
-		"wantsToEditOutsideWorkspace": "Kilo Code ต้องการแก้ไขไฟล์นี้นอกเวิร์กสเปซ:",
-		"wantsToEditProtected": "Kilo Code ต้องการแก้ไขไฟล์กำหนดค่าที่ได้รับการป้องกัน:",
-		"wantsToApplyBatchChanges": "Kilo Code ต้องการใช้การเปลี่ยนแปลงกับหลายไฟล์:",
-		"wantsToGenerateImage": "Kilo Code ต้องการสร้างภาพ:",
-		"wantsToGenerateImageOutsideWorkspace": "Kilo Code ต้องการสร้างภาพนอกพื้นที่ทำงาน:",
-		"wantsToGenerateImageProtected": "Kilo Code ต้องการสร้างภาพในตำแหน่งที่ได้รับการป้องกัน:",
-		"didGenerateImage": "Kilo Code ได้สร้างภาพแล้ว:",
-		"wantsToCreate": "Kilo Code ต้องการสร้างไฟล์ใหม่:",
-		"wantsToSearchReplace": "Kilo Code ต้องการค้นหาและแทนที่ในไฟล์นี้:",
-		"didSearchReplace": "Kilo Code ทำการค้นหาและแทนที่ในไฟล์นี้:",
-		"wantsToInsert": "Kilo Code ต้องการแทรกเนื้อหาลงในไฟล์นี้:",
-		"wantsToInsertWithLineNumber": "Kilo Code ต้องการแทรกเนื้อหาลงในไฟล์นี้ที่บรรทัด {{lineNumber}}:",
-		"wantsToInsertAtEnd": "Kilo Code ต้องการเพิ่มเนื้อหาที่ท้ายไฟล์นี้:",
-		"wantsToDelete": "Kilo Code ต้องการลบไฟล์นี้:",
-		"wantsToDeleteDirectory": "Kilo Code ต้องการลบไดเรกทอรีนี้:"
+		"wantsToRead": "Klepa AI ต้องการอ่านไฟล์นี้:",
+		"wantsToReadMultiple": "Klepa AI ต้องการอ่านหลายไฟล์:",
+		"wantsToReadAndXMore": "Klepa AI ต้องการอ่านไฟล์นี้และอีก {{count}} ไฟล์:",
+		"wantsToReadOutsideWorkspace": "Klepa AI ต้องการอ่านไฟล์นี้นอกเวิร์กสเปซ:",
+		"didRead": "Klepa AI อ่านไฟล์นี้:",
+		"wantsToEdit": "Klepa AI ต้องการแก้ไขไฟล์นี้:",
+		"wantsToEditOutsideWorkspace": "Klepa AI ต้องการแก้ไขไฟล์นี้นอกเวิร์กสเปซ:",
+		"wantsToEditProtected": "Klepa AI ต้องการแก้ไขไฟล์กำหนดค่าที่ได้รับการป้องกัน:",
+		"wantsToApplyBatchChanges": "Klepa AI ต้องการใช้การเปลี่ยนแปลงกับหลายไฟล์:",
+		"wantsToGenerateImage": "Klepa AI ต้องการสร้างภาพ:",
+		"wantsToGenerateImageOutsideWorkspace": "Klepa AI ต้องการสร้างภาพนอกพื้นที่ทำงาน:",
+		"wantsToGenerateImageProtected": "Klepa AI ต้องการสร้างภาพในตำแหน่งที่ได้รับการป้องกัน:",
+		"didGenerateImage": "Klepa AI ได้สร้างภาพแล้ว:",
+		"wantsToCreate": "Klepa AI ต้องการสร้างไฟล์ใหม่:",
+		"wantsToSearchReplace": "Klepa AI ต้องการค้นหาและแทนที่ในไฟล์นี้:",
+		"didSearchReplace": "Klepa AI ทำการค้นหาและแทนที่ในไฟล์นี้:",
+		"wantsToInsert": "Klepa AI ต้องการแทรกเนื้อหาลงในไฟล์นี้:",
+		"wantsToInsertWithLineNumber": "Klepa AI ต้องการแทรกเนื้อหาลงในไฟล์นี้ที่บรรทัด {{lineNumber}}:",
+		"wantsToInsertAtEnd": "Klepa AI ต้องการเพิ่มเนื้อหาที่ท้ายไฟล์นี้:",
+		"wantsToDelete": "Klepa AI ต้องการลบไฟล์นี้:",
+		"wantsToDeleteDirectory": "Klepa AI ต้องการลบไดเรกทอรีนี้:"
 	},
 	"directoryOperations": {
-		"wantsToViewTopLevel": "Kilo Code ต้องการดูไฟล์ระดับบนสุดในไดเรกทอรีนี้:",
-		"didViewTopLevel": "Kilo Code ดูไฟล์ระดับบนสุดในไดเรกทอรีนี้:",
-		"wantsToViewTopLevelOutsideWorkspace": "Kilo Code ต้องการดูไฟล์ระดับบนสุดในไดเรกทอรีนี้ (นอกเวิร์กสเปซ):",
-		"didViewTopLevelOutsideWorkspace": "Kilo Code ดูไฟล์ระดับบนสุดในไดเรกทอรีนี้ (นอกเวิร์กสเปซ):",
-		"wantsToViewRecursive": "Kilo Code ต้องการดูไฟล์ทั้งหมดในไดเรกทอรีนี้แบบเรียกซ้ำ:",
-		"didViewRecursive": "Kilo Code ดูไฟล์ทั้งหมดในไดเรกทอรีนี้แบบเรียกซ้ำ:",
-		"wantsToViewRecursiveOutsideWorkspace": "Kilo Code ต้องการดูไฟล์ทั้งหมดในไดเรกทอรีนี้แบบเรียกซ้ำ (นอกเวิร์กสเปซ):",
-		"didViewRecursiveOutsideWorkspace": "Kilo Code ดูไฟล์ทั้งหมดในไดเรกทอรีนี้แบบเรียกซ้ำ (นอกเวิร์กสเปซ):",
-		"wantsToViewDefinitions": "Kilo Code ต้องการดูชื่อนิยามซอร์สโค้ดที่ใช้ในไดเรกทอรีนี้:",
-		"didViewDefinitions": "Kilo Code ดูชื่อนิยามซอร์สโค้ดที่ใช้ในไดเรกทอรีนี้:",
-		"wantsToViewDefinitionsOutsideWorkspace": "Kilo Code ต้องการดูชื่อนิยามซอร์สโค้ดที่ใช้ในไดเรกทอรีนี้ (นอกเวิร์กสเปซ):",
-		"didViewDefinitionsOutsideWorkspace": "Kilo Code ดูชื่อนิยามซอร์สโค้ดที่ใช้ในไดเรกทอรีนี้ (นอกเวิร์กสเปซ):",
-		"wantsToSearch": "Kilo Code ต้องการค้นหาในไดเรกทอรีนี้สำหรับ <code>{{regex}}</code>:",
-		"didSearch": "Kilo Code ค้นหาในไดเรกทอรีนี้สำหรับ <code>{{regex}}</code>:",
-		"wantsToSearchOutsideWorkspace": "Kilo Code ต้องการค้นหาในไดเรกทอรีนี้ (นอกเวิร์กสเปซ) สำหรับ <code>{{regex}}</code>:",
-		"didSearchOutsideWorkspace": "Kilo Code ค้นหาในไดเรกทอรีนี้ (นอกเวิร์กสเปซ) สำหรับ <code>{{regex}}</code>:"
+		"wantsToViewTopLevel": "Klepa AI ต้องการดูไฟล์ระดับบนสุดในไดเรกทอรีนี้:",
+		"didViewTopLevel": "Klepa AI ดูไฟล์ระดับบนสุดในไดเรกทอรีนี้:",
+		"wantsToViewTopLevelOutsideWorkspace": "Klepa AI ต้องการดูไฟล์ระดับบนสุดในไดเรกทอรีนี้ (นอกเวิร์กสเปซ):",
+		"didViewTopLevelOutsideWorkspace": "Klepa AI ดูไฟล์ระดับบนสุดในไดเรกทอรีนี้ (นอกเวิร์กสเปซ):",
+		"wantsToViewRecursive": "Klepa AI ต้องการดูไฟล์ทั้งหมดในไดเรกทอรีนี้แบบเรียกซ้ำ:",
+		"didViewRecursive": "Klepa AI ดูไฟล์ทั้งหมดในไดเรกทอรีนี้แบบเรียกซ้ำ:",
+		"wantsToViewRecursiveOutsideWorkspace": "Klepa AI ต้องการดูไฟล์ทั้งหมดในไดเรกทอรีนี้แบบเรียกซ้ำ (นอกเวิร์กสเปซ):",
+		"didViewRecursiveOutsideWorkspace": "Klepa AI ดูไฟล์ทั้งหมดในไดเรกทอรีนี้แบบเรียกซ้ำ (นอกเวิร์กสเปซ):",
+		"wantsToViewDefinitions": "Klepa AI ต้องการดูชื่อนิยามซอร์สโค้ดที่ใช้ในไดเรกทอรีนี้:",
+		"didViewDefinitions": "Klepa AI ดูชื่อนิยามซอร์สโค้ดที่ใช้ในไดเรกทอรีนี้:",
+		"wantsToViewDefinitionsOutsideWorkspace": "Klepa AI ต้องการดูชื่อนิยามซอร์สโค้ดที่ใช้ในไดเรกทอรีนี้ (นอกเวิร์กสเปซ):",
+		"didViewDefinitionsOutsideWorkspace": "Klepa AI ดูชื่อนิยามซอร์สโค้ดที่ใช้ในไดเรกทอรีนี้ (นอกเวิร์กสเปซ):",
+		"wantsToSearch": "Klepa AI ต้องการค้นหาในไดเรกทอรีนี้สำหรับ <code>{{regex}}</code>:",
+		"didSearch": "Klepa AI ค้นหาในไดเรกทอรีนี้สำหรับ <code>{{regex}}</code>:",
+		"wantsToSearchOutsideWorkspace": "Klepa AI ต้องการค้นหาในไดเรกทอรีนี้ (นอกเวิร์กสเปซ) สำหรับ <code>{{regex}}</code>:",
+		"didSearchOutsideWorkspace": "Klepa AI ค้นหาในไดเรกทอรีนี้ (นอกเวิร์กสเปซ) สำหรับ <code>{{regex}}</code>:"
 	},
 	"codebaseSearch": {
-		"wantsToSearch": "Kilo Code ต้องการค้นหาในโค้ดเบสสำหรับ <code>{{query}}</code>:",
-		"wantsToSearchWithPath": "Kilo Code ต้องการค้นหาในโค้ดเบสสำหรับ <code>{{query}}</code> ใน <code>{{path}}</code>:",
+		"wantsToSearch": "Klepa AI ต้องการค้นหาในโค้ดเบสสำหรับ <code>{{query}}</code>:",
+		"wantsToSearchWithPath": "Klepa AI ต้องการค้นหาในโค้ดเบสสำหรับ <code>{{query}}</code> ใน <code>{{path}}</code>:",
 		"didSearch_one": "พบ 1 ผลลัพธ์",
 		"didSearch_other": "พบ {{count}} ผลลัพธ์",
 		"resultTooltip": "คะแนนความคล้ายคลึง: {{score}} (คลิกเพื่อเปิดไฟล์)"
@@ -316,18 +316,18 @@
 		"youSaid": "คุณกล่าว"
 	},
 	"mcp": {
-		"wantsToUseTool": "Kilo Code ต้องการใช้เครื่องมือบนเซิร์ฟเวอร์ MCP {{serverName}}:",
-		"wantsToAccessResource": "Kilo Code ต้องการเข้าถึงทรัพยากรบนเซิร์ฟเวอร์ MCP {{serverName}}:"
+		"wantsToUseTool": "Klepa AI ต้องการใช้เครื่องมือบนเซิร์ฟเวอร์ MCP {{serverName}}:",
+		"wantsToAccessResource": "Klepa AI ต้องการเข้าถึงทรัพยากรบนเซิร์ฟเวอร์ MCP {{serverName}}:"
 	},
 	"modes": {
-		"wantsToSwitch": "Kilo Code ต้องการเปลี่ยนเป็นโหมด {{mode}}",
-		"wantsToSwitchWithReason": "Kilo Code ต้องการเปลี่ยนเป็นโหมด {{mode}} เพราะ: {{reason}}",
-		"didSwitch": "Kilo Code เปลี่ยนเป็นโหมด {{mode}}",
-		"didSwitchWithReason": "Kilo Code เปลี่ยนเป็นโหมด {{mode}} เพราะ: {{reason}}"
+		"wantsToSwitch": "Klepa AI ต้องการเปลี่ยนเป็นโหมด {{mode}}",
+		"wantsToSwitchWithReason": "Klepa AI ต้องการเปลี่ยนเป็นโหมด {{mode}} เพราะ: {{reason}}",
+		"didSwitch": "Klepa AI เปลี่ยนเป็นโหมด {{mode}}",
+		"didSwitchWithReason": "Klepa AI เปลี่ยนเป็นโหมด {{mode}} เพราะ: {{reason}}"
 	},
 	"subtasks": {
-		"wantsToCreate": "Kilo Code ต้องการสร้างงานย่อยใหม่ในโหมด {{mode}}:",
-		"wantsToFinish": "Kilo Code ต้องการเสร็จสิ้นงานย่อยนี้",
+		"wantsToCreate": "Klepa AI ต้องการสร้างงานย่อยใหม่ในโหมด {{mode}}:",
+		"wantsToFinish": "Klepa AI ต้องการเสร็จสิ้นงานย่อยนี้",
 		"newTaskContent": "คำแนะนำงานย่อย",
 		"completionContent": "งานย่อยเสร็จสมบูรณ์",
 		"resultContent": "ผลลัพธ์งานย่อย",
@@ -335,7 +335,7 @@
 		"completionInstructions": "งานย่อยเสร็จสมบูรณ์! คุณสามารถตรวจสอบผลลัพธ์และแนะนำการแก้ไขหรือขั้นตอนถัดไป หากทุกอย่างดูดี ยืนยันเพื่อส่งผลลัพธ์กลับไปยังงานหลัก"
 	},
 	"questions": {
-		"hasQuestion": "Kilo Code มีคำถาม:"
+		"hasQuestion": "Klepa AI มีคำถาม:"
 	},
 	"taskCompleted": "งานเสร็จสมบูรณ์",
 	"error": "ข้อผิดพลาด",
@@ -357,14 +357,14 @@
 	"diffError": {
 		"title": "การแก้ไขไม่สำเร็จ"
 	},
-	"troubleMessage": "Kilo Code กำลังมีปัญหา...",
+	"troubleMessage": "Klepa AI กำลังมีปัญหา...",
 	"powershell": {
 		"issues": "ดูเหมือนว่าคุณกำลังมีปัญหากับ Windows PowerShell โปรดดูนี่"
 	},
 	"autoApprove": {
 		"title": "อนุมัติอัตโนมัติ:",
 		"none": "ไม่มี",
-		"description": "การอนุมัติอัตโนมัติอนุญาตให้ Kilo Code ดำเนินการโดยไม่ต้องขออนุญาต เปิดใช้งานเฉพาะสำหรับการดำเนินการที่คุณเชื่อถืออย่างเต็มที่ การกำหนดค่าโดยละเอียดเพิ่มเติมมีใน<settingsLink>การตั้งค่า</settingsLink>",
+		"description": "การอนุมัติอัตโนมัติอนุญาตให้ Klepa AI ดำเนินการโดยไม่ต้องขออนุญาต เปิดใช้งานเฉพาะสำหรับการดำเนินการที่คุณเชื่อถืออย่างเต็มที่ การกำหนดค่าโดยละเอียดเพิ่มเติมมีใน<settingsLink>การตั้งค่า</settingsLink>",
 		"selectOptionsFirst": "เลือกอย่างน้อยหนึ่งตัวเลือกด้านล่างเพื่อเปิดใช้งานการอนุมัติอัตโนมัติ",
 		"toggleAriaLabel": "สลับการอนุมัติอัตโนมัติ",
 		"disabledAriaLabel": "การอนุมัติอัตโนมัติปิดใช้งาน - เลือกตัวเลือกก่อน",
@@ -382,9 +382,9 @@
 	"announcement": {
 		"support": "โปรดสนับสนุน Roo Code โดยให้ดาวแก่เราบน <githubLink>GitHub</githubLink>",
 		"title": "🎉 เปิดตัว Roo Code {{version}}",
-		"description": "Kilo Code {{version}} นำเสนอฟีเจอร์ใหม่ที่สำคัญและการปรับปรุงตามคำติชมของคุณ",
+		"description": "Klepa AI {{version}} นำเสนอฟีเจอร์ใหม่ที่สำคัญและการปรับปรุงตามคำติชมของคุณ",
 		"whatsNew": "มีอะไรใหม่",
-		"feature1": "<bold>เปิดตัว Kilo Code Marketplace</bold>: ตลาดกลางเปิดให้บริการแล้ว! ค้นพบและติดตั้งโหมดและ MCP ได้ง่ายกว่าที่เคย",
+		"feature1": "<bold>เปิดตัว Klepa AI Marketplace</bold>: ตลาดกลางเปิดให้บริการแล้ว! ค้นพบและติดตั้งโหมดและ MCP ได้ง่ายกว่าที่เคย",
 		"feature2": "<bold>โมเดล Gemini 2.5</bold>: เพิ่มการรองรับโมเดล Gemini 2.5 Pro, Flash และ Flash Lite ใหม่",
 		"feature3": "<bold>รองรับไฟล์ Excel และอื่นๆ</bold>: เพิ่มการรองรับไฟล์ Excel (.xlsx) และการแก้ไขข้อผิดพลาดและการปรับปรุงมากมาย!",
 		"hideButton": "ซ่อนประกาศ",
@@ -445,7 +445,7 @@
 		"browserActionHover": "วางเมาส์",
 		"browserActionHoverDesc": "วางเมาส์ ({{coordinate}})",
 		"rooCloudAnnouncement": "🚀 ประกาศ Roo Code Cloud",
-		"rooWantsToUse": "Kilo Code ต้องการใช้เบราว์เซอร์:",
+		"rooWantsToUse": "Klepa AI ต้องการใช้เบราว์เซอร์:",
 		"consoleLogs": "บันทึกคอนโซล",
 		"noNewLogs": "(ไม่มีบันทึกใหม่)",
 		"screenshot": "ภาพหน้าจอเบราว์เซอร์",
@@ -506,18 +506,18 @@
 	"profileViolationWarning": "โปรไฟล์ปัจจุบันละเมิดการตั้งค่าขององค์กรของคุณ",
 	"shellIntegration": {
 		"title": "คำเตือนการดำเนินการคำสั่ง",
-		"description": "คำสั่งของคุณกำลังถูกดำเนินการโดยไม่มีการรวม shell ของ VSCode terminal เพื่อปิดคำเตือนนี้ คุณสามารถปิดการรวม shell ในส่วน <strong>Terminal</strong> ของ<settingsLink>การตั้งค่า Kilo Code</settingsLink>หรือแก้ไขปัญหาการรวม VSCode terminal โดยใช้ลิงก์ด้านล่าง",
+		"description": "คำสั่งของคุณกำลังถูกดำเนินการโดยไม่มีการรวม shell ของ VSCode terminal เพื่อปิดคำเตือนนี้ คุณสามารถปิดการรวม shell ในส่วน <strong>Terminal</strong> ของ<settingsLink>การตั้งค่า Klepa AI</settingsLink>หรือแก้ไขปัญหาการรวม VSCode terminal โดยใช้ลิงก์ด้านล่าง",
 		"troubleshooting": "คลิกที่นี่สำหรับเอกสารการรวม shell"
 	},
 	"ask": {
 		"autoApprovedRequestLimitReached": {
 			"title": "ถึงขีดจำกัดคำขอที่อนุมัติอัตโนมัติ",
-			"description": "Kilo Code ถึงขีดจำกัดการอนุมัติอัตโนมัติของ {{count}} คำขอ API คุณต้องการรีเซ็ตจำนวนและดำเนินการต่อกับงานหรือไม่?",
+			"description": "Klepa AI ถึงขีดจำกัดการอนุมัติอัตโนมัติของ {{count}} คำขอ API คุณต้องการรีเซ็ตจำนวนและดำเนินการต่อกับงานหรือไม่?",
 			"button": "รีเซ็ตและดำเนินการต่อ"
 		},
 		"autoApprovedCostLimitReached": {
 			"title": "ถึงขีดจำกัดค่าใช้จ่ายที่อนุมัติอัตโนมัติแล้ว",
-			"description": "Kilo Code ถึงขีดจำกัดค่าใช้จ่ายที่อนุมัติอัตโนมัติ ${{count}} แล้ว คุณต้องการรีเซ็ตค่าใช้จ่ายและดำเนินงานต่อหรือไม่?",
+			"description": "Klepa AI ถึงขีดจำกัดค่าใช้จ่ายที่อนุมัติอัตโนมัติ ${{count}} แล้ว คุณต้องการรีเซ็ตค่าใช้จ่ายและดำเนินงานต่อหรือไม่?",
 			"button": "รีเซ็ตและดำเนินการต่อ"
 		}
 	},
@@ -565,8 +565,8 @@
 	},
 	"generateCommitMessage": "สร้างข้อความ Commit",
 	"slashCommand": {
-		"wantsToRun": "Kilo Code ต้องการรันคำสั่ง slash:",
-		"didRun": "Kilo Code รันคำสั่ง slash แล้ว:"
+		"wantsToRun": "Klepa AI ต้องการรันคำสั่ง slash:",
+		"didRun": "Klepa AI รันคำสั่ง slash แล้ว:"
 	},
 	"contextMenu": {
 		"noResults": "ไม่มีผลลัพธ์",

@@ -1,15 +1,15 @@
 ---
 title: "AI Providers"
-description: "Configure and connect different AI model providers to Kilo Code"
+description: "Configure and connect different AI model providers to Klepa AI"
 ---
 
 # AI Providers
 
-Kilo Code supports a wide variety of AI providers, giving you flexibility in how you power your AI-assisted development workflow. Choose from cloud providers, local models, or AI gateways based on your needs.
+Klepa AI supports a wide variety of AI providers, giving you flexibility in how you power your AI-assisted development workflow. Choose from cloud providers, local models, or AI gateways based on your needs.
 
 ## Getting Started
 
-The fastest way to get started is with **Kilo Code's built-in provider**, which requires no configuration. Simply sign in and start coding.
+The fastest way to get started is with **Klepa AI's built-in provider**, which requires no configuration. Simply sign in and start coding.
 
 For users who want to use their own API keys or need specific models, we support over 30 providers.
 
@@ -45,7 +45,7 @@ Route requests through unified APIs with additional features:
 
 | Priority        | Recommended Provider                                |
 | --------------- | --------------------------------------------------- |
-| Ease of use     | [Kilo Code (built-in)](/docs/ai-providers/kilocode) |
+| Ease of use     | [Klepa AI (built-in)](/docs/ai-providers/kilocode) |
 | Best value      | Zhipu AI or Mistral                                 |
 | Privacy/Offline | Ollama or LM Studio                                 |
 | Enterprise      | AWS Bedrock or Google Vertex                        |
@@ -63,6 +63,6 @@ All API keys use VS Code's Secret Storage—never stored in plain text.
 
 ## Next Steps
 
-- **New to Kilo Code?** Start with the [Kilo Code provider](/docs/ai-providers/kilocode) - no setup required
+- **New to Klepa AI?** Start with the [Klepa AI provider](/docs/ai-providers/kilocode) - no setup required
 - **Have an API key?** Jump to your provider's page for configuration instructions
 - **Want to compare?** Check out [Model Selection](/docs/code-with-ai/agents/model-selection) for guidance on choosing models

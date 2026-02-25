@@ -26,7 +26,7 @@
 		"sharingDisabledByOrganization": "Sharing disabled by organization",
 		"shareSuccessOrganization": "Organization link copied to clipboard",
 		"shareSuccessPublic": "Public link copied to clipboard",
-		"openInCloud": "Open task in Kilo Code Cloud",
+		"openInCloud": "Open task in Klepa AI Cloud",
 		"openInCloudIntro": "Keep monitoring or interacting with Kilo from anywhere. Scan, click or copy to open.",
 		"openApiHistory": "Open API History",
 		"openUiHistory": "Open UI History"
@@ -346,19 +346,19 @@
 		"triggerLabelAll": "BRRR"
 	},
 	"announcement": {
-		"title": "Kilo Code {{version}} Released",
-		"support": "Please support Kilo Code by starring us on <githubLink>GitHub</githubLink>.",
+		"title": "Klepa AI {{version}} Released",
+		"support": "Please support Klepa AI by starring us on <githubLink>GitHub</githubLink>.",
 		"stealthModel": {
-			"feature": "<bold>Limited-time FREE stealth model</bold> - Code Supernova: Now upgraded with a <bold>1M token context window</bold>! A versatile agentic coding model that supports image inputs, accessible through Kilo Code Cloud.",
+			"feature": "<bold>Limited-time FREE stealth model</bold> - Code Supernova: Now upgraded with a <bold>1M token context window</bold>! A versatile agentic coding model that supports image inputs, accessible through Klepa AI Cloud.",
 			"note": "(Note: prompts and completions are logged by the model creator and used to improve the model)",
-			"connectButton": "Connect to Kilo Code Cloud",
-			"selectModel": "Select <code>roo/code-supernova</code> from the Kilo Code Cloud provider in Settings to get started.",
+			"connectButton": "Connect to Klepa AI Cloud",
+			"selectModel": "Select <code>roo/code-supernova</code> from the Klepa AI Cloud provider in Settings to get started.",
 			"goToSettingsButton": "Go to Settings"
 		},
 		"release": {
 			"heading": "What's New:",
 			"openaiCodexProvider": "Added OpenAI - ChatGPT Plus/Pro Provider that gives subscription-based access to Codex models without per-token costs.",
-			"gpt52codexModel": "Added the new gpt-5.2-codex model to Kilo Code Router, the standard OpenAI provider, and more.",
+			"gpt52codexModel": "Added the new gpt-5.2-codex model to Klepa AI Router, the standard OpenAI provider, and more.",
 			"bugFixes": "Fixed memory leaks causing gray screens, Gemini thought signature issues, and more stability improvements."
 		},
 		"cloudAgents": {

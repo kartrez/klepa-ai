@@ -145,7 +145,7 @@ export const gptChatByModels = {
 		defaultToolProtocol: "native",
 		inputPrice: 5 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		outputPrice: 25 * GTP_CHAT_BY_TAKE_PROFIT_USD,
-		acheWritesPrice: 6.25,
+		cacheWritesPrice: 6.25,
 		cacheReadsPrice: 0.5,
 		supportsReasoningBudget: true,
 		supportsAdaptiveThinking: true,

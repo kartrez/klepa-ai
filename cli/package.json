@@ -43,7 +43,7 @@
 		"@kilocode/agent-runtime": "workspace:^",
 		"@kilocode/core-schemas": "workspace:^",
 		"@lmstudio/sdk": "^1.5.0",
-		"@mistralai/mistralai": "^1.11.0",
+		"@mistralai/mistralai": "^1.14.0",
 		"@modelcontextprotocol/sdk": "^1.25.2",
 		"@qdrant/js-client-rest": "^1.16.2",
 		"@roo-code/cloud": "workspace:^",

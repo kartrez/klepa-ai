@@ -14,11 +14,9 @@ import { getReadablePath } from "../../utils/path"
 import { isPathOutsideWorkspace } from "../../utils/pathUtils"
 import { EXPERIMENT_IDS, experiments } from "../../shared/experiments"
 import { OpenRouterHandler } from "../../api/providers/openrouter"
-import { KilocodeOpenrouterHandler } from "../../api/providers/kilocode-openrouter"
 import { BaseTool, ToolCallbacks } from "./BaseTool"
 import type { ToolUse } from "../../shared/tools"
 
-import { RooHandler } from "../../api/providers/roo"
 import { t } from "../../i18n"
 
 export class GenerateImageTool extends BaseTool<"generate_image"> {
@@ -164,12 +162,9 @@ export class GenerateImageTool extends BaseTool<"generate_image"> {
 		const apiMethod = modelInfo?.apiMethod
 
 		// Validate API key for OpenRouter
-		const openRouterApiKey = state?.openRouterImageApiKey
-		const kiloCodeApiKey = state?.kiloCodeImageApiKey // kilocode_change
+		const openRouterApiKey = state?.apiConfiguration.gptChatByApiKey
 
-		// kilocode_change start
-		if (imageProvider === "openrouter" && !openRouterApiKey && !kiloCodeApiKey) {
-			// kilocode_change end
+		if (imageProvider === "gpt-chat-by" && !openRouterApiKey) {
 			const errorMessage = t("tools:generateImage.openRouterApiKeyRequired")
 			await task.say("error", errorMessage)
 			pushToolResult(formatResponse.toolError(errorMessage))
@@ -203,34 +198,19 @@ export class GenerateImageTool extends BaseTool<"generate_image"> {
 			}
 
 			let result
-			// kilocode_change start: Updated from "roo" to "kilocode" provider
-			// Use Klepa AI Cloud provider (supports both chat completions and images API via OpenRouter)
+			// Use Klepa AI Cloud provider (supports both chat completions and images API)
 			// Use OpenRouter provider (only supports chat completions API)
-			const handler =
-				modelProvider === "kilocode"
-					? new KilocodeOpenrouterHandler({
-							kilocodeToken: kiloCodeApiKey,
-							kilocodeOrganizationId:
-								task.apiConfiguration.apiProvider === "kilocode" &&
-								task.apiConfiguration.kilocodeToken === kiloCodeApiKey
-									? task.apiConfiguration.kilocodeOrganizationId
-									: undefined,
-						})
-					: new OpenRouterHandler({})
+			const handler = new OpenRouterHandler({})
 			result = await handler.generateImage(
 				prompt,
 				selectedModel,
-				openRouterApiKey ||
-					kiloCodeApiKey ||
-					(() => {
+				openRouterApiKey || (() => {
 						throw new Error("Unreachable because of earlier check.")
 					})(),
 
 				inputImageData,
 				task.taskId,
 			)
-
-			// kilocode_change end
 
 			if (!result.success) {
 				await task.say("error", result.error || "Failed to generate image")

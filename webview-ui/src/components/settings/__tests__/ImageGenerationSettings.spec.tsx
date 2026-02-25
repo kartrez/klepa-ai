@@ -64,7 +64,7 @@ describe.skip("ImageGenerationSettings", () => {
 		it("should call setimageGenerationSettings when user changes API key", async () => {
 			// Set provider to "openrouter" so the API key field renders
 			const { getByPlaceholderText } = render(
-				<ImageGenerationSettings {...defaultProps} enabled={true} imageGenerationProvider="openrouter" />,
+				<ImageGenerationSettings {...defaultProps} enabled={true} imageGenerationProvider="gpt-chat-by" />,
 			)
 
 			const apiKeyInput = getByPlaceholderText(
@@ -86,23 +86,12 @@ describe.skip("ImageGenerationSettings", () => {
 		it("should render input fields when enabled is true and provider is openrouter", () => {
 			// Set provider to "openrouter" so the API key field renders
 			const { getByPlaceholderText } = render(
-				<ImageGenerationSettings {...defaultProps} enabled={true} imageGenerationProvider="openrouter" />,
+				<ImageGenerationSettings {...defaultProps} enabled={true} imageGenerationProvider="gpt-chat-by" />,
 			)
 
 			expect(
 				getByPlaceholderText("settings:experimental.IMAGE_GENERATION.openRouterApiKeyPlaceholder"),
 			).toBeInTheDocument()
-		})
-
-		// kilocode_change: no roo provider
-		it.skip("should not render API key field when provider is roo", () => {
-			const { queryByPlaceholderText } = render(
-				<ImageGenerationSettings {...defaultProps} enabled={true} imageGenerationProvider="kilocode" />,
-			)
-
-			expect(
-				queryByPlaceholderText("settings:experimental.IMAGE_GENERATION.openRouterApiKeyPlaceholder"),
-			).not.toBeInTheDocument()
 		})
 
 		it("should not render input fields when enabled is false", () => {

@@ -118,11 +118,11 @@
 	},
 	"homepage": "https://gpt-chat.by/cli",
 	"bugs": {
-		"url": "https://github.com/kartrez/copy-code/issues"
+		"url": "https://github.com/kartrez/klepa-ai/issues"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/kartrez/copy-code.git",
+		"url": "git+https://github.com/kartrez/klepa-ai.git",
 		"directory": "cli"
 	},
 	"license": "Apache-2.0",

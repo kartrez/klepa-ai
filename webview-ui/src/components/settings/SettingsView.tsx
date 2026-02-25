@@ -257,6 +257,7 @@ const SettingsView = forwardRef<SettingsViewRef, SettingsViewProps>((props, ref)
 		includeTaskHistoryInEnhance,
 		imageGenerationProvider,
 		openRouterImageApiKey,
+		gptChatByApiKey,
 		kiloCodeImageApiKey,
 		openRouterImageGenerationSelectedModel,
 		reasoningBlockCollapsed,
@@ -485,13 +486,13 @@ const SettingsView = forwardRef<SettingsViewRef, SettingsViewProps>((props, ref)
 		})
 	}, [])
 
-	const setOpenRouterImageApiKey = useCallback((apiKey: string) => {
+	const setGptChatByApiKey = useCallback((apiKey: string) => {
 		setCachedState((prevState) => {
-			if (prevState.openRouterImageApiKey !== apiKey) {
+			if (prevState.gptChatByApiKey !== apiKey) {
 				setChangeDetected(true)
 			}
 
-			return { ...prevState, openRouterImageApiKey: apiKey }
+			return { ...prevState, gptChatByApiKey: apiKey }
 		})
 	}, [])
 
@@ -603,6 +604,7 @@ const SettingsView = forwardRef<SettingsViewRef, SettingsViewProps>((props, ref)
 					profileThresholds,
 					imageGenerationProvider,
 					openRouterImageApiKey,
+					gptChatByApiKey,
 					openRouterImageGenerationSelectedModel,
 					experiments,
 					customSupportPrompts,
@@ -1291,13 +1293,13 @@ const SettingsView = forwardRef<SettingsViewRef, SettingsViewProps>((props, ref)
 								apiConfiguration={apiConfiguration}
 								setApiConfigurationField={setApiConfigurationField}
 								imageGenerationProvider={imageGenerationProvider}
-								openRouterImageApiKey={openRouterImageApiKey as string | undefined}
+								openRouterImageApiKey={gptChatByApiKey as string | undefined}
 								kiloCodeImageApiKey={kiloCodeImageApiKey}
 								openRouterImageGenerationSelectedModel={
 									openRouterImageGenerationSelectedModel as string | undefined
 								}
 								setImageGenerationProvider={setImageGenerationProvider}
-								setOpenRouterImageApiKey={setOpenRouterImageApiKey}
+								setOpenRouterImageApiKey={setGptChatByApiKey}
 								setKiloCodeImageApiKey={setKiloCodeImageApiKey}
 								setImageGenerationSelectedModel={setImageGenerationSelectedModel}
 								currentProfileKilocodeToken={apiConfiguration.kilocodeToken}

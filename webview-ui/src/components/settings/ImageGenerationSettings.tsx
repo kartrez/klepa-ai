@@ -48,7 +48,7 @@ export const ImageGenerationSettings = ({
 		if (!enabled) {
 			return
 		}
-		if (currentProvider !== "openrouter" && openRouterImageApiKey) {
+		if (currentProvider !== "gpt-chat-by" && openRouterImageApiKey) {
 			setOpenRouterImageApiKey("")
 		}
 	}, [enabled, currentProvider, openRouterImageApiKey, setOpenRouterImageApiKey])
@@ -114,7 +114,7 @@ export const ImageGenerationSettings = ({
 		setImageGenerationSelectedModel(value)
 	}
 
-	const isConfigured = currentProvider === "openrouter" ? openRouterImageApiKey : kiloCodeImageApiKey // kilocode_change
+	const isConfigured = currentProvider === "gpt-chat-by" ? openRouterImageApiKey : kiloCodeImageApiKey // kilocode_change
 
 	return (
 		<div className="space-y-4">
@@ -176,7 +176,7 @@ export const ImageGenerationSettings = ({
 						// kilocode_change end
 					} */}
 
-					{
+					{/*{
 						// kilocode_change start
 						<div style={{ display: currentProvider === "openrouter" ? "none" : undefined }}>
 							<label className="block font-medium mb-1">
@@ -212,10 +212,10 @@ export const ImageGenerationSettings = ({
 							</p>
 						</div>
 						// kilocode_change end
-					}
+					}*/}
 
 					{/* API Key Configuration (only for OpenRouter) */}
-					{currentProvider === "openrouter" && (
+					{currentProvider === "gpt-chat-by" && (
 						<div>
 							<label className="block font-medium mb-1">
 								{t("settings:experimental.IMAGE_GENERATION.openRouterApiKeyLabel")}
@@ -230,7 +230,7 @@ export const ImageGenerationSettings = ({
 							<p className="text-vscode-descriptionForeground text-xs mt-1">
 								{t("settings:experimental.IMAGE_GENERATION.getApiKeyText")}{" "}
 								<a
-									href="https://openrouter.ai/keys"
+									href="https://gpt-chat.by/doc-api"
 									target="_blank"
 									rel="noopener noreferrer"
 									className="text-vscode-textLink-foreground hover:text-vscode-textLink-activeForeground">

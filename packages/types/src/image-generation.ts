@@ -15,21 +15,8 @@ export interface ImageGenerationModel {
 }
 
 export const IMAGE_GENERATION_MODELS: ImageGenerationModel[] = [
-	// OpenRouter models
-	{ value: "google/gemini-2.5-flash-image", label: "Gemini 2.5 Flash Image", provider: "openrouter" },
-	{ value: "google/gemini-3-pro-image-preview", label: "Gemini 3 Pro Image Preview", provider: "openrouter" },
-	{ value: "openai/gpt-5-image", label: "GPT-5 Image", provider: "openrouter" },
-	{ value: "openai/gpt-5-image-mini", label: "GPT-5 Image Mini", provider: "openrouter" },
-	{ value: "black-forest-labs/flux.2-flex", label: "Black Forest Labs FLUX.2 Flex", provider: "openrouter" },
-	{ value: "black-forest-labs/flux.2-pro", label: "Black Forest Labs FLUX.2 Pro", provider: "openrouter" },
-	// kilocode_change start: disable roo cloud models, add openrouter models with kilocode provider
-	{ value: "google/gemini-2.5-flash-image", label: "Gemini 2.5 Flash Image", provider: "kilocode" },
-	{ value: "google/gemini-3-pro-image-preview", label: "Gemini 3 Pro Image Preview", provider: "kilocode" },
-	{ value: "openai/gpt-5-image", label: "GPT-5 Image", provider: "kilocode" },
-	{ value: "openai/gpt-5-image-mini", label: "GPT-5 Image Mini", provider: "kilocode" },
-	{ value: "black-forest-labs/flux.2-flex", label: "Black Forest Labs FLUX.2 Flex", provider: "kilocode" },
-	{ value: "black-forest-labs/flux.2-pro", label: "Black Forest Labs FLUX.2 Pro", provider: "kilocode" },
-	// kilocode_change end
+	{ value: "gemini-2.5-flash-image", label: "Gemini 2.5 Flash Image", provider: "gpt-chat-by" },
+	{ value: "gemini-3-pro-image-preview", label: "Gemini 3 Pro Image Preview", provider: "gpt-chat-by" }
 ]
 
 /**
@@ -40,7 +27,7 @@ export const IMAGE_GENERATION_MODEL_IDS = IMAGE_GENERATION_MODELS.map((m) => m.v
 /**
  * Image generation provider type
  */
-export type ImageGenerationProvider = "openrouter" | "kilocode" // kilocode_change: remove roo, add kilocode
+export type ImageGenerationProvider = "gpt-chat-by"
 
 /**
  * Get the image generation provider with backwards compatibility
@@ -52,5 +39,5 @@ export function getImageGenerationProvider(
 	explicitProvider: ImageGenerationProvider | undefined,
 	hasExistingModel: boolean,
 ): ImageGenerationProvider {
-	return explicitProvider !== undefined ? explicitProvider : hasExistingModel ? "openrouter" : "kilocode" // kilocode_change: remove roo, add kilocode
+	return explicitProvider !== undefined ? explicitProvider : "gpt-chat-by"
 }

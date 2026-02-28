@@ -2,12 +2,12 @@ import type { ModelInfo } from "../model.js"
 
 export type GptChatByModelId = keyof typeof gptChatByModels
 
-export const gptChatByDefaultModelId: GptChatByModelId = "mimo-free"
+export const gptChatByDefaultModelId: GptChatByModelId = "mimo/free"
 
 const GTP_CHAT_BY_TAKE_PROFIT_USD = 1.15;
 
 export const gptChatByModels = {
-	"mimo-free": {
+	"mimo/free": {
 		maxTokens: 16_384,
 		contextWindow: 150_000,
 		supportsImages: false,
@@ -17,6 +17,18 @@ export const gptChatByModels = {
 		outputPrice: 0,
 		description: `Mimo v2 Flash.`,
 		isFree: true,
+	},
+	"openai/gpt-oss-120b": {
+		maxTokens: 16_384,
+		contextWindow: 128_072,
+		supportsImages: false,
+		supportsPromptCache: false,
+		supportsNativeTools: true,
+		inputPrice: 0.04,
+		outputPrice: 0.2,
+		cacheWritesPrice: 0,
+		cacheReadsPrice: 0,
+		description: "Extremely capable general-purpose LLM with strong, controllable reasoning capabilities",
 	},
 	"kat-coder-pro": {
 		maxTokens: 32768,
@@ -49,7 +61,7 @@ export const gptChatByModels = {
 		outputPrice: 2.4 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `The Qwen3.5 native vision-language series Plus models are built on a hybrid architecture that integrates linear attention mechanisms with sparse mixture-of-experts models, achieving higher inference efficiency.`,
 	},
-	"gemini-3-flash": {
+	"google/gemini-3-flash": {
 		maxTokens: 65_536,
 		contextWindow: 1_048_576,
 		supportsImages: true,
@@ -64,7 +76,7 @@ export const gptChatByModels = {
 		outputPrice: 3 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `Google: Gemini 3 Flash Preview.`,
 	},
-	"gemini-3-pro": {
+	"google/gemini-3-pro": {
 		maxTokens: 65_536,
 		contextWindow: 1_048_576,
 		supportsImages: true,
@@ -90,7 +102,7 @@ export const gptChatByModels = {
 			},
 		],
 	},
-	"gemini-3.1-pro": {
+	"google/gemini-3.1-pro": {
 		maxTokens: 65_536,
 		contextWindow: 1_048_576,
 		supportsImages: true,

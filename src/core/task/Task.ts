@@ -3907,13 +3907,13 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 								this.updateApiConfiguration({
 									...state?.apiConfiguration,
 									apiProvider: "gpt-chat-by",
-									apiModelId: "qwen/coder-480B",
+									apiModelId: "openai/gpt-oss-120b",
 									toolProtocol: "native",
 								} as ProviderSettings)
 
 								await this.say(
 									"text",
-									`Switched to "qwen/coder-480B" due to MODEL_NO_TOOLS_USED error.`,
+									`Switched to "openai/gpt-oss-120b" due to MODEL_NO_TOOLS_USED error.`,
 									undefined,
 									false,
 									undefined,
@@ -4791,7 +4791,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			this.isWaitingForFirstChunk = false
 			// kilocode_change start
 			if (apiConfiguration?.apiProvider !== "gpt-chat-by" && isAnyRecognizedKiloCodeError(error)) {
-				const defaultFreeModel = "mimo-free"
+				const defaultFreeModel = "mimo/free"
 				this.updateApiConfiguration({
 					...state?.apiConfiguration,
 					apiProvider: "gpt-chat-by",

@@ -30,7 +30,7 @@ export const gptChatByModels = {
 		cacheReadsPrice: 0,
 		description: "Extremely capable general-purpose LLM with strong, controllable reasoning capabilities",
 	},
-	"kat-coder-pro": {
+	"kwaipilot/kat-coder-pro": {
 		maxTokens: 32768,
 		contextWindow: 256_000,
 		supportsImages: false,

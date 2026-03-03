@@ -111,7 +111,7 @@
 		"puppeteer-core": "^24.37.5",
 		"react": "^19.2.3",
 		"react-devtools-core": "^7.0.1",
-		"react-error-boundary": "^6.0.3",
+		"react-error-boundary": "^6.1.1",
 		"reconnecting-eventsource": "^1.6.4",
 		"sanitize-filename": "^1.6.3",
 		"say": "^0.16.0",

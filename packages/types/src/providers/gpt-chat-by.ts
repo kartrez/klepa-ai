@@ -61,6 +61,16 @@ export const gptChatByModels = {
 		outputPrice: 2.4 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `The Qwen3.5 native vision-language series Plus models are built on a hybrid architecture that integrates linear attention mechanisms with sparse mixture-of-experts models, achieving higher inference efficiency.`,
 	},
+	"qwen/qwen3.5-397B": {
+		maxTokens: 65_000,
+		contextWindow: 262_000,
+		supportsImages: true,
+		supportsPromptCache: false,
+		supportsNativeTools: true,
+		inputPrice: 0.6 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		outputPrice: 3.6 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		description: `The Qwen3.5 397B native vision-language series Plus models are built on a hybrid architecture that integrates linear attention mechanisms with sparse mixture-of-experts models, achieving higher inference efficiency.`,
+	},
 	"google/gemini-3-flash": {
 		maxTokens: 65_536,
 		contextWindow: 1_048_576,

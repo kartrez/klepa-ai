@@ -17,7 +17,8 @@ export interface ImageGenerationModel {
 export const IMAGE_GENERATION_MODELS: ImageGenerationModel[] = [
 	{ value: "google/gemini-2.5-flash-image", label: "Nano Banana (Gemini 2.5 Flash Image)", provider: "gpt-chat-by" },
 	{ value: "google/gemini-3-pro-image-preview", label: "Nano Banana Pro (Gemini 3 Pro Image Preview)", provider: "gpt-chat-by" },
-	{ value: "google/gemini-3.1-flash-image-preview", label: "Nano Banana 2 (Gemini 3.1 Flash Image Preview)", provider: "gpt-chat-by" }
+	{ value: "google/gemini-3.1-flash-image-preview", label: "Nano Banana 2 (Gemini 3.1 Flash Image Preview)", provider: "gpt-chat-by" },
+	{ value: "bytedance-seed/seedream-4.5", label: "SeeDream 4.5 ByteDance", provider: "gpt-chat-by" },
 ]
 
 /**

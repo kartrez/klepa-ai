@@ -196,6 +196,37 @@ export const gptChatByModels = {
 		defaultTemperature: 0.6,
 		description: "Kimi K2.5 is the latest generation of Moonshot AI's Kimi series, featuring improved reasoning capabilities and enhanced performance across diverse tasks.",
 	},
+	"z-ai/glm-4.7-flash": {
+		maxTokens: 65_000,
+		contextWindow: 200_000,
+		supportsImages: false,
+		supportsPromptCache: true,
+		supportsNativeTools: true,
+		inputPrice: 0.06 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		outputPrice: 0.4 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		description: `As a 30B-class SOTA model, GLM-4.7-Flash offers a new option that balances performance and efficiency.`,
+	},
+	"z-ai/glm-4.7": {
+		maxTokens: 65_000,
+		contextWindow: 200_000,
+		supportsImages: false,
+		supportsPromptCache: true,
+		supportsNativeTools: true,
+		inputPrice: 0.38 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		outputPrice: 1.98 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		description: `GLM-4.7 is Z.ai’s latest flagship model, featuring upgrades in two key areas: enhanced programming capabilities and more stable multi-step reasoning/execution.`,
+	},
+	"z-ai/glm-5": {
+		maxTokens: 65_000,
+		contextWindow: 200_000,
+		supportsImages: false,
+		supportsPromptCache: true,
+		supportsNativeTools: true,
+		inputPrice: 0.8 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		outputPrice: 2.56 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		description: `GLM-5 is Z.ai’s flagship open-source foundation model engineered for complex systems design and long-horizon agent workflows. `,
+	},
+
 	"anthropic/claude-opus-4.6": {
 		maxTokens: 128_000, // Overridden to 8k if `enableReasoningEffort` is false.
 		contextWindow: 200_000, // Default 200K, extendable to 1M with beta flag 'context-1m-2025-08-07'

@@ -226,7 +226,6 @@ export const gptChatByModels = {
 		outputPrice: 2.56 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `GLM-5 is Z.ai’s flagship open-source foundation model engineered for complex systems design and long-horizon agent workflows. `,
 	},
-
 	"anthropic/claude-opus-4.6": {
 		maxTokens: 128_000, // Overridden to 8k if `enableReasoningEffort` is false.
 		contextWindow: 200_000, // Default 200K, extendable to 1M with beta flag 'context-1m-2025-08-07'

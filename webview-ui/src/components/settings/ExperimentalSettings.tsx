@@ -176,22 +176,6 @@ export const ExperimentalSettings = ({
 							</SearchableSetting>
 						)
 					})}
-
-				{experiments[EXPERIMENT_IDS.IMAGE_GENERATION] &&
-					setImageGenerationProvider &&
-					setGptChatByApiKey &&
-					setImageGenerationSelectedModel && (
-						<ImageGenerationSettings
-							enabled={experiments[EXPERIMENT_IDS.IMAGE_GENERATION] ?? false}
-							onChange={(enabled) => setExperimentEnabled(EXPERIMENT_IDS.IMAGE_GENERATION, enabled)}
-							imageGenerationProvider={imageGenerationProvider}
-							gptChatByApiKey={gptChatByApiKey}
-							openRouterImageGenerationSelectedModel={openRouterImageGenerationSelectedModel}
-							setImageGenerationProvider={setImageGenerationProvider}
-							setGptChatByApiKey={setGptChatByApiKey}
-							setImageGenerationSelectedModel={setImageGenerationSelectedModel}
-						/>
-					)}
 			</Section>
 		</div>
 	)

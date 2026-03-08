@@ -107,7 +107,7 @@ export const ImageGenerationSettings = ({
 			<div>
 				<div className="flex items-center gap-2">
 					<VSCodeCheckbox checked={enabled} onChange={(e: any) => onChange(e.target.checked)}>
-						<span className="font-medium">{t("settings:experimental.IMAGE_GENERATION.name")}</span>
+						<span className="font-medium">{t("settings:experimental.IMAGE_GENERATION.name.enable")}</span>
 					</VSCodeCheckbox>
 				</div>
 				<p className="text-vscode-descriptionForeground text-sm mt-0">

@@ -3,7 +3,7 @@
 	"displayName": "%extension.displayName%",
 	"description": "%extension.description%",
 	"publisher": "copy-code",
-	"version": "0.2.x",
+	"version": "0.0.1-local",
 	"icon": "assets/icons/klepa-light.png",
 	"galleryBanner": {
 		"color": "#FFFFFF",

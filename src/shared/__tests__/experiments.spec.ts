@@ -43,6 +43,7 @@ describe("experiments", () => {
 				runSlashCommand: false,
 				multipleNativeToolCalls: false,
 				customTools: false,
+				imageGeneration: false, // kilocode_change
 			}
 			expect(Experiments.isEnabled(experiments, EXPERIMENT_IDS.POWER_STEERING)).toBe(false)
 		})
@@ -57,6 +58,7 @@ describe("experiments", () => {
 				runSlashCommand: false,
 				multipleNativeToolCalls: false,
 				customTools: false,
+				imageGeneration: false, // kilocode_change
 			}
 			expect(Experiments.isEnabled(experiments, EXPERIMENT_IDS.POWER_STEERING)).toBe(true)
 		})
@@ -71,6 +73,7 @@ describe("experiments", () => {
 				runSlashCommand: false,
 				multipleNativeToolCalls: false,
 				customTools: false,
+				imageGeneration: false, // kilocode_change
 			}
 			expect(Experiments.isEnabled(experiments, EXPERIMENT_IDS.POWER_STEERING)).toBe(false)
 		})

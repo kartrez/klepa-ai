@@ -5,7 +5,7 @@ import type { ProviderSettings, ProviderSettingsEntry } from "./provider-setting
 import type { HistoryItem } from "./history.js"
 import type { ModeConfig, PromptComponent } from "./mode.js"
 import type { TelemetrySetting } from "./telemetry.js"
-import type { Experiments } from "./experiment.js"
+import type { Experiments, ExperimentId } from "./experiment.js"
 import type { ClineMessage, QueuedMessage } from "./message.js"
 import {
 	type MarketplaceItem,
@@ -1093,6 +1093,7 @@ export interface WebviewMessage {
 	// kilocode_change start: Review mode
 	reviewScope?: "uncommitted" | "branch"
 	// kilocode_change end: Review mode
+	experimentId?: ExperimentId // kilocode_change
 }
 
 // kilocode_change: Create discriminated union for type-safe messages

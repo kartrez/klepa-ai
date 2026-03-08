@@ -292,12 +292,6 @@
 				"category": "%configuration.title%"
 			},
 			{
-				"command": "copy-coder.agentManagerOpen",
-				"title": "Open Agent Manager",
-				"icon": "$(circuit-board)",
-				"category": "%configuration.title%"
-			},
-			{
 				"command": "copy-coder.popoutButtonClicked",
 				"title": "%command.openInEditor.title%",
 				"icon": "$(link-external)"

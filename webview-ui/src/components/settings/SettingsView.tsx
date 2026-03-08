@@ -1098,6 +1098,16 @@ const SettingsView = forwardRef<SettingsViewRef, SettingsViewProps>((props, ref)
 										errorMessage={errorMessage}
 										setErrorMessage={setErrorMessage}
 										currentApiConfigName={editingApiConfigName}
+										// kilocode_change start
+										imageGenerationProvider={imageGenerationProvider}
+										gptChatByApiKey={gptChatByApiKey}
+										openRouterImageGenerationSelectedModel={openRouterImageGenerationSelectedModel}
+										setImageGenerationProvider={setImageGenerationProvider}
+										setGptChatByApiKey={setGptChatByApiKey}
+										setImageGenerationSelectedModel={setImageGenerationSelectedModel}
+										experiments={experiments}
+										setExperimentEnabled={setExperimentEnabled}
+										// kilocode_change end
 									/>
 									{/* kilocode_change end - pass editing profile name */}
 								</Section>

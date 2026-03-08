@@ -31,12 +31,7 @@ type ExperimentalSettingsProps = HTMLAttributes<HTMLDivElement> & {
 	// kilocode_change end
 	apiConfiguration?: any
 	setApiConfigurationField?: any
-	imageGenerationProvider?: ImageGenerationProvider
-	gptChatByApiKey?: string
-	openRouterImageGenerationSelectedModel?: string
-	setImageGenerationProvider?: (provider: ImageGenerationProvider) => void
-	setGptChatByApiKey?: (apiKey: string) => void
-	setImageGenerationSelectedModel?: (model: string) => void
+	className?: string
 }
 
 export const ExperimentalSettings = ({
@@ -44,12 +39,6 @@ export const ExperimentalSettings = ({
 	setExperimentEnabled,
 	apiConfiguration,
 	setApiConfigurationField,
-	imageGenerationProvider,
-	gptChatByApiKey,
-	openRouterImageGenerationSelectedModel,
-	setImageGenerationProvider,
-	setGptChatByApiKey,
-	setImageGenerationSelectedModel,
 	className,
 	// kilocode_change start
 	morphApiKey,
@@ -136,33 +125,6 @@ export const ExperimentalSettings = ({
 									/>
 									{enabled && <STTSettings />}
 								</React.Fragment>
-							)
-						}
-						if (
-							config[0] === "IMAGE_GENERATION" &&
-							setImageGenerationProvider &&
-							setGptChatByApiKey &&
-							setImageGenerationSelectedModel
-						) {
-							return (
-								<SearchableSetting
-									key={config[0]}
-									settingId={`experimental-${config[0].toLowerCase()}`}
-									section="experimental"
-									label={label}>
-									<ImageGenerationSettings
-										enabled={experiments[EXPERIMENT_IDS.IMAGE_GENERATION] ?? false}
-										onChange={(enabled) =>
-											setExperimentEnabled(EXPERIMENT_IDS.IMAGE_GENERATION, enabled)
-										}
-										imageGenerationProvider={imageGenerationProvider}
-										gptChatByApiKey={gptChatByApiKey}
-										openRouterImageGenerationSelectedModel={openRouterImageGenerationSelectedModel}
-										setImageGenerationProvider={setImageGenerationProvider}
-										setGptChatByApiKey={setGptChatByApiKey}
-										setImageGenerationSelectedModel={setImageGenerationSelectedModel}
-									/>
-								</SearchableSetting>
 							)
 						}
 						if (config[0] === "CUSTOM_TOOLS") {

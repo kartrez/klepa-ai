@@ -36,10 +36,7 @@ export class GenerateImageTool extends BaseTool<"generate_image"> {
 
 		const provider = task.providerRef.deref()
 		const state = await provider?.getState()
-		const isImageGenerationEnabled = experiments.isEnabled(
-			state?.experiments ?? {},
-			EXPERIMENT_IDS.IMAGE_GENERATION,
-		)
+		const isImageGenerationEnabled = state?.experiments?.imageGeneration ?? false
 
 		if (!isImageGenerationEnabled) {
 			pushToolResult(

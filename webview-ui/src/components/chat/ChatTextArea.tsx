@@ -31,7 +31,7 @@ import { KiloProfileSelector } from "../kilocode/chat/KiloProfileSelector"
 import { MAX_IMAGES_PER_MESSAGE } from "./ChatView"
 import ContextMenu from "./ContextMenu"
 import { ImageWarningBanner } from "./ImageWarningBanner"
-import { VolumeX, Pin, Check, WandSparkles, SendHorizontal, Paperclip, MessageSquareX } from "lucide-react"
+import { VolumeX, Pin, Check, WandSparkles, SendHorizontal, Paperclip, MessageSquareX, Image } from "lucide-react"
 import { IndexingStatusBadge } from "./IndexingStatusBadge"
 import { MicrophoneButton } from "./MicrophoneButton" // kilocode_change: STT microphone button
 import { VolumeVisualizer } from "./VolumeVisualizer" // kilocode_change: STT volume level visual
@@ -1759,6 +1759,40 @@ export const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 							<Paperclip className={cn("w-4", "h-4", { hidden: containerWidth < 235 })} />
 						</button>
 					</StandardTooltip>
+					{/* kilocode_change start: Image generation toggle */}
+					<StandardTooltip
+						content={
+							experiments?.imageGeneration
+								? t("settings:experimental.IMAGE_GENERATION.name") + ": " + t("settings:common.enabled")
+								: t("settings:experimental.IMAGE_GENERATION.name") + ": " + t("settings:common.disabled")
+						}>
+						<button
+							aria-label={t("settings:experimental.IMAGE_GENERATION.name")}
+							onClick={() => {
+								vscode.postMessage({
+									type: "setExperimentEnabled",
+									experimentId: "imageGeneration",
+									enabled: !experiments?.imageGeneration,
+								})
+							}}
+							className={cn(
+								"relative inline-flex items-center justify-center",
+								"bg-transparent border-none p-1.5",
+								"rounded-md min-w-[28px] min-h-[28px]",
+								"transition-all duration-150",
+								"hover:bg-[rgba(255,255,255,0.03)] hover:border-[rgba(255,255,255,0.15)]",
+								"focus:outline-none focus-visible:ring-1 focus-visible:ring-vscode-focusBorder",
+								"active:bg-[rgba(255,255,255,0.1)]",
+								"cursor-pointer",
+								experiments?.imageGeneration
+									? "opacity-100 text-vscode-button-background"
+									: "opacity-60 text-vscode-descriptionForeground hover:opacity-100 hover:text-vscode-foreground",
+							)}>
+							<Image className="w-4 h-4" />
+						</button>
+					</StandardTooltip>
+					{/* kilocode_change end */}
+
 					{isEditMode && (
 						<StandardTooltip content={t("chat:cancel.title")}>
 							<button

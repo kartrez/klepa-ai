@@ -144,8 +144,10 @@ import { RooBalanceDisplay } from "./providers/RooBalanceDisplay"
 import { buildDocLink } from "@src/utils/docLinks"
 import { KiloProviderRouting, KiloProviderRoutingManagedByOrganization } from "./providers/KiloProviderRouting"
 import { RateLimitAfterControl } from "./RateLimitAfterSettings"
+import { ImageGenerationSettings } from "./ImageGenerationSettings"
 import { GptChatBy } from "@/components/settings/providers/GptChatBy" // kilocode_change
 import { BookOpenText } from "lucide-react"
+import { ImageGenerationProvider } from "@roo-code/types"
 
 export interface ApiOptionsProps {
 	uriScheme: string | undefined
@@ -160,6 +162,16 @@ export interface ApiOptionsProps {
 	setErrorMessage: React.Dispatch<React.SetStateAction<string | undefined>>
 	hideKiloCodeButton?: boolean // kilocode_change
 	currentApiConfigName?: string // kilocode_change
+	// kilocode_change start
+	imageGenerationProvider?: ImageGenerationProvider
+	gptChatByApiKey?: string
+	openRouterImageGenerationSelectedModel?: string
+	setImageGenerationProvider?: (provider: ImageGenerationProvider) => void
+	setGptChatByApiKey?: (apiKey: string) => void
+	setImageGenerationSelectedModel?: (model: string) => void
+	experiments?: any
+	setExperimentEnabled?: any
+	// kilocode_change end
 }
 
 const ApiOptions = ({
@@ -171,6 +183,16 @@ const ApiOptions = ({
 	setErrorMessage,
 	hideKiloCodeButton = false,
 	currentApiConfigName, // kilocode_change
+	// kilocode_change start
+	imageGenerationProvider,
+	gptChatByApiKey,
+	openRouterImageGenerationSelectedModel,
+	setImageGenerationProvider,
+	setGptChatByApiKey,
+	setImageGenerationSelectedModel,
+	experiments,
+	setExperimentEnabled,
+	// kilocode_change end
 }: ApiOptionsProps) => {
 	const { t } = useAppTranslation()
 	const {
@@ -833,6 +855,26 @@ const ApiOptions = ({
 			{selectedProvider === "gpt-chat-by" && (
 				<GptChatBy apiConfiguration={apiConfiguration} setApiConfigurationField={setApiConfigurationField} />
 			)}
+
+			{/* kilocode_change start */}
+			{setImageGenerationProvider &&
+				setGptChatByApiKey &&
+				setImageGenerationSelectedModel &&
+				setExperimentEnabled && (
+					<div className="mt-2">
+						<ImageGenerationSettings
+							enabled={experiments?.imageGeneration ?? false}
+							onChange={(enabled) => setExperimentEnabled("imageGeneration", enabled)}
+							imageGenerationProvider={imageGenerationProvider}
+							gptChatByApiKey={gptChatByApiKey}
+							openRouterImageGenerationSelectedModel={openRouterImageGenerationSelectedModel}
+							setImageGenerationProvider={setImageGenerationProvider}
+							setGptChatByApiKey={setGptChatByApiKey}
+							setImageGenerationSelectedModel={setImageGenerationSelectedModel}
+						/>
+					</div>
+				)}
+			{/* kilocode_change end */}
 
 			{selectedProvider === "doubao" && (
 				<Doubao

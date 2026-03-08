@@ -599,6 +599,20 @@ export const webviewMessageHandler = async (
 
 			provider.isViewLaunched = true
 			break
+		case "setExperimentEnabled":
+			if (message.experimentId && message.enabled !== undefined) {
+				const currentExperiments = (getGlobalState("experiments") ?? experimentDefault) as Record<
+					ExperimentId,
+					boolean
+				>
+				const updatedExperiments = {
+					...currentExperiments,
+					[message.experimentId as ExperimentId]: message.enabled,
+				}
+				await updateGlobalState("experiments", updatedExperiments)
+				await provider.postStateToWebview()
+			}
+			break
 		case "newTask":
 			// Initializing new instance of Cline will make sure that any
 			// agentically running promises in old instance don't affect our new

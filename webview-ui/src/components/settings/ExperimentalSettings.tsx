@@ -31,6 +31,12 @@ type ExperimentalSettingsProps = HTMLAttributes<HTMLDivElement> & {
 	// kilocode_change end
 	apiConfiguration?: any
 	setApiConfigurationField?: any
+	imageGenerationProvider?: ImageGenerationProvider
+	setImageGenerationProvider?: (provider: ImageGenerationProvider) => void
+	setImageGenerationSelectedModel?: (model: string) => void
+	gptChatByApiKey?: string
+	openRouterImageGenerationSelectedModel?: string
+	setGptChatByApiKey?: (key: string) => void
 	className?: string
 }
 
@@ -39,6 +45,12 @@ export const ExperimentalSettings = ({
 	setExperimentEnabled,
 	apiConfiguration,
 	setApiConfigurationField,
+	imageGenerationProvider,
+	setImageGenerationProvider,
+	setImageGenerationSelectedModel,
+	gptChatByApiKey,
+	openRouterImageGenerationSelectedModel,
+	setGptChatByApiKey,
 	className,
 	// kilocode_change start
 	morphApiKey,
@@ -164,6 +176,17 @@ export const ExperimentalSettings = ({
 							</SearchableSetting>
 						)
 					})}
+
+				{experiments[EXPERIMENT_IDS.IMAGE_GENERATION] && (
+					<ImageGenerationSettings
+						imageGenerationProvider={imageGenerationProvider}
+						gptChatByApiKey={gptChatByApiKey}
+						openRouterImageGenerationSelectedModel={openRouterImageGenerationSelectedModel}
+						setImageGenerationProvider={setImageGenerationProvider}
+						setGptChatByApiKey={setGptChatByApiKey}
+						setImageGenerationSelectedModel={setImageGenerationSelectedModel}
+					/>
+				)}
 			</Section>
 		</div>
 	)

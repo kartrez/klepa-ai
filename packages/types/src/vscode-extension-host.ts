@@ -717,6 +717,7 @@ export interface WebviewMessage {
 		| "renameApiConfiguration"
 		| "getListApiConfiguration"
 		| "customInstructions"
+		| "setExperimentEnabled" // kilocode_change
 		| "webviewDidLaunch"
 		| "newTask"
 		| "askResponse"

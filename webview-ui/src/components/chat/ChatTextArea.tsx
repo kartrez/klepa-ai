@@ -1763,11 +1763,11 @@ export const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 					<StandardTooltip
 						content={
 							experiments?.imageGeneration
-								? t("settings:experimental.IMAGE_GENERATION.name") + ": " + t("settings:common.enabled")
-								: t("settings:experimental.IMAGE_GENERATION.name") + ": " + t("settings:common.disabled")
+								? t("settings:experimental.IMAGE_GENERATION.name.disable")
+								: t("settings:experimental.IMAGE_GENERATION.name.enable")
 						}>
 						<button
-							aria-label={t("settings:experimental.IMAGE_GENERATION.name")}
+							aria-label={t("settings:experimental.IMAGE_GENERATION.name.enable")}
 							onClick={() => {
 								vscode.postMessage({
 									type: "setExperimentEnabled",

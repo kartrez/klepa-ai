@@ -1046,7 +1046,10 @@
 			"description": "When enabled, the new_task tool will require a todos parameter to be provided. This ensures all new tasks start with a clear list of objectives. When disabled (default), the todos parameter remains optional for backward compatibility."
 		},
 		"IMAGE_GENERATION": {
-			"name": "Enable AI image generation",
+			"name": {
+				"enable": "Enable AI image generation",
+				"disable" : "Disable AI image generation"
+			},
 			"description": "When enabled, Klepa AI can generate images from text prompts. Requires a Klepa AI key to be configured.",
 			"apiProvider": "API Provider",
 			"providerLabel": "Provider",

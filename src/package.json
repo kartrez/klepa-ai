@@ -357,11 +357,6 @@
 					"when": "view == copy-coder.SidebarProvider"
 				},
 				{
-					"command": "copy-coder.agentManagerOpen",
-					"group": "navigation@1",
-					"when": "view == copy-coder.SidebarProvider"
-				},
-				{
 					"command": "copy-coder.marketplaceButtonClicked",
 					"group": "navigation@3",
 					"when": "view == copy-coder.SidebarProvider"

@@ -259,7 +259,7 @@ export const gptChatByModels = {
 		contextWindow: 1_000_000,
 		supportsImages: true,
 		supportsPromptCache: true,
-		supportsNativeTools: false,
+		supportsNativeTools: true,
 		inputPrice: 3 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		outputPrice: 15 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `anthropic claude sonnet 4.6.`,

@@ -273,6 +273,16 @@ export const gptChatByModels = {
 			},
 		],
 	},
+	"anthropic/claude-haiku-4.5": {
+		maxTokens: 64_000,
+		contextWindow: 200_000,
+		supportsImages: true,
+		supportsPromptCache: true,
+		supportsNativeTools: true,
+		inputPrice: GTP_CHAT_BY_TAKE_PROFIT_USD,
+		outputPrice: 5 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		defaultToolProtocol: "native",
+	},
 	// "grok/code": {
 	// 	maxTokens: 65_000,
 	// 	contextWindow: 1_000_000,

@@ -155,6 +155,8 @@ export const gptChatByModels = {
 		supportsImages: false,
 		supportsPromptCache: true,
 		supportsNativeTools: true,
+		includedTools: ["search_and_replace"],
+		excludedTools: ["apply_diff"],
 		inputPrice: 0.12 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		outputPrice: 0.48 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `MiniMax M2.5`,

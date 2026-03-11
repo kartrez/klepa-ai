@@ -70,15 +70,6 @@ export const About = ({
 					</p>
 				</div>
 
-				<div>
-					<Trans
-						i18nKey="settings:footer.feedback"
-						components={{
-							discordLink: <VSCodeLink href="https://gpt-chat.by/discord" />,
-						}}
-					/>
-				</div>
-
 				{/* kilocode_change start */}
 				{/*<div>*/}
 				{/*	<Trans*/}

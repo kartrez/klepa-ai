@@ -14,7 +14,7 @@ const tips = [
 	},
 	{
 		icon: <ReplaceAll className="size-4 shrink-0 mt-0.5" />,
-		href: buildDocLink("getting-started/connecting-api-provider", "tips"),
+		href: buildDocLink("overview"),
 		titleKey: "rooTips.modelAgnostic.title",
 		descriptionKey: "rooTips.modelAgnostic.description",
 	},

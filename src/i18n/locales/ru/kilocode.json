@@ -178,8 +178,8 @@
 	"agentManager": {
 		"errors": {
 			"cliOutdated": "Твоя версия Klepa AI CLI устарела и не поддерживает Agent Manager. Обнови до последней версии.",
-			"cliNotFound": "Klepa AI CLI не найден. Установи его для использования Agent Manager.",
-			"cliMisconfigured": "Code CLI не настроен. Выполни 'kilocode auth' для входа или 'kilocode config' для настройки.",
+			"cliNotFound": "Klepa CLI не найден. Установи его для использования Agent Manager.",
+			"cliMisconfigured": "Klepa CLI не настроен. Выполни 'klepa auth' для входа или 'klepa config' для настройки.",
 			"sessionFailed": "Не удалось запустить сессию агента",
 			"sessionFailedWithMessage": "Не удалось запустить сессию агента: {{message}}"
 		},
@@ -197,7 +197,7 @@
 		},
 		"terminal": {
 			"installMessage": "Выполнение npm install для установки Copy Klepa AI CLI. После завершения можешь закрыть этот терминал и попробовать запустить Agent Manager снова.",
-			"authReminder": "If this is your first install, run `kilocode auth` to sign in before starting the Agent Manager."
+			"authReminder": "If this is your first install, run `klepa auth` to sign in before starting the Agent Manager."
 		}
 	},
 	"speechToText": {

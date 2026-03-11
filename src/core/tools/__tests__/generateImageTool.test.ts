@@ -51,7 +51,7 @@ describe("generateImageTool", () => {
 				deref: vi.fn().mockReturnValue({
 					getState: vi.fn().mockResolvedValue({
 						experiments: {
-							imageGeneration: true,
+							[EXPERIMENT_IDS.IMAGE_GENERATION]: true,
 						},
 						openRouterImageApiKey: "test-api-key",
 						openRouterImageGenerationSelectedModel: "google/gemini-2.5-flash-image",
@@ -277,7 +277,7 @@ describe("generateImageTool", () => {
 			// Disable the experiment
 			mockCline.providerRef.deref().getState.mockResolvedValue({
 				experiments: {
-					imageGeneration: false,
+					[EXPERIMENT_IDS.IMAGE_GENERATION]: false,
 				},
 			})
 

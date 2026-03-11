@@ -150,7 +150,9 @@ import { MessageQueueService } from "../message-queue/MessageQueueService"
 import {
 	isAnyRecognizedKiloCodeError,
 	isPaymentRequiredError,
-	isUnauthorizedError,
+	isUnauthorizedGenericError,
+	isUnauthorizedPaidModelError,
+	isUnauthorizedPromotionLimitError,
 } from "../../shared/kilocode/errorUtils"
 import { getAppUrl } from "@roo-code/types"
 import { getKilocodeDefaultModel } from "../../api/providers/kilocode/getKilocodeDefaultModel" // kilocode_change
@@ -158,6 +160,7 @@ import { addOrMergeUserContent } from "./kilocode"
 import { AutoApprovalHandler, checkAutoApproval } from "../auto-approval"
 import { MessageManager } from "../message-manager"
 import { validateAndFixToolResultIds } from "./validateToolResultIds"
+import { deduplicateToolUseBlocks } from "./deduplicateToolUseBlocks"
 
 const MAX_EXPONENTIAL_BACKOFF_SECONDS = 600 // 10 minutes
 const DEFAULT_USAGE_COLLECTION_TIMEOUT_MS = 5000 // 5 seconds
@@ -425,7 +428,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		| Anthropic.TextBlockParam
 		| Anthropic.ImageBlockParam
 		| Anthropic.ToolResultBlockParam // kilocode_change
-		)[] = []
+	)[] = []
 	userMessageContentReady = false
 
 	/**
@@ -484,28 +487,28 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 	private _messageManager?: MessageManager
 
 	constructor({
-					context, // kilocode_change
-					provider,
-					apiConfiguration,
-					enableDiff = false,
-					enableCheckpoints = true,
-					checkpointTimeout = DEFAULT_CHECKPOINT_TIMEOUT_SECONDS,
-					enableBridge = false,
-					fuzzyMatchThreshold = 1.0,
-					consecutiveMistakeLimit = DEFAULT_CONSECUTIVE_MISTAKE_LIMIT,
-					task,
-					images,
-					historyItem,
-					experiments: experimentsConfig,
-					startTask = true,
-					rootTask,
-					parentTask,
-					taskNumber = -1,
-					onCreated,
-					initialTodos,
-					workspacePath,
-					initialStatus,
-				}: TaskOptions) {
+		context, // kilocode_change
+		provider,
+		apiConfiguration,
+		enableDiff = false,
+		enableCheckpoints = true,
+		checkpointTimeout = DEFAULT_CHECKPOINT_TIMEOUT_SECONDS,
+		enableBridge = false,
+		fuzzyMatchThreshold = 1.0,
+		consecutiveMistakeLimit = DEFAULT_CONSECUTIVE_MISTAKE_LIMIT,
+		task,
+		images,
+		historyItem,
+		experiments: experimentsConfig,
+		startTask = true,
+		rootTask,
+		parentTask,
+		taskNumber = -1,
+		onCreated,
+		initialTodos,
+		workspacePath,
+		initialStatus,
+	}: TaskOptions) {
 		super()
 		this.context = context // kilocode_change
 
@@ -520,10 +523,10 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		) {
 			throw new Error(
 				"checkpointTimeout must be between " +
-				MIN_CHECKPOINT_TIMEOUT_SECONDS +
-				" and " +
-				MAX_CHECKPOINT_TIMEOUT_SECONDS +
-				" seconds",
+					MIN_CHECKPOINT_TIMEOUT_SECONDS +
+					" and " +
+					MAX_CHECKPOINT_TIMEOUT_SECONDS +
+					" seconds",
 			)
 		}
 
@@ -632,12 +635,12 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			this._taskToolProtocol = resolveToolProtocol(this.apiConfiguration, modelInfo)
 		}
 
-		// Initialize the assistant message parser.
+		// Initialize the assistant message parser based on the locked tool protocol.
+		// For native protocol, tool calls come as tool_call chunks, not XML.
 		// For history items without a persisted protocol, we default to XML parser
 		// and will update it in resumeTaskFromHistory after detection.
-		// Always enable AssistantMessageParser even in native mode as a fallback/safety measure
-		// for models that ignore NTC and output XML tags anyway.
-		this.assistantMessageParser = new AssistantMessageParser()
+		const effectiveProtocol = this._taskToolProtocol || "xml"
+		this.assistantMessageParser = effectiveProtocol !== "native" ? new AssistantMessageParser() : undefined
 
 		this.messageQueueService = new MessageQueueService()
 
@@ -2152,10 +2155,12 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			}
 
 			// Update parser state to match the detected/resolved protocol
-			// Always enable AssistantMessageParser even in native mode as a fallback/safety measure
-			// for models that ignore NTC and output XML tags anyway.
-			if (!this.assistantMessageParser) {
+			const shouldUseXmlParser = this._taskToolProtocol === "xml"
+			if (shouldUseXmlParser && !this.assistantMessageParser) {
 				this.assistantMessageParser = new AssistantMessageParser()
+			} else if (!shouldUseXmlParser && this.assistantMessageParser) {
+				this.assistantMessageParser.reset()
+				this.assistantMessageParser = undefined
 			}
 		} else {
 		}
@@ -2896,19 +2901,19 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 					const costResult =
 						apiProtocol === "anthropic"
 							? calculateApiCostAnthropic(
-								streamModelInfo,
-								inputTokens,
-								outputTokens,
-								cacheWriteTokens,
-								cacheReadTokens,
-							)
+									streamModelInfo,
+									inputTokens,
+									outputTokens,
+									cacheWriteTokens,
+									cacheReadTokens,
+								)
 							: calculateApiCostOpenAI(
-								streamModelInfo,
-								inputTokens,
-								outputTokens,
-								cacheWriteTokens,
-								cacheReadTokens,
-							)
+									streamModelInfo,
+									inputTokens,
+									outputTokens,
+									cacheWriteTokens,
+									cacheReadTokens,
+								)
 
 					this.clineMessages[lastApiReqIndex].text = JSON.stringify({
 						...existingData,
@@ -3106,6 +3111,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 									id: chunk.id,
 									name: chunk.name,
 									arguments: chunk.arguments,
+									extra_content: chunk.extra_content,
 								})
 
 								for (const event of events) {
@@ -3123,7 +3129,11 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 										}
 
 										// Initialize streaming in NativeToolCallParser
-										NativeToolCallParser.startStreamingToolCall(event.id, event.name as ToolName)
+										NativeToolCallParser.startStreamingToolCall(
+											event.id,
+											event.name as ToolName,
+											event.extra_content,
+										)
 
 										// Before adding a new tool, finalize any preceding text block
 										// This prevents the text block from blocking tool presentation
@@ -3139,14 +3149,19 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 										// Create initial partial tool use
 										const partialToolUse: ToolUse = {
-												type: "tool_use",
-												name: event.name as ToolName,
-												params: {},
-												partial: true,
-											}
+											type: "tool_use",
+											name: event.name as ToolName,
+											params: {},
+											partial: true,
+										}
 
-											// Store the ID for native protocol
+										// Store the ID for native protocol
 										;(partialToolUse as any).id = event.id
+
+										// Preserve extra_content for Gemini 3 thought_signature support
+										if (event.extra_content) {
+											partialToolUse.extra_content = event.extra_content
+										}
 
 										// Add to content and present
 										this.assistantMessageContent.push(partialToolUse)
@@ -3166,6 +3181,14 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 												// Store the ID for native protocol
 												;(partialToolUse as any).id = event.id
 
+												// Preserve extra_content from the original tool use (Gemini 3 thought_signature)
+												const existingToolUse = this.assistantMessageContent[
+													toolUseIndex
+												] as any
+												if (existingToolUse?.extra_content && !partialToolUse.extra_content) {
+													partialToolUse.extra_content = existingToolUse.extra_content
+												}
+
 												// Update the existing tool use with new partial data
 												this.assistantMessageContent[toolUseIndex] = partialToolUse
 
@@ -3183,6 +3206,16 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 										if (finalToolUse) {
 											// Store the tool call ID
 											;(finalToolUse as any).id = event.id
+
+											// Preserve extra_content from the original tool use (Gemini 3 thought_signature)
+											if (toolUseIndex !== undefined) {
+												const existingToolUse = this.assistantMessageContent[
+													toolUseIndex
+												] as any
+												if (existingToolUse?.extra_content && !finalToolUse.extra_content) {
+													finalToolUse.extra_content = existingToolUse.extra_content
+												}
+											}
 
 											// Get the index and replace partial with final
 											if (toolUseIndex !== undefined) {
@@ -3253,33 +3286,25 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 							}
 							case "text": {
 								assistantMessage += chunk.text
-								const prevLength = this.assistantMessageContent.length
 
-								if (this.assistantMessageParser) {
-									// Parse raw assistant message chunk into content blocks
-									// In XML mode, this is the primary way to get tool calls.
-									// In Native mode, this serves as a fallback to detect XML tool calls
-									// if the model ignores native function calling instructions.
+								// Use the protocol determined at the start of streaming
+								// Don't rely solely on parser existence - parser might exist from previous state
+								if (shouldUseXmlParser && this.assistantMessageParser) {
+									// XML protocol: Parse raw assistant message chunk into content blocks
+									const prevLength = this.assistantMessageContent.length
 									this.assistantMessageContent = this.assistantMessageParser.processChunk(chunk.text)
-								}
 
-								if (this.assistantMessageContent.length > prevLength) {
-									// New content we need to present (could be new text block or new tool use)
-									this.userMessageContentReady = false
-
-									// If we detected a new tool call in native mode via XML fallback,
-									// it won't have an ID. We should log this for debugging.
-									if (!shouldUseXmlParser) {
-										const lastBlock = this.assistantMessageContent[this.assistantMessageContent.length - 1]
-										if (lastBlock?.type === "tool_use" && !(lastBlock as any).id) {
-											console.log(`[Task] Detected XML tool use fallback in native mode: ${lastBlock.name}`)
-										}
+									if (this.assistantMessageContent.length > prevLength) {
+										// New content we need to present, reset to
+										// false in case previous content set this to true.
+										this.userMessageContentReady = false
 									}
 
+									// Present content to user.
 									presentAssistantMessage(this)
-								} else if (!shouldUseXmlParser) {
+								} else {
 									// Native protocol: Text chunks are plain text, not XML tool calls
-									// If the parser didn't add new blocks, we update the existing text block directly
+									// Create or update a text content block directly
 									const lastBlock =
 										this.assistantMessageContent[this.assistantMessageContent.length - 1]
 
@@ -3297,9 +3322,6 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 									}
 
 									// Present content to user
-									presentAssistantMessage(this)
-								} else {
-									// XML protocol and no new blocks yet: still present current (partial) content
 									presentAssistantMessage(this)
 								}
 								break
@@ -3352,7 +3374,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 							if (finalToolUse) {
 								// Store the tool call ID
-								;(finalToolUse as any).id = event.id || `tool_${Math.random().toString(36).substr(2, 9)}`
+								;(finalToolUse as any).id = event.id
 
 								// Get the index and replace partial with final
 								if (toolUseIndex !== undefined) {
@@ -3467,19 +3489,19 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 								const costResult =
 									apiProtocol === "anthropic"
 										? calculateApiCostAnthropic(
-											streamModelInfo,
-											tokens.input,
-											tokens.output,
-											tokens.cacheWrite,
-											tokens.cacheRead,
-										)
+												streamModelInfo,
+												tokens.input,
+												tokens.output,
+												tokens.cacheWrite,
+												tokens.cacheRead,
+											)
 										: calculateApiCostOpenAI(
-											streamModelInfo,
-											tokens.input,
-											tokens.output,
-											tokens.cacheWrite,
-											tokens.cacheRead,
-										)
+												streamModelInfo,
+												tokens.input,
+												tokens.output,
+												tokens.cacheWrite,
+												tokens.cacheRead,
+											)
 
 								TelemetryService.instance.captureLlmCompletion(this.taskId, {
 									inputTokens: costResult.totalInputTokens,
@@ -3793,12 +3815,17 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 									continue
 								}
 								seenToolUseIds.add(sanitizedId)
-								assistantContent.push({
+								const toolUseBlock: any = {
 									type: "tool_use" as const,
 									id: sanitizedId,
 									name: mcpBlock.name, // Original dynamic name
 									input: mcpBlock.arguments, // Direct tool arguments
-								})
+								}
+								// Preserve extra_content for Gemini 3 thought_signature support
+								if (mcpBlock.extra_content) {
+									toolUseBlock.extra_content = mcpBlock.extra_content
+								}
+								assistantContent.push(toolUseBlock)
 							}
 						} else {
 							// Regular ToolUse
@@ -3823,19 +3850,37 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 								// was told the tool was named, preventing confusion in multi-turn conversations.
 								const toolNameForHistory = toolUse.originalName ?? toolUse.name
 
-								assistantContent.push({
+								const toolUseBlock: any = {
 									type: "tool_use" as const,
 									id: sanitizedId,
 									name: toolNameForHistory,
 									input,
-								})
+								}
+								// Preserve extra_content for Gemini 3 thought_signature support
+								if (toolUse.extra_content) {
+									toolUseBlock.extra_content = toolUse.extra_content
+								}
+								assistantContent.push(toolUseBlock)
 							}
 						}
 					}
 
+					// Deduplicate tool_use blocks to prevent "unexpected tool_use_id" API errors
+					// This handles edge cases like long waits during orchestrator sessions
+					// Skip deduplication if 0-1 tool_use blocks (no duplicates possible)
+					const assistantApiMessage: Anthropic.MessageParam = {
+						role: "assistant",
+						content: assistantContent,
+					}
+
+					const deduplicatedAssistantMessage =
+						toolUseBlocks.length > 1
+							? deduplicateToolUseBlocks(assistantApiMessage) // Deduplicate if multiple tools
+							: assistantApiMessage
+
 					await this.addToApiConversationHistory(
-						{ role: "assistant", content: assistantContent },
-						reasoningMessage || undefined,
+						deduplicatedAssistantMessage,
+						reasoningMessage || undefined, // Include reasoning if present
 					)
 
 					TelemetryService.instance.captureConversationMessage(this.taskId, "assistant")
@@ -3873,28 +3918,8 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 						// Increment consecutive no-tool-use counter
 						this.consecutiveNoToolUseCount++
 
-						// Check if the model tried to use XML tags in native mode
-						let extraFeedback = ""
-						if (isNativeProtocol(this._taskToolProtocol ?? "xml")) {
-							const hasXmlTags = this.assistantMessageContent.some(
-								(block) => block.type === "text" && /<[\w_]+>/.test(block.content),
-							)
-							if (hasXmlTags) {
-								extraFeedback =
-									"\n\nIMPORTANT: I detected XML-style tags in your response. You MUST NOT use XML tags for tool calls in this mode. You MUST use the API's native function-calling feature instead. XML tags are not supported and will be ignored."
-							}
-						}
-
-						// For XML protocol, check if we might have interrupted the response prematurely
-						if (!isNativeProtocol(this._taskToolProtocol ?? "xml") && this.didAlreadyUseTool) {
-							const lastBlock = this.assistantMessageContent[this.assistantMessageContent.length - 1]
-							if (lastBlock && (lastBlock.type === "tool_use" || lastBlock.type === "mcp_tool_use") && lastBlock.partial) {
-								extraFeedback += "\n\n(Note: The previous tool call was interrupted before it could be completed. Please ensure you provide a complete XML tool call at the end of your response.)"
-							}
-						}
-
 						// Only show error and count toward mistake limit after 2 consecutive failures
-						if (this.consecutiveNoToolUseCount > 0) {
+						if (this.consecutiveNoToolUseCount > 1) {
 							// await this.say("error", "MODEL_NO_TOOLS_USED")
 							// Only count toward mistake limit after second consecutive failure
 							if (!wasModelTemporarilyChanged) {
@@ -4294,8 +4319,8 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		// Log the context window error for debugging
 		console.warn(
 			`[Task#${this.taskId}] Context window exceeded for model ${this.api.getModel().id}. ` +
-			`Current tokens: ${contextTokens}, Context window: ${contextWindow}. ` +
-			`Forcing truncation to ${FORCED_CONTEXT_REDUCTION_PERCENT}% of current context.`,
+				`Current tokens: ${contextTokens}, Context window: ${contextWindow}. ` +
+				`Forcing truncation to ${FORCED_CONTEXT_REDUCTION_PERCENT}% of current context.`,
 		)
 
 		// Determine if we're using native tool protocol for proper message handling
@@ -4731,16 +4756,18 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			// Include tools and tool protocol when using native protocol and model supports it
 			...(shouldIncludeTools
 				? {
-					tools: allTools,
-					tool_choice: isNativeProtocol(taskProtocol) ? "required" : "auto",
-					toolProtocol: taskProtocol,
-					parallelToolCalls: parallelToolCallsEnabled,
-				// When mode restricts tools, provide allowedFunctionNames so providers
+						tools: allTools,
+						tool_choice: "auto",
+						toolProtocol: taskProtocol,
+						parallelToolCalls: parallelToolCallsEnabled,
+						// When mode restricts tools, provide allowedFunctionNames so providers
 						// like Gemini can see all tools in history but only call allowed ones
 						...(allowedFunctionNames ? { allowedFunctionNames } : {}),
 					}
 				: {}),
 			projectId: (await kiloConfig)?.project?.id, // kilocode_change: pass projectId for backend tracking (ignored by other providers)
+			// kilocode_change: child tasks (spawned via new_task tool) are parallel agents
+			...(this.parentTaskId ? { feature: "parallel-agent" } : {}),
 		}
 
 		// Create an AbortController to allow cancelling the request mid-stream
@@ -4798,34 +4825,50 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 					apiModelId: defaultFreeModel,
 				} as ProviderSettings)
 
-				const { response } = await (isPaymentRequiredError(error)
-					? this.ask(
+				let askResponse: { response: string }
+
+				if (isPaymentRequiredError(error)) {
+					askResponse = await this.ask(
 						"payment_required_prompt",
 						JSON.stringify({
 							title: error.error?.title ?? t("kilocode:lowCreditWarning.title"),
 							message: error.error?.message ?? t("kilocode:lowCreditWarning.message"),
 							balance: error.error?.balance ?? "0.00",
 							buyCreditsUrl: error.error?.buyCreditsUrl ?? getAppUrl("/profile"),
-						defaultFreeModel,
-							}),
-						)
-					: isUnauthorizedError(error)
-						? this.ask(
-								"unauthorized_prompt",
-								JSON.stringify({
-									modelId: state?.apiConfiguration.apiModelId,}),
+							defaultFreeModel,
+						}),
 					)
-					: this.ask(
+				} else if (isUnauthorizedPromotionLimitError(error)) {
+					askResponse = await this.ask(
+						"promotion_model_sign_up_required_prompt",
+						JSON.stringify({
+							modelId: apiConfiguration.kilocodeModel,
+						}),
+					)
+				} else if (isUnauthorizedPaidModelError(error) || isUnauthorizedGenericError(error)) {
+					askResponse = await this.ask(
+						"unauthorized_prompt",
+						JSON.stringify({
+							modelId: apiConfiguration.kilocodeModel,
+						}),
+					)
+				} else {
+					askResponse = await this.ask(
 						"invalid_model",
 						JSON.stringify({
-							modelId: state?.apiConfiguration.apiModelId,
+							modelId: apiConfiguration.kilocodeModel,
 							error: {
 								status: error.status,
 								message: error.message,
 							},
 						}),
-					))
+					)
+				}
+
+				const { response } = askResponse
+
 				this.currentRequestAbortController = undefined
+				const isContextWindowExceededError = checkContextWindowExceededError(error)
 
 				if (response === "retry_clicked") {
 					yield* this.attemptApiRequest(retryAttempt + 1)
@@ -4882,7 +4925,17 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				yield* this.attemptApiRequest()
 				return
 			}
+			// kilocode_change start
+		} finally {
+			// Clean up abort listeners to prevent memory leaks.
+			// Both listeners are only needed during the first-chunk phase,
+			// so it's safe to remove them here before consuming the rest of the stream.
+			abortSignal.removeEventListener("abort", abortCleanupListener)
+			if (firstChunkAbortListener) {
+				abortSignal.removeEventListener("abort", firstChunkAbortListener)
+			}
 		}
+		// kilocode_change end
 
 		// No error, so we can continue to yield all remaining chunks.
 		// (Needs to be placed outside of try/catch since it we want caller to
@@ -4899,12 +4952,6 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			Task.lastGlobalApiRequestTime = performance.now()
 		}
 		// kilocode_change end
-
-		// Clean up abort listeners to prevent memory leaks
-		abortSignal.removeEventListener("abort", abortCleanupListener)
-		if (firstChunkAbortListener) {
-			abortSignal.removeEventListener("abort", firstChunkAbortListener)
-		}
 	}
 
 	// Shared exponential backoff for retries (first-chunk and mid-stream)
@@ -5017,8 +5064,8 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 					? (rawContent as Anthropic.Messages.ContentBlockParam[])
 					: rawContent !== undefined
 						? ([
-							{ type: "text", text: rawContent } satisfies Anthropic.Messages.TextBlockParam,
-						] as Anthropic.Messages.ContentBlockParam[])
+								{ type: "text", text: rawContent } satisfies Anthropic.Messages.TextBlockParam,
+							] as Anthropic.Messages.ContentBlockParam[])
 						: []
 
 				const [first, ...rest] = contentArray

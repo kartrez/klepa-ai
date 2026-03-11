@@ -568,7 +568,7 @@ describe("importExport", () => {
 
 		it("should export settings to the selected file location", async () => {
 			;(vscode.window.showSaveDialog as Mock).mockResolvedValue({
-				fsPath: "/mock/path/copy-coder-settings.json",
+				fsPath: "/mock/path/kilo-code-settings.json",
 			})
 
 			const mockProviderProfiles = {

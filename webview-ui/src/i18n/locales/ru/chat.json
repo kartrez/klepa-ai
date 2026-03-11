@@ -99,8 +99,8 @@
 	},
 	"enqueueMessage": "Добавить сообщение в очередь (будет отправлено после завершения текущей задачи)",
 	"scrollToBottom": "Прокрутить чат вниз",
-	"about": "Генерируйте, рефакторьте и отлаживайте код с помощью ИИ.",
-	"docs": "",
+	"about": "Генерируйте, рефакторьте и отлаживайте код с помощью ИИ. Ознакомьтесь с нашей <DocsLink>документацией</DocsLink>, чтобы узнать больше.",
+	"docs": "Ознакомьтесь с нашей <DocsLink>документацией</DocsLink>, чтобы узнать больше.",
 	"onboarding": "Ваш список задач в этом рабочем пространстве пуст.",
 	"rooTips": {
 		"customizableModes": {
@@ -339,7 +339,7 @@
 			"tryButton": "Попробовать облачных агентов"
 		},
 		"careers": "Кроме того, <careersLink>мы нанимаем!</careersLink>",
-		"socialLinks": "Присоединяйтесь к нам в <xLink>X</xLink>, <discordLink>Discord</discordLink>, или <redditLink>r/Klepa AI</redditLink> 🚀"
+		"socialLinks": "Присоединяйтесь к нам 🚀"
 	},
 	"reasoning": {
 		"thinking": "Обдумывание",

@@ -198,7 +198,6 @@ export async function presentAssistantMessage(cline: Task) {
 						type: "tool_result",
 						tool_use_id: toolCallId,
 						content: resultContent,
-						is_error: true,
 					})
 
 					if (imageBlocks.length > 0) {
@@ -207,9 +206,7 @@ export async function presentAssistantMessage(cline: Task) {
 				}
 
 				hasToolResult = true
-				if (!mcpBlock.partial) {
-					cline.didAlreadyUseTool = true
-				}
+				cline.didAlreadyUseTool = true
 			}
 
 			const toolDescription = () => `[mcp_tool: ${mcpBlock.serverName}/${mcpBlock.toolName}]`
@@ -675,20 +672,20 @@ export async function presentAssistantMessage(cline: Task) {
 					}
 				}
 
-				// Uses step-by-step for both protocol types.
-				// For XML protocol, only one tool call is allowed per message.
-				// For NATIVE protocol, multiple tool calls are allowed per message, but they are executed one by one.
-				if (!block.partial) {
+				// For XML protocol: Only one tool per message is allowed
+				// For native protocol with experimental flag enabled: Multiple tools can be executed in sequence
+				// For native protocol with experimental flag disabled: Single tool per message (default safe behavior)
+				if (toolProtocol === TOOL_PROTOCOL.XML) {
 					// Once a tool result has been collected, ignore all other tool
 					// uses since we should only ever present one tool result per
 					// message (XML protocol only).
-					if (toolProtocol === TOOL_PROTOCOL.XML) {
-						cline.didAlreadyUseTool = true
-					} else if (toolProtocol === TOOL_PROTOCOL.NATIVE && !isMultipleNativeToolCallsEnabled) {
-						// For native protocol with experimental flag disabled, enforce single tool per message
-						cline.didAlreadyUseTool = true
-					}
+					cline.didAlreadyUseTool = true
+				} else if (toolProtocol === TOOL_PROTOCOL.NATIVE && !isMultipleNativeToolCallsEnabled) {
+					// For native protocol with experimental flag disabled, enforce single tool per message
+					cline.didAlreadyUseTool = true
 				}
+				// If toolProtocol is NATIVE and isMultipleNativeToolCallsEnabled is true,
+				// allow multiple tool calls in sequence (don't set didAlreadyUseTool)
 			}
 
 			const askApproval = async (
@@ -705,9 +702,7 @@ export async function presentAssistantMessage(cline: Task) {
 					if (!approved) {
 						// Gatekeeper denied the action
 						pushToolResult(formatResponse.toolDenied())
-						if (!block.partial) {
-							cline.didRejectTool = true
-						}
+						cline.didRejectTool = true
 						captureAskApproval(block.name, false)
 						return false
 					}
@@ -737,9 +732,7 @@ export async function presentAssistantMessage(cline: Task) {
 					} else {
 						pushToolResult(formatResponse.toolDenied(toolProtocol))
 					}
-					if (!block.partial) {
-						cline.didRejectTool = true
-					}
+					cline.didRejectTool = true
 					captureAskApproval(block.name, false) // kilocode_change
 					return false
 				}

@@ -7,6 +7,7 @@ import {
 	claudeCodeReasoningConfig,
 	type ClaudeCodeReasoningLevel,
 	type ModelInfo,
+	normalizeClaudeCodeModelId,
 } from "@roo-code/types"
 import { type ApiHandler, ApiHandlerCreateMessageMetadata, type SingleCompletionHandler } from ".."
 import { ApiStreamUsageChunk, type ApiStream } from "../transform/stream"

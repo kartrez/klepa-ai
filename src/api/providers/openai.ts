@@ -123,7 +123,7 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 					}
 				}
 
-				convertedMessages = [systemMessage, ...convertToOpenAiMessages(messages, { modelInfo })]
+				convertedMessages = [systemMessage, ...convertToOpenAiMessages(messages)]
 
 				if (modelInfo.supportsPromptCache) {
 					// Note: the following logic is copied from openrouter:
@@ -174,14 +174,11 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 
 			let stream
 			try {
-				console.log(`[OpenAI] Creating completion for model ${modelId} with ${convertedMessages.length} messages`)
-				console.log(`[OpenAI] Request options: ${JSON.stringify({ ...requestOptions, messages: "[TRUNCATED]" })}`)
 				stream = await this.client.chat.completions.create(
 					requestOptions,
 					isAzureAiInference ? { path: OPENAI_AZURE_AI_INFERENCE_PATH } : {},
 				)
 			} catch (error) {
-				console.error(`[OpenAI] API Error:`, error)
 				throw handleOpenAIError(error, this.providerName)
 			}
 
@@ -198,7 +195,6 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 			const activeToolCallIds = new Set<string>()
 
 			for await (const chunk of stream) {
-				console.log(`[OpenAI] Raw chunk: ${JSON.stringify(chunk)}`)
 				const delta = chunk.choices?.[0]?.delta ?? {}
 				const finishReason = chunk.choices?.[0]?.finish_reason
 
@@ -293,11 +289,6 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 						}
 					}
 				}
-			}
-
-			yield {
-				type: "text",
-				text: message?.content || "",
 			}
 
 			yield this.processUsageMetrics(response.usage, modelInfo)
@@ -507,7 +498,14 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 		finishReason: string | null | undefined,
 		activeToolCallIds: Set<string>,
 	): Generator<
-		| { type: "tool_call_partial"; index: number; id?: string; name?: string; arguments?: string }
+		| {
+				type: "tool_call_partial"
+				index: number
+				id?: string
+				name?: string
+				arguments?: string
+				extra_content?: Record<string, unknown> // kilocode_change
+		  }
 		| { type: "tool_call_end"; id: string }
 	> {
 		if (delta?.tool_calls) {
@@ -521,6 +519,9 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 					id: toolCall.id,
 					name: toolCall.function?.name,
 					arguments: toolCall.function?.arguments,
+					// kilocode_change start: Preserve extra_content for Gemini 3 thought_signature support
+					extra_content: (toolCall as any).extra_content,
+					// kilocode_change end
 				}
 			}
 		}

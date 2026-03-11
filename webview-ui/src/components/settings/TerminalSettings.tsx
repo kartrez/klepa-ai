@@ -125,8 +125,7 @@ export const TerminalSettings = ({
 								<Trans i18nKey="settings:terminal.outputLineLimit.description">
 									<VSCodeLink
 										href={buildDocLink(
-											"features/shell-integration#terminal-output-limit",
-											"settings_terminal_output_limit",
+											"overview"
 										)}
 										style={{ display: "inline" }}>
 										{" "}
@@ -158,8 +157,7 @@ export const TerminalSettings = ({
 								<Trans i18nKey="settings:terminal.outputCharacterLimit.description">
 									<VSCodeLink
 										href={buildDocLink(
-											"features/shell-integration#terminal-output-limit",
-											"settings_terminal_output_character_limit",
+											"overview"
 										)}
 										style={{ display: "inline" }}>
 										{" "}
@@ -183,8 +181,7 @@ export const TerminalSettings = ({
 								<Trans i18nKey="settings:terminal.compressProgressBar.description">
 									<VSCodeLink
 										href={buildDocLink(
-											"features/shell-integration#compress-progress-bar-output",
-											"settings_terminal_compress_progress_bar",
+											"overview"
 										)}
 										style={{ display: "inline" }}>
 										{" "}
@@ -224,8 +221,7 @@ export const TerminalSettings = ({
 								<Trans i18nKey="settings:terminal.shellIntegrationDisabled.description">
 									<VSCodeLink
 										href={buildDocLink(
-											"features/shell-integration#use-inline-terminal-recommended",
-											"settings_terminal_shell_integration_disabled",
+											"overview"
 										)}
 										style={{ display: "inline" }}>
 										{" "}
@@ -257,8 +253,7 @@ export const TerminalSettings = ({
 										<Trans i18nKey="settings:terminal.inheritEnv.description">
 											<VSCodeLink
 												href={buildDocLink(
-													"features/shell-integration#inherit-environment-variables",
-													"settings_terminal_inherit_env",
+													"overview"
 												)}
 												style={{ display: "inline" }}>
 												{" "}
@@ -295,8 +290,7 @@ export const TerminalSettings = ({
 										<Trans i18nKey="settings:terminal.shellIntegrationTimeout.description">
 											<VSCodeLink
 												href={buildDocLink(
-													"features/shell-integration#terminal-shell-integration-timeout",
-													"settings_terminal_shell_integration_timeout",
+													"overview"
 												)}
 												style={{ display: "inline" }}>
 												{" "}
@@ -331,8 +325,7 @@ export const TerminalSettings = ({
 										<Trans i18nKey="settings:terminal.commandDelay.description">
 											<VSCodeLink
 												href={buildDocLink(
-													"features/shell-integration#terminal-command-delay",
-													"settings_terminal_command_delay",
+													"overview"
 												)}
 												style={{ display: "inline" }}>
 												{" "}
@@ -359,8 +352,7 @@ export const TerminalSettings = ({
 										<Trans i18nKey="settings:terminal.powershellCounter.description">
 											<VSCodeLink
 												href={buildDocLink(
-													"features/shell-integration#enable-powershell-counter-workaround",
-													"settings_terminal_powershell_counter",
+													"overview"
 												)}
 												style={{ display: "inline" }}>
 												{" "}
@@ -387,8 +379,7 @@ export const TerminalSettings = ({
 										<Trans i18nKey="settings:terminal.zshClearEolMark.description">
 											<VSCodeLink
 												href={buildDocLink(
-													"features/shell-integration#clear-zsh-eol-mark",
-													"settings_terminal_zsh_clear_eol_mark",
+													"overview"
 												)}
 												style={{ display: "inline" }}>
 												{" "}
@@ -411,8 +402,7 @@ export const TerminalSettings = ({
 										<Trans i18nKey="settings:terminal.zshOhMy.description">
 											<VSCodeLink
 												href={buildDocLink(
-													"features/shell-integration#enable-oh-my-zsh-integration",
-													"settings_terminal_zsh_oh_my",
+													"overview"
 												)}
 												style={{ display: "inline" }}>
 												{" "}
@@ -435,8 +425,7 @@ export const TerminalSettings = ({
 										<Trans i18nKey="settings:terminal.zshP10k.description">
 											<VSCodeLink
 												href={buildDocLink(
-													"features/shell-integration#enable-powerlevel10k-integration",
-													"settings_terminal_zsh_p10k",
+													"overview"
 												)}
 												style={{ display: "inline" }}>
 												{" "}
@@ -459,8 +448,7 @@ export const TerminalSettings = ({
 										<Trans i18nKey="settings:terminal.zdotdir.description">
 											<VSCodeLink
 												href={buildDocLink(
-													"features/shell-integration#enable-zdotdir-handling",
-													"settings_terminal_zdotdir",
+													"overview"
 												)}
 												style={{ display: "inline" }}>
 												{" "}

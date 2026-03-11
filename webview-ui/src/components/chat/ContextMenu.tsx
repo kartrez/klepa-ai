@@ -329,8 +329,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
 											DocsLink: (
 												<a
 													href={buildDocLink(
-														"features/slash-commands",
-														"slash_commands_settings",
+														"overview",
 													)}
 													target="_blank"
 													rel="noopener noreferrer"

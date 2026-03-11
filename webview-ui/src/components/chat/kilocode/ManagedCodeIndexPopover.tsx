@@ -1,7 +1,5 @@
 // kilocode_change - new file
 import React, { useState, useRef, useEffect } from "react"
-import { VSCodeCheckbox} from "@vscode/webview-ui-toolkit/react"
-import { useAppTranslation } from "@/i18n/TranslationContext"
 
 import type { IndexingStatus } from "@roo/ExtensionMessage"
 
@@ -58,7 +56,6 @@ export const ManagedCodeIndexPopover: React.FC<CodeIndexPopoverProps> = ({ child
 
 const Content = () => {
 	const state = useExtensionState()
-	const orgId = state.apiConfiguration?.kilocodeOrganizationId
 	const [workspaceFolders, setWorkspaceFolders] = useState<WorkspaceFolderState[]>([])
 
 	// Request initial state when popover opens
@@ -97,8 +94,6 @@ const Content = () => {
 			</>
 		)
 	}
-
-	const { t } = useAppTranslation()
 
 	return (
 		<>

@@ -1700,7 +1700,7 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 									components={{
 										DocsLink: (
 											<a
-												href={buildDocLink("", "welcome")}
+												href={buildDocLink("overview")}
 												target="_blank"
 												rel="noopener noreferrer">
 												the docs

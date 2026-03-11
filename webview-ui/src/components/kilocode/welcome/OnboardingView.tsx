@@ -2,8 +2,6 @@
 import React from "react"
 import Logo from "../common/Logo"
 import { useAppTranslation } from "@/i18n/TranslationContext"
-import { vscode } from "@/utils/vscode"
-import { ButtonPrimary } from "@/components/kilocode/common/ButtonPrimary"
 
 interface OnboardingOptionProps {
 	title: string
@@ -40,20 +38,13 @@ const OnboardingView: React.FC<OnboardingViewProps> = ({ onSelectFreeModels, onS
 
 	return (
 		<div className="flex flex-col items-center justify-center min-h-screen p-6 bg-vscode-sideBar-background">
-			<Logo width={56} height={56} />
+			<Logo width={80} height={80} />
 
 			<h1 className="text-2xl font-bold text-vscode-foreground text-center mt-4 mb-10">
 				{t("kilocode:onboarding.title")}
 			</h1>
 
 			<div className="w-full max-w-md flex flex-col gap-4">
-				<OnboardingOption
-					title={t("kilocode:onboarding.freeModels.title")}
-					description={t("kilocode:onboarding.freeModels.description")}
-					icon="sparkle"
-					onClick={onSelectFreeModels}
-				/>
-
 				<OnboardingOption
 					title={t("kilocode:settings.provider.loginTelegram")}
 					description={t("kilocode:settings.provider.loginTelegram")}

@@ -101,6 +101,7 @@ export const modelInfoSchema = z.object({
 	cacheWritesPrice: z.number().optional(),
 	cacheReadsPrice: z.number().optional(),
 	description: z.string().optional(),
+	banner: z.string().optional(), // kilocode_change
 	// Default effort value for models that support reasoning effort
 	reasoningEffort: reasoningEffortExtendedSchema.optional(),
 	minTokensPerCachePoint: z.number().optional(),
@@ -118,9 +119,6 @@ export const modelInfoSchema = z.object({
 	isFree: z.boolean().optional(),
 	// Flag to indicate if the model supports native tool calling (OpenAI-style function calling)
 	supportsNativeTools: z.boolean().optional(),
-	// Format for tool call IDs. Some providers (like Mistral) require a specific format.
-	// - "alphanumeric-9": Exactly 9 alphanumeric characters (Mistral style)
-	toolCallIdFormat: z.enum(["alphanumeric-9"]).optional(),
 	// Default tool protocol preferred by this model (if not specified, falls back to capability/provider defaults)
 	defaultToolProtocol: z.enum(["xml", "native"]).optional(),
 	// Exclude specific native tools from being available (only applies to native protocol)
@@ -130,6 +128,17 @@ export const modelInfoSchema = z.object({
 	// These tools will be added if they belong to an allowed group in the current mode
 	// Cannot force-add tools from groups the mode doesn't allow
 	includedTools: z.array(z.string()).optional(),
+
+	// kilocode_change start
+	/**
+	 * List of supported API types for this model, e.g. ['chat-completions', 'responses']
+	 */
+	supportedApiTypes: z.array(z.string()).optional(),
+	/**
+	 * Preferred API type for this model, e.g. 'responses' or 'chat-completions'.
+	 */
+	apiType: z.string().optional(),
+	// kilocode_change end
 	/**
 	 * Service tiers with pricing information.
 	 * Each tier can have a name (for OpenAI service tiers) and pricing overrides.

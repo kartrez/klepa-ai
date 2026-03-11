@@ -76,7 +76,7 @@ function logGitEvent(event: GitWatcherEvent) {
 
 		case "start": {
 			console.info(
-				`[ManagedIndexer] Watcher started on branch ${event.branch} ${event.isBaseBranch ? `(base)` : `(feature)`} - doing initial indexing`
+				`[ManagedIndexer] Watcher started on branch ${event.branch} ${event.isBaseBranch ? `(base)` : `(feature)`} - doing initial indexing`,
 			)
 			break
 		}
@@ -101,12 +101,12 @@ function serializeWorkspaceFolderState(state: ManagedIndexerWorkspaceFolderState
 		hasWatcher: !!state.watcher,
 		error: state.error
 			? {
-				type: state.error.type,
-				message: state.error.message,
-				timestamp: state.error.timestamp,
-				context: state.error.context
-			}
-			: undefined
+					type: state.error.type,
+					message: state.error.message,
+					timestamp: state.error.timestamp,
+					context: state.error.context,
+				}
+			: undefined,
 	}
 }
 
@@ -412,7 +412,7 @@ export class ManagedIndexer implements vscode.Disposable {
 
 				state.manifest = manifest
 				console.info(
-					`[ManagedIndexer] Successfully fetched manifest for branch ${branch} (${Object.keys(manifest.files).length} files)`
+					`[ManagedIndexer] Successfully fetched manifest for branch ${branch} (${Object.keys(manifest.files).length} files)`,
 				)
 
 				// Clear any previous manifest errors
@@ -434,9 +434,9 @@ export class ManagedIndexer implements vscode.Disposable {
 					timestamp: new Date().toISOString(),
 					context: {
 						operation: "fetch-manifest",
-						branch
+						branch,
 					},
-					details: error instanceof Error ? error.stack : undefined
+					details: error instanceof Error ? error.stack : undefined,
 				}
 
 				// Send state update after error
@@ -501,7 +501,7 @@ export class ManagedIndexer implements vscode.Disposable {
 	private async processFiles(
 		state: ManagedIndexerWorkspaceFolderState,
 		event: GitWatcherEvent,
-		signal: AbortSignal
+		signal: AbortSignal,
 	): Promise<void> {
 		// Set indexing state
 		state.isIndexing = true

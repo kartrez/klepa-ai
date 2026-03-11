@@ -22,6 +22,7 @@ import {
 	openAiModelInfoSaneDefaults,
 	openAiNativeModels,
 	vertexModels,
+	normalizeVertexModelId, // kilocode_change
 	xaiModels,
 	groqModels,
 	vscodeLlmModels,
@@ -344,7 +345,8 @@ function getSelectedModel({
 		}
 		case "zai": {
 			// kilocode_change - china_api uses mainland model catalog too.
-			const isChina = apiConfiguration.zaiApiLine === "china_coding" || apiConfiguration.zaiApiLine === "china_api"
+			const isChina =
+				apiConfiguration.zaiApiLine === "china_coding" || apiConfiguration.zaiApiLine === "china_api"
 			const models = isChina ? mainlandZAiModels : internationalZAiModels
 			const defaultModelId = getProviderDefaultModelId(provider, { isChina })
 			const id = apiConfiguration.apiModelId ?? defaultModelId
@@ -431,6 +433,13 @@ function getSelectedModel({
 			const info = routerModels.deepinfra?.[id]
 			return { id, info }
 		}
+		// kilocode_change start
+		case "poe": {
+			const id = getValidatedModelId(apiConfiguration.poeModelId, routerModels.poe, defaultModelId)
+			const info = routerModels.poe?.[id]
+			return { id, info }
+		}
+		// kilocode_change end
 		case "vscode-lm": {
 			const id = apiConfiguration?.vsCodeLmModelSelector
 				? `${apiConfiguration.vsCodeLmModelSelector.vendor}/${apiConfiguration.vsCodeLmModelSelector.family}`
@@ -585,9 +594,21 @@ function getSelectedModel({
 			}
 			return { id, info }
 		}
+		case "aihubmix": {
+			const id = getValidatedModelId(apiConfiguration.aihubmixModelId, routerModels.aihubmix, defaultModelId)
+			const info = routerModels.aihubmix?.[id]
+			return { id, info }
+		}
 		case "zenmux": {
 			const id = getValidatedModelId(apiConfiguration.zenmuxModelId, routerModels.zenmux, defaultModelId)
 			const info = routerModels.zenmux?.[id]
+			return { id, info }
+		}
+		// kilocode_change end
+		// kilocode_change start
+		case "oca": {
+			const id = apiConfiguration.apiModelId ?? ""
+			const info = id && routerModels?.oca ? routerModels.oca[id] : undefined
 			return { id, info }
 		}
 		// kilocode_change end
@@ -595,18 +616,21 @@ function getSelectedModel({
 		// case "human-relay":
 		// case "fake-ai":
 		default: {
-			provider satisfies "anthropic" | "fake-ai" | "human-relay" | "kilocode"
+			provider satisfies "anthropic" | "fake-ai" | "human-relay" | "kilocode" | "apertis" | "oca" // kilocode_change: add oca
 			const id = apiConfiguration.apiModelId ?? defaultModelId
 			const baseInfo = anthropicModels[id as keyof typeof anthropicModels]
 
 			// Apply 1M context beta tier pricing for Claude Sonnet 4
 			if (
 				provider === "anthropic" &&
-				(id === "claude-sonnet-4-20250514" || id === "claude-sonnet-4-5") &&
+				(id === "claude-sonnet-4-20250514" ||
+					id === "claude-sonnet-4-5" ||
+					id === "claude-sonnet-4-6" ||
+					id === "claude-opus-4-6") &&
 				apiConfiguration.anthropicBeta1MContext &&
 				baseInfo
 			) {
-				// Type assertion since we know claude-sonnet-4-20250514 and claude-sonnet-4-5 have tiers
+				// Type assertion since supported Claude 4 models include 1M context pricing tiers.
 				const modelWithTiers = baseInfo as typeof baseInfo & {
 					tiers?: Array<{
 						contextWindow: number

@@ -30,9 +30,21 @@ const KiloRulesToggleModal: React.FC = () => {
 	const [menuPosition, setMenuPosition] = useState(0)
 	const [currentView, setCurrentView] = useState<"modes" | "mcp" | "rule" | "workflow" | "skills">("rule")
 
-	useClickAway(modalRef, () => {
-		setIsVisible(false)
-	})
+	useEffect(() => {
+		const handler = (event: MouseEvent | TouchEvent) => {
+			const target = event.target as HTMLElement
+			if (modalRef.current?.contains(target)) return
+			// Ignore clicks on Radix portaled content (Select/Popover dropdowns)
+			if (target.closest("[data-radix-popper-content-wrapper]")) return
+			setIsVisible(false)
+		}
+		document.addEventListener("mousedown", handler)
+		document.addEventListener("touchstart", handler)
+		return () => {
+			document.removeEventListener("mousedown", handler)
+			document.removeEventListener("touchstart", handler)
+		}
+	}, [])
 
 	useEffect(() => {
 		if (isVisible && buttonRef.current) {

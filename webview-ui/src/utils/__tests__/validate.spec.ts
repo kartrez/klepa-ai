@@ -78,15 +78,19 @@ describe("Model Validation Functions", () => {
 		"io-intelligence": {},
 		"vercel-ai-gateway": {},
 		huggingface: {},
+		oca: {}, // kilocode_change
 		// kilocode_change start
+		apertis: {},
 		ovhcloud: {},
 		gemini: {},
 		inception: {},
 		synthetic: {},
 		"sap-ai-core": {},
+		aihubmix: {},
 		// kilocode_change end
 		roo: {},
 		chutes: {},
+		poe: {}, // kilocode_change
 		zenmux: {},
 	}
 

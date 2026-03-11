@@ -714,11 +714,11 @@ const ModesView = ({ hideHeader = false }: { hideHeader?: boolean }) => {
 
 						<Trans i18nKey="prompts:modes.createModeHelpText">
 							<VSCodeLink
-								href={buildDocLink("basic-usage/using-modes", "prompts_view_modes")}
+								href={buildDocLink("overview")}
 								style={{ display: "inline" }}
 								aria-label="Learn about using modes"></VSCodeLink>
 							<VSCodeLink
-								href={buildDocLink("features/custom-modes", "prompts_view_modes")}
+								href={buildDocLink("overview")}
 								style={{ display: "inline" }}
 								aria-label="Learn about customizing modes"></VSCodeLink>
 						</Trans>
@@ -1311,8 +1311,7 @@ const ModesView = ({ hideHeader = false }: { hideHeader?: boolean }) => {
 								"0": (
 									<VSCodeLink
 										href={buildDocLink(
-											"features/custom-instructions#global-rules-directory",
-											"prompts_mode_specific_global_rules",
+											"overview"
 										)}
 										style={{ display: "inline" }}
 										aria-label="Learn about global custom instructions for modes"
@@ -1404,8 +1403,7 @@ const ModesView = ({ hideHeader = false }: { hideHeader?: boolean }) => {
 												"1": (
 													<VSCodeLink
 														href={buildDocLink(
-															"features/footgun-prompting",
-															"prompts_advanced_system_prompt",
+															"overview"
 														)}
 														style={{ display: "inline" }}
 														aria-label="Read important information about overriding system prompts"></VSCodeLink>
@@ -1427,8 +1425,7 @@ const ModesView = ({ hideHeader = false }: { hideHeader?: boolean }) => {
 						<Trans i18nKey="prompts:globalCustomInstructions.description">
 							<VSCodeLink
 								href={buildDocLink(
-									"features/custom-instructions#setting-up-global-rules",
-									"prompts_global_custom_instructions",
+									"overview"
 								)}
 								style={{ display: "inline" }}
 								aria-label="Learn more about global custom instructions"></VSCodeLink>
@@ -1473,8 +1470,7 @@ const ModesView = ({ hideHeader = false }: { hideHeader?: boolean }) => {
 								"0": (
 									<VSCodeLink
 										href={buildDocLink(
-											"features/custom-instructions#setting-up-global-rules",
-											"prompts_global_rules",
+											"overview"
 										)}
 										style={{ display: "inline" }}
 										aria-label="Learn about setting up global custom instructions"

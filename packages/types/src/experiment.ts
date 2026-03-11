@@ -38,4 +38,4 @@ export const experimentsSchema = z.object({
 
 export type Experiments = z.infer<typeof experimentsSchema>
 
-type _AssertExperiments = AssertEqual<Equals<ExperimentId, Keys<z.infer<typeof experimentsSchema>>>>
+type _AssertExperiments = AssertEqual<Equals<ExperimentId, Keys<Experiments>>>

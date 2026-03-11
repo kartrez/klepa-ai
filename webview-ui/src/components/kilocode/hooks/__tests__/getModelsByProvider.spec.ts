@@ -22,6 +22,7 @@ describe("getModelsByProvider", () => {
 	}
 
 	const routerModels: RouterModels = {
+		apertis: { "test-model": testModel }, // kilocode_change
 		openrouter: { "test-model": testModel },
 		requesty: { "test-model": testModel },
 		glama: { "test-model": testModel },
@@ -42,6 +43,9 @@ describe("getModelsByProvider", () => {
 		synthetic: { "test-model": testModel },
 		inception: { "test-model": testModel },
 		roo: { "test-model": testModel },
+		oca: { "test-model": testModel },
+		poe: { "test-model": testModel },
+		aihubmix: { "test-model": testModel }, // kilocode_change
 		zenmux: { "test-model": testModel },
 	}
 

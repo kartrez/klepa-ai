@@ -39,6 +39,7 @@ import { autoImportSettings } from "./utils/autoImportSettings"
 import { API } from "./extension/api"
 
 import {
+	handleUri,
 	registerCommands,
 	registerCodeActions,
 	registerTerminalActions,
@@ -52,8 +53,7 @@ import { checkAnthropicApiKeyConflict } from "./utils/anthropicApiKeyWarning" //
 import { SettingsSyncService } from "./services/settings-sync/SettingsSyncService" // kilocode_change
 import { ManagedIndexer } from "./services/code-index/managed/ManagedIndexer" // kilocode_change
 import { flushModels, getModels, initializeModelCacheRefresh, refreshModels } from "./api/providers/fetchers/modelCache"
-import { kilo_initializeSessionManager } from "./shared/kilocode/cli-sessions/extension/session-manager-utils"
-import { UriEventHandler } from "./core/auth/UriEventHandler" // kilocode_change
+import { kilo_initializeSessionManager } from "./shared/kilocode/cli-sessions/extension/session-manager-utils" // kilocode_change
 import { fetchKilocodeNotificationsOnStartup } from "./core/kilocode/webview/webviewMessageHandlerUtils" // kilocode_change
 
 // kilocode_change start
@@ -499,12 +499,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.workspace.registerTextDocumentContentProvider(DIFF_VIEW_URI_SCHEME, diffContentProvider),
 	)
 
-	// Другие регистрации...
-    const uriHandler = new UriEventHandler(context);
-	// Регистрируем обработчик URI
-	context.subscriptions.push(
-		vscode.window.registerUriHandler(uriHandler)
-	);
+	context.subscriptions.push(vscode.window.registerUriHandler({ handleUri }))
 
 	// Register code actions provider.
 	context.subscriptions.push(

@@ -1,4 +1,5 @@
 export { Anthropic } from "./Anthropic"
+export { Apertis } from "./Apertis" // kilocode_change
 export { Bedrock } from "./Bedrock"
 export { Cerebras } from "./Cerebras"
 export { Chutes } from "./Chutes"
@@ -34,6 +35,7 @@ export { VirtualQuotaFallbackProvider } from "./VirtualQuotaFallbackProvider"
 export { Inception } from "./Inception"
 export { Synthetic } from "./Synthetic"
 export { default as SapAiCore } from "./SapAiCore"
+export { Aihubmix } from "./Aihubmix"
 // kilocode_change end
 export { ZAi } from "./ZAi"
 export { LiteLLM } from "./LiteLLM"
@@ -41,6 +43,8 @@ export { Fireworks } from "./Fireworks"
 export { Featherless } from "./Featherless"
 export { VercelAiGateway } from "./VercelAiGateway"
 export { DeepInfra } from "./DeepInfra"
+export { OCA } from "./Oca" // kilocode_change
 export { MiniMax } from "./MiniMax"
 export { Baseten } from "./Baseten"
+export { Poe } from "./Poe" // kilocode_change
 export { Corethink } from "./Corethink"

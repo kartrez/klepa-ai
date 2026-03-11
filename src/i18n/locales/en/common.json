@@ -99,8 +99,7 @@
 			"errorOutput": "Error output: {{output}}",
 			"processExitedWithError": "Claude Code process exited with code {{exitCode}}. Error output: {{output}}",
 			"stoppedWithReason": "Claude Code stopped with reason: {{reason}}",
-			"apiKeyModelPlanMismatch": "API keys and subscription plans allow different models. Make sure the selected model is included in your plan.",
-			"notFound": "Claude Code executable '{{claudePath}}' not found.\n\nPlease install Claude Code CLI:\n1. Visit {{installationUrl}} to download Claude Code\n2. Follow the installation instructions for your operating system\n3. Ensure the 'claude' command is available in your PATH\n4. Alternatively, configure a custom path in Klepa AI settings under 'Claude Code Path'\n\nOriginal error: {{originalError}}"
+			"apiKeyModelPlanMismatch": "API keys and subscription plans allow different models. Make sure the selected model is included in your plan."
 		},
 		"qwenCode": {
 			"oauthLoadFailed": "Failed to load OAuth credentials. Please authenticate first: {{error}}"
@@ -257,6 +256,9 @@
 			"confirm": "Delete"
 		}
 	},
+	"suggestions": {
+		"start_code_review": "Start code review"
+	},
 	"commands": {
 		"preventCompletionWithOpenTodos": {
 			"description": "Prevent task completion when there are incomplete todos in the todo list"
@@ -264,7 +266,7 @@
 	},
 	"docsLink": {
 		"label": "Docs",
-		"url": "https://gpt-chat.by/docs"
+		"url": "https://gpt-chat.by/klepa/overview"
 	},
 	"errorBoundary": {
 		"title": "Error",

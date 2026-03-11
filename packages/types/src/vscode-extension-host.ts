@@ -241,6 +241,13 @@ export interface ExtensionMessage {
 		| "browserSessionUpdate"
 		| "browserSessionNavigate"
 		| "organizationSwitchResult"
+		// kilocode_change start
+		| "oca/show-auth-url"
+		| "oca/login-success"
+		| "oca/login-error"
+		| "oca/status"
+		| "oca/logout-success"
+		// kilocode_change end
 		| "showTimestamps" // kilocode_change
 		| "showDiffStats" // kilocode_change
 		| "apiMessagesSaved" // kilocode_change: File save event for API messages
@@ -1037,6 +1044,7 @@ export interface WebviewMessage {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	settings?: any
 	url?: string // For openExternal
+	authenticated?: boolean // kilocode_change
 	mpItem?: MarketplaceItem
 	mpInstallOptions?: InstallMarketplaceItemOptions
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any

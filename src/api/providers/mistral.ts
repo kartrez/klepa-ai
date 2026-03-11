@@ -192,10 +192,7 @@ export class MistralHandler extends BaseProvider implements SingleCompletionHand
 
 	override getModel() {
 		const id = this.options.apiModelId ?? mistralDefaultModelId
-		const info = {
-			...(mistralModels[id as MistralModelId] ?? mistralModels[mistralDefaultModelId]),
-			toolCallIdFormat: "alphanumeric-9" as const,
-		}
+		const info = mistralModels[id as MistralModelId] ?? mistralModels[mistralDefaultModelId]
 
 		// @TODO: Move this to the `getModelParams` function.
 		const maxTokens = this.options.includeMaxTokens ? info.maxTokens : undefined

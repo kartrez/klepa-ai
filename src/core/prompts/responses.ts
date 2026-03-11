@@ -78,12 +78,7 @@ export const formatResponse = {
 	noToolsUsed: (protocol?: ToolProtocol) => {
 		const instructions = getToolInstructionsReminder(protocol)
 
-		const nativeSpecificMessage = isNativeProtocol(protocol ?? TOOL_PROTOCOL.XML)
-			? "\n\nCRITICAL: You MUST use the API's native function-calling feature for tool calls. DO NOT use XML tags (like <read_file>...</read_file>) for tool calls. XML tags are not supported and will be ignored."
-			: ""
-
 		return `[ERROR] You did not use a tool in your previous response! Please retry with a tool use.
-Remember: You MUST use a tool in EVERY response to interact with the environment, explore the codebase, or complete the task.${nativeSpecificMessage}
 
 ${instructions}
 
@@ -91,7 +86,7 @@ ${instructions}
 
 If you have completed the user's task, use the attempt_completion tool.
 If you require additional information from the user, use the ask_followup_question tool.
-Otherwise, if you have not completed the task and do not need additional information, then proceed with the next step of the task by using the appropriate tool.
+Otherwise, if you have not completed the task and do not need additional information, then proceed with the next step of the task.
 (This is an automated message, so do not respond to it conversationally.)`
 	},
 
@@ -327,8 +322,6 @@ Always use the actual tool name as the XML tag name for proper parsing and execu
 const toolUseInstructionsReminderNative = `# Reminder: Instructions for Tool Use
 
 Tools are invoked using the platform's native tool calling mechanism. Each tool requires specific parameters as defined in the tool descriptions. Refer to the tool definitions provided in your system instructions for the correct parameter structure and usage examples.
-
-CRITICAL: DO NOT use XML tags (e.g., <read_file>...</read_file>) for tool calls. You MUST use the API's native function-calling feature.
 
 Always ensure you provide all required parameters for the tool you wish to use.`
 

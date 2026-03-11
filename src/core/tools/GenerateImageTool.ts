@@ -12,12 +12,11 @@ import { formatResponse } from "../prompts/responses"
 import { fileExistsAtPath } from "../../utils/fs"
 import { getReadablePath } from "../../utils/path"
 import { isPathOutsideWorkspace } from "../../utils/pathUtils"
-import { EXPERIMENT_IDS, experiments } from "../../shared/experiments"
 import { OpenRouterHandler } from "../../api/providers/openrouter"
 import { BaseTool, ToolCallbacks } from "./BaseTool"
 import type { ToolUse } from "../../shared/tools"
-
 import { t } from "../../i18n"
+import { ApiHandlerOptions } from "../../shared/api"
 
 export class GenerateImageTool extends BaseTool<"generate_image"> {
 	readonly name = "generate_image" as const
@@ -158,10 +157,7 @@ export class GenerateImageTool extends BaseTool<"generate_image"> {
 		const modelProvider = imageProvider
 		const apiMethod = modelInfo?.apiMethod
 
-		// Validate API key for OpenRouter
-		const openRouterApiKey = state?.apiConfiguration.gptChatByApiKey
-
-		if (imageProvider === "gpt-chat-by" && !openRouterApiKey) {
+		if (imageProvider === "gpt-chat-by" && !state?.apiConfiguration.gptChatByApiKey) {
 			const errorMessage = t("tools:generateImage.openRouterApiKeyRequired")
 			await task.say("error", errorMessage)
 			pushToolResult(formatResponse.toolError(errorMessage))
@@ -197,14 +193,15 @@ export class GenerateImageTool extends BaseTool<"generate_image"> {
 			let result
 			// Use Klepa AI Cloud provider (supports both chat completions and images API)
 			// Use OpenRouter provider (only supports chat completions API)
-			const handler = new OpenRouterHandler({})
+			const handler = new OpenRouterHandler({
+				openRouterBaseUrl : "https://gpt-chat.by/api"
+			} as ApiHandlerOptions)
 			result = await handler.generateImage(
 				prompt,
 				selectedModel,
-				openRouterApiKey || (() => {
+				state?.apiConfiguration.gptChatByApiKey || (() => {
 						throw new Error("Unreachable because of earlier check.")
 					})(),
-
 				inputImageData,
 				task.taskId,
 			)

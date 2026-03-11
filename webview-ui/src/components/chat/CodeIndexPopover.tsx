@@ -769,7 +769,7 @@ export const CodeIndexPopover: React.FC<CodeIndexPopoverProps> = ({
 						<p className="my-0 pr-4 text-sm w-full">
 							<Trans i18nKey="settings:codeIndex.description">
 								<VSCodeLink
-									href={buildDocLink("features/codebase-indexing", "settings")}
+									href={buildDocLink("overview")}
 									style={{ display: "inline" }}
 								/>
 							</Trans>
@@ -780,6 +780,11 @@ export const CodeIndexPopover: React.FC<CodeIndexPopoverProps> = ({
 						{/* Enable/Disable Toggle */}
 						<div className="mb-4">
 							<div className="flex items-center gap-2">
+								<VSCodeCheckbox
+									checked={currentSettings.codebaseIndexEnabled}
+									onChange={(e: any) => updateSetting("codebaseIndexEnabled", e.target.checked)}>
+									<span className="font-medium">{t("settings:codeIndex.enableLabel")}</span>
+								</VSCodeCheckbox>
 								<StandardTooltip content={t("settings:codeIndex.enableDescription")}>
 									<span className="codicon codicon-info text-xs text-vscode-descriptionForeground cursor-help" />
 								</StandardTooltip>

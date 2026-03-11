@@ -255,7 +255,7 @@ const WelcomeViewProvider = () => {
 												components={{
 													DocsLink: (
 														<a
-															href={buildDocLink("roo-code-cloud/login", "setup")}
+															href={buildDocLink("overview")}
 															target="_blank"
 															rel="noopener noreferrer"
 															className="text-vscode-textLink-foreground hover:underline">

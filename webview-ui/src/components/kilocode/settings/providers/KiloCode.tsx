@@ -44,7 +44,7 @@ export const KiloCode = ({
 	)
 
 	// Use the existing hook to get user identity
-	const userIdentity = useIdentity(apiConfiguration.kilocodeToken || "", "")
+	const userIdentity = useIdentity(apiConfiguration.gptChatByApiKey || "", "")
 	const isKiloCodeAiUser = userIdentity.endsWith("@gpt-chat.by")
 
 	const areKilocodeWarningsDisabled = apiConfiguration.kilocodeTesterWarningsDisabledUntil

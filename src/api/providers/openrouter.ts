@@ -321,10 +321,14 @@ export class OpenRouterHandler extends BaseProvider implements SingleCompletionH
 		}
 
 		// Convert Anthropic messages to OpenAI format.
-		// Pass model info for automatic tool call ID normalization (e.g. Mistral requires 9-char alphanumeric IDs)
+		// Pass normalization function for Mistral compatibility (requires 9-char alphanumeric IDs)
+		const isMistral = modelId.toLowerCase().includes("mistral")
 		let openAiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
 			{ role: "system", content: systemPrompt },
-			...convertToOpenAiMessages(messages, { modelInfo: model.info }),
+			...convertToOpenAiMessages(
+				messages,
+				isMistral ? { normalizeToolCallId: normalizeMistralToolCallId } : undefined,
+			),
 		]
 
 		// DeepSeek highly recommends using user instead of system role.
@@ -425,11 +429,28 @@ export class OpenRouterHandler extends BaseProvider implements SingleCompletionH
 
 		let stream
 		try {
-			console.log(`[OpenRouter] Creating completion for model ${modelId} with ${openAiMessages.length} messages`)
-			console.log(`[OpenRouter] Completion params: ${JSON.stringify({ ...completionParams, messages: "[TRUNCATED]" })}`)
-			stream = await this.client.chat.completions.create(completionParams, requestOptions)
+			// kilocode_change start
+			let attempts = 0
+			while (true) {
+				try {
+					attempts++
+					stream = await this.client.chat.completions.create(completionParams, requestOptions)
+					break
+				} catch (error: any) {
+					const msg = error?.message || ""
+					const isBedrockNetworkError =
+						msg.includes("Amazon Bedrock error") && msg.includes("Network connection lost")
+
+					if (isBedrockNetworkError && attempts < 3) {
+						console.log(`[OpenRouter] Retrying Bedrock network error (attempt ${attempts}/3): ${msg}`)
+						await new Promise((resolve) => setTimeout(resolve, attempts * 2000))
+						continue
+					}
+					throw error
+				}
+			}
+			// kilocode_change end
 		} catch (error) {
-			console.error(`[OpenRouter] API Error:`, error)
 			// kilocode_change start
 			// KiloCode backend errors are already user-readable and should be handled upstream.
 			if (this.providerName === "KiloCode" && isAnyRecognizedKiloCodeError(error)) {
@@ -495,7 +516,6 @@ export class OpenRouterHandler extends BaseProvider implements SingleCompletionH
 		let hasYieldedReasoningFromDetails = false
 
 		for await (const chunk of stream) {
-			console.log(`[OpenRouter] Raw chunk: ${JSON.stringify(chunk)}`)
 			// OpenRouter returns an error object instead of the OpenAI SDK throwing an error.
 			if ("error" in chunk) {
 				this.handleStreamingError(chunk.error as OpenRouterError, modelId, "createMessage")
@@ -504,7 +524,7 @@ export class OpenRouterHandler extends BaseProvider implements SingleCompletionH
 			// kilocode_change start
 			const kiloCodeChunk = KiloCodeChunkSchema.safeParse(chunk).data
 			inferenceProvider =
-				kiloCodeChunk?.choices?.[0]?.delta?.provider_metadata?.gateway?.routing?.resolvedProvider ??
+				kiloCodeChunk?.choices?.[0]?.delta?.provider_metadata?.gateway?.routing?.finalProvider ??
 				kiloCodeChunk?.provider ??
 				inferenceProvider
 			// kilocode_change end
@@ -790,7 +810,7 @@ export class OpenRouterHandler extends BaseProvider implements SingleCompletionH
 			}
 		}
 
-		const baseURL = this.options.openRouterBaseUrl || "https://gpt-chat.by/api"
+		const baseURL = this.options.openRouterBaseUrl || "https://openrouter.ai/api/v1"
 
 		// OpenRouter only supports chat completions approach for image generation
 		return generateImageWithProvider({

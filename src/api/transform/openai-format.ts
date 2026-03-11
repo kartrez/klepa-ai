@@ -1,7 +1,5 @@
 import { Anthropic } from "@anthropic-ai/sdk"
 import OpenAI from "openai"
-import { ModelInfo } from "@roo-code/types"
-import { normalizeMistralToolCallId } from "./mistral-format"
 
 /**
  * Type for OpenRouter's reasoning detail elements.
@@ -260,14 +258,9 @@ export function sanitizeGeminiMessages(
  */
 export interface ConvertToOpenAiMessagesOptions {
 	/**
-	 * Model info to determine provider-specific requirements like tool call ID format.
-	 */
-	modelInfo?: ModelInfo
-	/**
 	 * Optional function to normalize tool call IDs for providers with strict ID requirements.
 	 * When provided, this function will be applied to all tool_use IDs and tool_result tool_use_ids.
 	 * This allows callers to declare provider-specific ID format requirements.
-	 * If both modelInfo and normalizeToolCallId are provided, normalizeToolCallId takes precedence.
 	 */
 	normalizeToolCallId?: (id: string) => string
 	/**
@@ -320,14 +313,8 @@ export function convertToOpenAiMessages(
 		})
 	}
 
-	// Use provided normalization function, or determine from modelInfo, or use identity function
-	let normalizeId = options?.normalizeToolCallId
-	if (!normalizeId && options?.modelInfo?.toolCallIdFormat === "alphanumeric-9") {
-		normalizeId = normalizeMistralToolCallId
-	}
-	if (!normalizeId) {
-		normalizeId = (id: string) => id || ""
-	}
+	// Use provided normalization function or identity function
+	const normalizeId = options?.normalizeToolCallId ?? ((id: string) => id)
 
 	for (const anthropicMessage of anthropicMessages) {
 		if (typeof anthropicMessage.content === "string") {
@@ -394,23 +381,12 @@ export function convertToOpenAiMessages(
 								})
 								.join("\n") ?? ""
 					}
-					const toolResultId = normalizeId(toolMessage.tool_use_id)
-					if (toolResultId) {
-						openAiMessages.push({
-							role: "tool",
-							tool_call_id: toolResultId,
-							content: content,
-						})
-					} else {
-						// Fallback if normalization returned empty - but still provide the ID
-						const fallbackId = toolMessage.tool_use_id || "dummy_id"
-						openAiMessages.push({
-							role: "tool",
-							tool_call_id: normalizeId(fallbackId) || fallbackId,
-							// Use "(empty)" placeholder for empty content to satisfy providers like Gemini (via OpenRouter)
+					openAiMessages.push({
+						role: "tool",
+						tool_call_id: normalizeId(toolMessage.tool_use_id),
+						// Use "(empty)" placeholder for empty content to satisfy providers like Gemini (via OpenRouter)
 						content: content || "(empty)",
-						})
-					}
+					})
 				})
 
 				// If tool results contain images, send as a separate user message
@@ -526,31 +502,29 @@ export function convertToOpenAiMessages(
 				}
 
 				// Process tool use messages
-				let tool_calls: OpenAI.Chat.ChatCompletionMessageToolCall[] = toolMessages.map((toolMessage) => {
-					const toolCallId = normalizeId(toolMessage.id)
-					if (toolCallId) {
-						return {
-							id: toolCallId,
-							type: "function",
-							function: {
-								name: toolMessage.name,
-								// json string
-								arguments: JSON.stringify(toolMessage.input),
-							},
-						}
-					}
-					// Return a dummy tool call with the original ID if normalization failed,
-					// to avoid "tool_call_id is not set" or "mismatch" errors
-					const fallbackId = toolMessage.id || "dummy_id"
-					return {
-						id: normalizeId(fallbackId) || fallbackId,
+				// kilocode_change start: Use type assertion to access extra_content which may be added for Gemini 3 support
+				let tool_calls: (OpenAI.Chat.ChatCompletionMessageToolCall & {
+					extra_content?: Record<string, unknown>
+				})[] = toolMessages.map((toolMessage) => {
+					const toolCall: OpenAI.Chat.ChatCompletionMessageToolCall & {
+						extra_content?: Record<string, unknown>
+					} = {
+						id: normalizeId(toolMessage.id),
 						type: "function",
 						function: {
 							name: toolMessage.name,
+							// json string
 							arguments: JSON.stringify(toolMessage.input),
 						},
 					}
+					// Preserve extra_content for Gemini 3 thought_signature support
+					const toolMessageWithExtra = toolMessage as any
+					if (toolMessageWithExtra.extra_content) {
+						toolCall.extra_content = toolMessageWithExtra.extra_content
+					}
+					return toolCall
 				})
+				// kilocode_change end
 
 				// Check if the message has reasoning_details (used by Gemini 3, xAI, etc.)
 				const messageWithDetails = anthropicMessage as any

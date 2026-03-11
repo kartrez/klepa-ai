@@ -11,7 +11,7 @@ import type {
 	PushToolResult, // kilocode_change
 	ToolUse,
 } from "../../shared/tools"
-import { ManagedIndexer } from "../../services/code-index/managed/ManagedIndexer"
+import { ManagedIndexer } from "../../services/code-index/managed/ManagedIndexer" // kilocode_change
 
 interface CodebaseSearchParams {
 	query: string

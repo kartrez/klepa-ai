@@ -20,6 +20,7 @@ import { getOpenRouterModels } from "./openrouter"
 import { getVercelAiGatewayModels } from "./vercel-ai-gateway"
 import { getRequestyModels } from "./requesty"
 import { getGlamaModels } from "./glama" // kilocode_change
+import { getOCAModels } from "./oca" // kilocode_change
 import { getUnboundModels } from "./unbound"
 import { getLiteLLMModels } from "./litellm"
 import { GetModelsOptions } from "../../../shared/api"
@@ -33,13 +34,17 @@ import { getGeminiModels } from "./gemini"
 import { getInceptionModels } from "./inception"
 import { getSyntheticModels } from "./synthetic"
 import { getSapAiCoreModels } from "./sap-ai-core"
+import { getAihubmixModels } from "./aihubmix"
+import { getApertisModels } from "./apertis"
 // kilocode_change end
 
+import { DEFAULT_OCA_BASE_URL } from "../oca/utils/constants" // kilocode_change
 import { getDeepInfraModels } from "./deepinfra"
 import { getHuggingFaceModels } from "./huggingface"
 import { getRooModels } from "./roo"
 import { getChutesModels } from "./chutes"
 import { getNanoGptModels } from "./nano-gpt" //kilocode_change
+import { getPoeModels } from "./poe" // kilocode_change
 import { getZenmuxModels } from "./zenmux"
 
 const memoryCache = new NodeCache({ stdTTL: 5 * 60, checkperiod: 5 * 60 })
@@ -149,6 +154,11 @@ async function fetchModelsFromProvider(options: GetModelsOptions): Promise<Model
 			models = await getHuggingFaceModels()
 			break
 		// kilocode_change start
+		case "oca":
+			models = await getOCAModels(options.baseUrl ?? DEFAULT_OCA_BASE_URL, options.apiKey)
+			break
+		// kilocode_change end
+		// kilocode_change start
 		case "sap-ai-core":
 			models = await getSapAiCoreModels(
 				options.sapAiCoreServiceKey,
@@ -161,6 +171,12 @@ async function fetchModelsFromProvider(options: GetModelsOptions): Promise<Model
 			break
 		case "ovhcloud":
 			models = await getOvhCloudAiEndpointsModels()
+			break
+		case "apertis":
+			models = await getApertisModels({
+				apiKey: options.apiKey,
+				baseUrl: options.baseUrl,
+			})
 			break
 		// kilocode_change end
 		case "roo": {
@@ -179,7 +195,18 @@ async function fetchModelsFromProvider(options: GetModelsOptions): Promise<Model
 				apiKey: options.apiKey,
 			})
 			break
+		case "aihubmix":
+			models = await getAihubmixModels({
+				baseUrl: options.baseUrl,
+				apiKey: options.apiKey,
+			})
+			break
 		//kilocode_change end
+		// kilocode_change start
+		case "poe":
+			models = await getPoeModels(options.apiKey)
+			break
+		// kilocode_change end
 		default: {
 			// Ensures router is exhaustively checked if RouterName is a strict union.
 			const exhaustiveCheck: never = provider
@@ -340,6 +367,8 @@ export async function initializeModelCacheRefresh(): Promise<void> {
 			{ provider: "io-intelligence", options: { provider: "io-intelligence" } }, // kilocode_change: Add io-intelligence to background refresh
 			{ provider: "ovhcloud", options: { provider: "ovhcloud" } }, // kilocode_change: Add ovhcloud to background refresh
 			{ provider: "litellm", options: { provider: "litellm" } }, // kilocode_change: Add litellm to background refresh
+			{ provider: "apertis", options: { provider: "apertis" } }, // kilocode_change: Add apertis to background refresh
+			{ provider: "aihubmix", options: { provider: "aihubmix" } }, // kilocode_change: Add aihubmix to background refresh
 		]
 
 		// Refresh each provider in background (fire and forget)
@@ -386,6 +415,12 @@ export function getModelsFromCache(provider: ProviderName): ModelRecord | undefi
 	// Check memory cache first (fast)
 	const memoryModels = memoryCache.get<ModelRecord>(provider)
 	if (memoryModels) {
+		// kilocode_change start
+		if (provider === "zenmux" && hasInvalidZenmuxContextWindow(memoryModels)) {
+			console.warn("[MODEL_CACHE] Ignoring stale ZenMux model cache with invalid contextWindow values")
+			return undefined
+		}
+		// kilocode_change end
 		return memoryModels
 	}
 
@@ -421,6 +456,13 @@ export function getModelsFromCache(provider: ProviderName): ModelRecord | undefi
 				)
 				return undefined
 			}
+			// kilocode_change start
+			// Self-heal stale ZenMux cache entries from v5.7.0 where contextWindow was persisted as 0.
+			if (provider === "zenmux" && hasInvalidZenmuxContextWindow(validation.data)) {
+				console.warn("[MODEL_CACHE] Ignoring stale ZenMux model cache with invalid contextWindow values")
+				return undefined
+			}
+			// kilocode_change end
 
 			// Populate memory cache for future fast access
 			memoryCache.set(provider, validation.data)
@@ -451,3 +493,9 @@ function getCacheDirectoryPathSync(): string | undefined {
 		return undefined
 	}
 }
+
+// kilocode_change start
+function hasInvalidZenmuxContextWindow(models: ModelRecord): boolean {
+	return Object.values(models).some((model) => (model.contextWindow ?? 0) <= 0)
+}
+// kilocode_change end

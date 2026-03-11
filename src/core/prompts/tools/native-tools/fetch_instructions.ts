@@ -1,11 +1,8 @@
 import type OpenAI from "openai"
 
-const FETCH_INSTRUCTIONS_DESCRIPTION = `Retrieve detailed instructions for performing a predefined task, such as creating an MCP server or creating a mode.
+const FETCH_INSTRUCTIONS_DESCRIPTION = `Retrieve detailed instructions for performing a predefined task, such as creating an MCP server or creating a mode.`
 
-Example: Fetching instructions for creating an MCP server
-{ "task": "create_mcp_server" }`
-
-const TASK_PARAMETER_DESCRIPTION = `The task identifier to fetch instructions for.`
+const TASK_PARAMETER_DESCRIPTION = `Task identifier to fetch instructions for`
 
 export default {
 	type: "function",

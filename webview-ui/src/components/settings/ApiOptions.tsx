@@ -25,6 +25,7 @@ import {
 	gptChatByDefaultModelId,
 	moonshotDefaultModelId,
 	// kilocode_change start
+	apertisDefaultModelId,
 	syntheticDefaultModelId,
 	ovhCloudAiEndpointsDefaultModelId,
 	inceptionDefaultModelId,
@@ -50,6 +51,7 @@ import {
 	deepInfraDefaultModelId,
 	minimaxDefaultModelId,
 	nanoGptDefaultModelId, //kilocode_change
+	poeDefaultModelId, // kilocode_change
 } from "@roo-code/types"
 
 import { vscode } from "@src/utils/vscode"
@@ -79,6 +81,7 @@ import {
 
 import {
 	Anthropic,
+	Apertis, // kilocode_change
 	Baseten,
 	Corethink,
 	Bedrock,
@@ -117,13 +120,16 @@ import {
 	OvhCloudAiEndpoints,
 	Inception,
 	SapAiCore,
+	Aihubmix,
 	// kilocode_change end
 	ZAi,
 	Fireworks,
 	Featherless,
 	VercelAiGateway,
 	DeepInfra,
+	OCA, // kilocode_change
 	MiniMax,
+	Poe, // kilocode_change
 } from "./providers"
 
 import { MODELS_BY_PROVIDER, PROVIDERS } from "./constants"
@@ -324,6 +330,7 @@ const ApiOptions = ({
 				selectedProvider === "deepinfra" ||
 				selectedProvider === "chutes" || // kilocode_change
 				selectedProvider === "synthetic" || // kilocode_change
+				selectedProvider === "poe" || // kilocode_change
 				selectedProvider === "roo"
 			) {
 				vscode.postMessage({ type: "requestRouterModels" })
@@ -367,9 +374,8 @@ const ApiOptions = ({
 				? Object.fromEntries(
 						Object.entries(filteredModels).filter(
 							([modelId]) =>
-								apiConfiguration.moonshotBaseUrl === "https://api.kimi.com/coding/v1"
-									? modelId === "kimi-for-coding"
-									: modelId !== "kimi-for-coding",
+								modelId !== "kimi-for-coding" ||
+								apiConfiguration.moonshotBaseUrl === "https://api.kimi.com/coding/v1",
 						),
 					)
 				: filteredModels
@@ -379,16 +385,16 @@ const ApiOptions = ({
 		// But filter out other deprecated models from being newly selectable
 		const availableModels = modelsAllowedByEndpoint
 			? Object.entries(modelsAllowedByEndpoint)
-				.filter(([modelId, modelInfo]) => {
-					// Always include the currently selected model
-					if (modelId === selectedModelId) return true
-					// Filter out deprecated models that aren't currently selected
-					return !modelInfo.deprecated
-				})
-				.map(([modelId]) => ({
-					value: modelId,
-					label: modelId,
-				}))
+					.filter(([modelId, modelInfo]) => {
+						// Always include the currently selected model
+						if (modelId === selectedModelId) return true
+						// Filter out deprecated models that aren't currently selected
+						return !modelInfo.deprecated
+					})
+					.map(([modelId]) => ({
+						value: modelId,
+						label: modelId,
+					}))
 			: []
 
 		return availableModels
@@ -500,10 +506,12 @@ const ApiOptions = ({
 				ollama: { field: "ollamaModelId" },
 				lmstudio: { field: "lmStudioModelId" },
 				// kilocode_change start
+				apertis: { field: "apertisModelId", default: apertisDefaultModelId },
 				kilocode: { field: "kilocodeModel", default: kilocodeDefaultModel },
 				synthetic: { field: "apiModelId", default: syntheticDefaultModelId },
 				ovhcloud: { field: "ovhCloudAiEndpointsModelId", default: ovhCloudAiEndpointsDefaultModelId },
 				inception: { field: "inceptionLabsModelId", default: inceptionDefaultModelId },
+				poe: { field: "poeModelId", default: poeDefaultModelId },
 				// kilocode_change end
 			}
 
@@ -534,7 +542,7 @@ const ApiOptions = ({
 
 		// kilocode_change start
 		// Providers that don't have documentation pages yet
-		const excludedProviders = ["moonshot", "chutes", "cerebras", "litellm", "zai", "qwen-code", "minimax"]
+		const excludedProviders = ["moonshot", "chutes", "cerebras", "litellm", "zai", "qwen-code", "minimax", "oca"]
 
 		// Skip documentation link when the provider is excluded because documentation is not available
 		if (excludedProviders.includes(selectedProvider)) {
@@ -551,7 +559,7 @@ const ApiOptions = ({
 
 		const slug = slugs[selectedProvider] || selectedProvider
 		return {
-			url: buildDocLink(`providers/${slug}`, "provider_docs"),
+			url: buildDocLink("overview"),
 			name,
 		}
 	}, [selectedProvider])
@@ -661,6 +669,17 @@ const ApiOptions = ({
 			)}
 			{/* kilocode_change end */}
 
+			{/* kilocode_change start */}
+			{selectedProvider === "oca" && (
+				<OCA
+					apiConfiguration={apiConfiguration}
+					setApiConfigurationField={setApiConfigurationField}
+					organizationAllowList={organizationAllowList}
+					modelValidationError={modelValidationError}
+				/>
+			)}
+			{/* kilocode_change end */}
+
 			{selectedProvider === "requesty" && (
 				<Requesty
 					uriScheme={uriScheme}
@@ -682,6 +701,21 @@ const ApiOptions = ({
 						setApiConfigurationField={setApiConfigurationField}
 						routerModels={routerModels}
 						uriScheme={uriScheme}
+						organizationAllowList={organizationAllowList}
+						modelValidationError={modelValidationError}
+						simplifySettings={fromWelcomeView}
+					/>
+				)
+				/* kilocode_change end */
+			}
+
+			{
+				/* kilocode_change start */
+				selectedProvider === "aihubmix" && (
+					<Aihubmix
+						apiConfiguration={apiConfiguration}
+						setApiConfigurationField={setApiConfigurationField}
+						routerModels={routerModels}
 						organizationAllowList={organizationAllowList}
 						modelValidationError={modelValidationError}
 						simplifySettings={fromWelcomeView}
@@ -726,6 +760,19 @@ const ApiOptions = ({
 			)}
 			{/* kilocode_change end */}
 
+			{/* kilocode_change start */}
+			{selectedProvider === "poe" && (
+				<Poe
+					apiConfiguration={apiConfiguration}
+					setApiConfigurationField={setApiConfigurationField}
+					routerModels={routerModels}
+					refetchRouterModels={refetchRouterModels}
+					organizationAllowList={organizationAllowList}
+					modelValidationError={modelValidationError}
+				/>
+			)}
+			{/* kilocode_change end */}
+
 			{selectedProvider === "anthropic" && (
 				<Anthropic
 					apiConfiguration={apiConfiguration}
@@ -733,6 +780,12 @@ const ApiOptions = ({
 					simplifySettings={fromWelcomeView}
 				/>
 			)}
+
+			{/* kilocode_change start */}
+			{selectedProvider === "apertis" && (
+				<Apertis apiConfiguration={apiConfiguration} setApiConfigurationField={setApiConfigurationField} />
+			)}
+			{/* kilocode_change end */}
 
 			{selectedProvider === "claude-code" && (
 				<ClaudeCode

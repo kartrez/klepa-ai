@@ -123,7 +123,7 @@ export const BrowserSettings = ({
 					<div className="text-vscode-descriptionForeground text-sm mt-1">
 						<Trans i18nKey="settings:browser.enable.description">
 							<VSCodeLink
-								href={buildDocLink("features/browser-use", "settings_browser_tool")}
+								href={buildDocLink("overview")}
 								style={{ display: "inline" }}>
 								{" "}
 							</VSCodeLink>

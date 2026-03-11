@@ -68,12 +68,14 @@ export const PROVIDERS = [
 	{ value: "gemini", label: "Google Gemini", proxy: false },
 	{ value: "doubao", label: "Doubao", proxy: false },
 	// kilocode_change start
+	{ value: "aihubmix", label: "AIhubmix", proxy: false },
 	{ value: "zenmux", label: "ZenMux" },
 	{ value: "inception", label: "Inception", proxy: false },
 	{ value: "virtual-quota-fallback", label: "Virtual Quota Fallback", proxy: false },
 	{ value: "synthetic", label: "Synthetic", proxy: false },
 	{ value: "ovhcloud", label: "OVHcloud AI Endpoints", proxy: false },
 	{ value: "sap-ai-core", label: "SAP AI Core", proxy: false },
+	{ value: "apertis", label: "Apertis" },
 	// kilocode_change end
 	{ value: "deepseek", label: "DeepSeek", proxy: false },
 	{ value: "moonshot", label: "Moonshot", proxy: false },
@@ -107,6 +109,8 @@ export const PROVIDERS = [
 	{ value: "vercel-ai-gateway", label: "Vercel AI Gateway", proxy: false },
 	{ value: "minimax", label: "MiniMax", proxy: false },
 	{ value: "baseten", label: "Baseten", proxy: false },
+	{ value: "oca", label: "Oracle Code Assist" }, // kilocode_change
+	{ value: "poe", label: "Poe", proxy: false }, // kilocode_change
 	{ value: "corethink", label: "Corethink", proxy: false },
 ].sort((a, b) => a.label.localeCompare(b.label))
 

@@ -26,6 +26,7 @@ export { OpenAiCompatibleResponsesHandler } from "./openai-responses" // kilocod
 export { OpenAICompatibleHandler } from "./openai-compatible"
 export type { OpenAICompatibleConfig } from "./openai-compatible"
 export { OpenRouterHandler } from "./openrouter"
+export { PoeHandler } from "./poe" // kilocode_change
 export { ZenMuxHandler } from "./zenmux" // kilocode_change
 export { QwenCodeHandler } from "./qwen-code"
 export { RequestyHandler } from "./requesty"
@@ -38,6 +39,8 @@ export { VirtualQuotaFallbackHandler } from "./virtual-quota-fallback"
 export { SyntheticHandler } from "./synthetic"
 export { InceptionLabsHandler } from "./inception"
 export { SapAiCoreHandler } from "./sap-ai-core"
+export { AihubmixHandler } from "./aihubmix"
+export { ApertisHandler } from "./apertis"
 // kilocode_change end
 export { VsCodeLmHandler } from "./vscode-lm"
 export { XAIHandler } from "./xai"
@@ -47,6 +50,7 @@ export { RooHandler } from "./roo"
 export { FeatherlessHandler } from "./featherless"
 export { VercelAiGatewayHandler } from "./vercel-ai-gateway"
 export { DeepInfraHandler } from "./deepinfra"
+export { OcaHandler } from "./oca-handler" // kilocode_change
 export { MiniMaxHandler } from "./minimax"
 export { BasetenHandler } from "./baseten"
 export { CorethinkHandler } from "./corethink"

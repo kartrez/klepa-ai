@@ -6,8 +6,8 @@
  * @returns The full docs URL with UTM parameters
  */
 // kilocode_change: unused campaign param
-export function buildDocLink(path: string, _campaign: string): string {
-	return "https://gpt-chat.by"
+export function buildDocLink(path: string): string {
+	return `https://gpt-chat.by/klepa/${path}`
 	// Remove any leading slash from path
 	// const cleanPath = path
 	// 	.replace(/^\//, "")

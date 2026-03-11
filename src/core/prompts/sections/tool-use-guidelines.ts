@@ -17,10 +17,6 @@ export function getToolUseGuidelinesSection(
 	)
 
 	guidelinesList.push(
-		`${itemNumber++}. You MUST use tools to interact with the environment. Do not attempt to describe actions or results without actually using the corresponding tools. For example, do not say "I have reviewed the files" without first using \`read_file\`.`,
-	)
-
-	guidelinesList.push(
 		`${itemNumber++}. Choose the most appropriate tool based on the task and the tool descriptions provided. Assess if you need additional information to proceed, and which of the available tools would be most effective for gathering this information. For example using the list_files tool is more effective than running a command like \`ls\` in the terminal. It's critical that you think about each available tool and use the one that best fits the current step in the task.`,
 	)
 
@@ -53,9 +49,7 @@ export function getToolUseGuidelinesSection(
 
 	// Protocol-specific guideline - only add for XML protocol
 	if (!isNativeProtocol(protocol)) {
-		guidelinesList.push(
-			`${itemNumber++}. Formulate your tool use using the XML format specified for each tool. The XML must NOT be wrapped in markdown code blocks and MUST be the very last thing in your response.`,
-		)
+		guidelinesList.push(`${itemNumber++}. Formulate your tool use using the XML format specified for each tool.`)
 	}
 	guidelinesList.push(`${itemNumber++}. After each tool use, the user will respond with the result of that tool use. This result will provide you with the necessary information to continue your task or make further decisions. This response may include:
 	 - Information about whether the tool succeeded or failed, along with any reasons for failure.

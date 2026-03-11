@@ -97,7 +97,7 @@ export function createReadFileTool(options: ReadFileToolOptions = {}): OpenAI.Ch
 		type: "function",
 		function: {
 			name: "read_file",
-			description: baseDescription,
+			description,
 			strict: true,
 			parameters: {
 				type: "object",

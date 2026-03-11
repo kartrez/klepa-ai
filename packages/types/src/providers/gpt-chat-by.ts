@@ -228,6 +228,87 @@ export const gptChatByModels = {
 		outputPrice: 2.56 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `GLM-5 is Z.ai’s flagship open-source foundation model engineered for complex systems design and long-horizon agent workflows. `,
 	},
+	"anthropic/claude-opus-4.6": {
+		maxTokens: 128_000, // Overridden to 8k if `enableReasoningEffort` is false.
+		contextWindow: 200_000, // Default 200K, extendable to 1M with beta flag 'context-1m-2025-08-07'
+		supportsImages: true,
+		supportsPromptCache: true,
+		supportsNativeTools: true,
+		defaultToolProtocol: "native",
+		inputPrice: 5 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		outputPrice: 25 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		cacheWritesPrice: 6.25,
+		cacheReadsPrice: 0.5,
+		supportsReasoningBudget: true,
+		supportsAdaptiveThinking: true,
+		supportsVerbosity: ["low", "medium", "high", "max"],
+		// Tiered pricing for extended context (requires beta flag 'context-1m-2025-08-07')
+		tiers: [
+			{
+				contextWindow: 1_000_000, // 1M tokens with beta flag
+				inputPrice: 10.0 * GTP_CHAT_BY_TAKE_PROFIT_USD, // $6 per million input tokens (>200K context)
+				outputPrice: 37.5 * GTP_CHAT_BY_TAKE_PROFIT_USD, // $22.50 per million output tokens (>200K context)
+				cacheWritesPrice: 7.5, // $7.50 per million tokens (>200K context)
+				cacheReadsPrice: 0.6, // $0.60 per million tokens (>200K context)
+			},
+		],
+		description: `Anthropic claude opus 4.6. Top performance model`,
+	},
+	"anthropic/claude-sonnet-4.6": {
+		maxTokens: 128_000,
+		contextWindow: 1_000_000,
+		supportsImages: true,
+		supportsPromptCache: true,
+		supportsNativeTools: true,
+		inputPrice: 3 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		outputPrice: 15 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		description: `anthropic claude sonnet 4.6.`,
+		tiers: [
+			{
+				contextWindow: 1_000_000, // 1M tokens with beta flag
+				inputPrice: 6.0 * GTP_CHAT_BY_TAKE_PROFIT_USD, // $6 per million input tokens (>200K context)
+				outputPrice: 22.5 * GTP_CHAT_BY_TAKE_PROFIT_USD, // $22.50 per million output tokens (>200K context)
+				cacheWritesPrice: 7.5, // $7.50 per million tokens (>200K context)
+				cacheReadsPrice: 0.6, // $0.60 per million tokens (>200K context)
+			},
+		],
+	},
+	// "grok/code": {
+	// 	maxTokens: 65_000,
+	// 	contextWindow: 1_000_000,
+	// 	supportsImages: false,
+	// 	supportsPromptCache: true,
+	// 	inputPrice: 0.2 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+	// 	outputPrice: 1.5 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+	// 	description: `grok code.`,
+	// },
+	// "openai/codex": {
+	// 	maxTokens: 65_000,
+	// 	contextWindow: 1_000_000,
+	// 	supportsImages: false,
+	// 	supportsPromptCache: true,
+	// 	inputPrice: 1.25 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+	// 	outputPrice: 10 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+	// 	description: `Open AI gpt 5`,
+	// },
+	// "openai/gpt-5.1": {
+	// 	maxTokens: 65_000,
+	// 	contextWindow: 1_000_000,
+	// 	supportsImages: false,
+	// 	supportsPromptCache: true,
+	// 	inputPrice: 1.25 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+	// 	outputPrice: 10 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+	// 	description: `Open AI gpt 5.1`,
+	// },
+	// "openai/gpt-5.2": {
+	// 	maxTokens: 128_000,
+	// 	contextWindow: 400_000,
+	// 	supportsImages: false,
+	// 	supportsPromptCache: true,
+	// 	inputPrice: 1.75 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+	// 	outputPrice: 14 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+	// 	description: `Open AI gpt 5.2`,
+	// },
 } as const satisfies Record<string, ModelInfo>
 
 export const GPT_CHAT_BY_DEFAULT_TEMPERATURE = 0.6

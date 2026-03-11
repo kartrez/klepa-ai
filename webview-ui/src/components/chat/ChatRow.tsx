@@ -452,7 +452,11 @@ export const ChatRowContent = ({
 	}, [tool])
 
 	const followUpData = useMemo(() => {
-		if (message.type === "ask" && message.ask === "followup" && !message.partial) {
+		if (
+			message.type === "ask" &&
+			(message.ask === "followup" || message.ask === "completion_result") &&
+			!message.partial
+		) {
 			return safeJsonParse<FollowUpData>(message.text)
 		}
 		return null
@@ -1810,8 +1814,23 @@ export const ChatRowContent = ({
 									<div style={{ flexGrow: 1 }} />
 									<OpenMarkdownPreviewButton markdown={message.text} />
 								</div>
-								<div style={{ color: "var(--vscode-charts-green)", paddingTop: 10 }}>
-									<Markdown markdown={message.text} partial={message.partial} />
+								<div className="flex flex-col gap-2 ml-6">
+									<div style={{ color: "var(--vscode-charts-green)", paddingTop: 10 }}>
+										<Markdown
+											markdown={
+												followUpData?.suggest ? followUpData.question || "" : message.text
+											}
+											partial={message.partial}
+										/>
+									</div>
+									<FollowUpSuggest
+										suggestions={followUpData?.suggest}
+										onSuggestionClick={onSuggestionClick}
+										ts={message?.ts}
+										onCancelAutoApproval={onFollowUpUnmount}
+										isAnswered={isFollowUpAnswered}
+										isFollowUpAutoApprovalPaused={isFollowUpAutoApprovalPaused}
+									/>
 								</div>
 							</div>
 						)

@@ -414,8 +414,21 @@ export class NativeToolCallParser {
 				break
 
 			case "search_replace":
+			case "edit_file":
 				if (!normalized.file_path && normalized.path) {
 					normalized.file_path = normalized.path
+				}
+				break
+
+			case "fast_edit_file":
+				if (!normalized.target_file && normalized.path) {
+					normalized.target_file = normalized.path
+				}
+				break
+
+			case "apply_patch":
+				if (!normalized.patch && (normalized.diff || normalized.content)) {
+					normalized.patch = (normalized.diff as string) || (normalized.content as string)
 				}
 				break
 
@@ -553,6 +566,45 @@ export class NativeToolCallParser {
 					nativeArgs = {
 						path: args.path,
 						diff: args.diff,
+					}
+				}
+				break
+
+			case "apply_patch":
+				if (args.patch !== undefined) {
+					nativeArgs = {
+						patch: args.patch,
+					}
+				}
+				break
+
+			case "search_replace":
+				if (args.file_path !== undefined || args.old_string !== undefined || args.new_string !== undefined) {
+					nativeArgs = {
+						file_path: args.file_path,
+						old_string: args.old_string,
+						new_string: args.new_string,
+					}
+				}
+				break
+
+			case "edit_file":
+				if (args.file_path !== undefined || args.old_string !== undefined || args.new_string !== undefined) {
+					nativeArgs = {
+						file_path: args.file_path,
+						old_string: args.old_string,
+						new_string: args.new_string,
+						expected_replacements: args.expected_replacements,
+					}
+				}
+				break
+
+			case "fast_edit_file":
+				if (args.target_file !== undefined || args.instructions !== undefined || args.code_edit !== undefined) {
+					nativeArgs = {
+						target_file: args.target_file,
+						instructions: args.instructions,
+						code_edit: args.code_edit,
 					}
 				}
 				break
@@ -830,7 +882,7 @@ export class NativeToolCallParser {
 					break
 				// kilocode_change end
 
-				case "apply_diff":
+				case "apply_diff": // kilocode_change: allow partial nativeArgs
 					if (args.path !== undefined || args.diff !== undefined) {
 						nativeArgs = {
 							path: args.path,
@@ -839,8 +891,59 @@ export class NativeToolCallParser {
 					}
 					break
 
-				case "search_and_replace":
-					if (args.path !== undefined && args.operations !== undefined && Array.isArray(args.operations)) {
+				case "apply_patch": // kilocode_change: allow partial nativeArgs
+					if (args.patch !== undefined) {
+						nativeArgs = {
+							patch: args.patch,
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "search_replace": // kilocode_change: allow partial nativeArgs
+					if (
+						args.file_path !== undefined ||
+						args.old_string !== undefined ||
+						args.new_string !== undefined
+					) {
+						nativeArgs = {
+							file_path: args.file_path,
+							old_string: args.old_string,
+							new_string: args.new_string,
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "edit_file": // kilocode_change: allow partial nativeArgs
+					if (
+						args.file_path !== undefined ||
+						args.old_string !== undefined ||
+						args.new_string !== undefined
+					) {
+						nativeArgs = {
+							file_path: args.file_path,
+							old_string: args.old_string,
+							new_string: args.new_string,
+							expected_replacements: args.expected_replacements,
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "fast_edit_file": // kilocode_change: allow partial nativeArgs
+					if (
+						args.target_file !== undefined ||
+						args.instructions !== undefined ||
+						args.code_edit !== undefined
+					) {
+						nativeArgs = {
+							target_file: args.target_file,
+							instructions: args.instructions,
+							code_edit: args.code_edit,
+						} as NativeArgsFor<TName>
+					}
+					break
+
+				case "search_and_replace": // kilocode_change: allow partial nativeArgs
+					if (args.path !== undefined || (args.operations !== undefined && Array.isArray(args.operations))) {
 						nativeArgs = {
 							path: args.path,
 							operations: args.operations,
@@ -848,8 +951,8 @@ export class NativeToolCallParser {
 					}
 					break
 
-				case "ask_followup_question":
-					if (args.question !== undefined && args.follow_up !== undefined) {
+				case "ask_followup_question": // kilocode_change: allow partial nativeArgs
+					if (args.question !== undefined || args.follow_up !== undefined) {
 						nativeArgs = {
 							question: args.question,
 							follow_up: args.follow_up,
@@ -887,8 +990,8 @@ export class NativeToolCallParser {
 					}
 					break
 
-				case "generate_image":
-					if (args.prompt !== undefined && args.path !== undefined) {
+				case "generate_image": // kilocode_change: allow partial nativeArgs
+					if (args.prompt !== undefined || args.path !== undefined) {
 						nativeArgs = {
 							prompt: args.prompt,
 							path: args.path,
@@ -906,8 +1009,8 @@ export class NativeToolCallParser {
 					}
 					break
 
-				case "search_files":
-					if (args.path !== undefined && args.regex !== undefined) {
+				case "search_files": // kilocode_change: allow partial nativeArgs
+					if (args.path !== undefined || args.regex !== undefined) {
 						nativeArgs = {
 							path: args.path,
 							regex: args.regex,
@@ -916,8 +1019,8 @@ export class NativeToolCallParser {
 					}
 					break
 
-				case "switch_mode":
-					if (args.mode_slug !== undefined && args.reason !== undefined) {
+				case "switch_mode": // kilocode_change: allow partial nativeArgs
+					if (args.mode_slug !== undefined || args.reason !== undefined) {
 						nativeArgs = {
 							mode_slug: args.mode_slug,
 							reason: args.reason,
@@ -933,8 +1036,8 @@ export class NativeToolCallParser {
 					}
 					break
 
-				case "write_to_file":
-					if (args.path !== undefined && args.content !== undefined) {
+				case "write_to_file": // kilocode_change: allow partial nativeArgs
+					if (args.path !== undefined || args.content !== undefined) {
 						nativeArgs = {
 							path: args.path,
 							content: args.content,
@@ -942,8 +1045,8 @@ export class NativeToolCallParser {
 					}
 					break
 
-				case "use_mcp_tool":
-					if (args.server_name !== undefined && args.tool_name !== undefined) {
+				case "use_mcp_tool": // kilocode_change: allow partial nativeArgs
+					if (args.server_name !== undefined || args.tool_name !== undefined) {
 						nativeArgs = {
 							server_name: args.server_name,
 							tool_name: args.tool_name,
@@ -952,8 +1055,8 @@ export class NativeToolCallParser {
 					}
 					break
 
-				case "access_mcp_resource":
-					if (args.server_name !== undefined && args.uri !== undefined) {
+				case "access_mcp_resource": // kilocode_change: allow partial nativeArgs
+					if (args.server_name !== undefined || args.uri !== undefined) {
 						nativeArgs = {
 							server_name: args.server_name,
 							uri: args.uri,
@@ -961,7 +1064,7 @@ export class NativeToolCallParser {
 					}
 					break
 
-				case "apply_patch":
+				case "apply_patch": // kilocode_change: allow partial nativeArgs
 					if (args.patch !== undefined) {
 						nativeArgs = {
 							patch: args.patch,
@@ -969,10 +1072,10 @@ export class NativeToolCallParser {
 					}
 					break
 
-				case "search_replace":
+				case "search_replace": // kilocode_change: allow partial nativeArgs
 					if (
-						args.file_path !== undefined &&
-						args.old_string !== undefined &&
+						args.file_path !== undefined ||
+						args.old_string !== undefined ||
 						args.new_string !== undefined
 					) {
 						nativeArgs = {
@@ -983,10 +1086,10 @@ export class NativeToolCallParser {
 					}
 					break
 
-				case "edit_file":
+				case "edit_file": // kilocode_change: allow partial nativeArgs
 					if (
-						args.file_path !== undefined &&
-						args.old_string !== undefined &&
+						args.file_path !== undefined ||
+						args.old_string !== undefined ||
 						args.new_string !== undefined
 					) {
 						nativeArgs = {
@@ -999,10 +1102,10 @@ export class NativeToolCallParser {
 					break
 
 				// kilocode_change start: Fast Apply
-				case "fast_edit_file":
+				case "fast_edit_file": // kilocode_change: allow partial nativeArgs
 					if (
-						args.target_file !== undefined &&
-						args.instructions !== undefined &&
+						args.target_file !== undefined ||
+						args.instructions !== undefined ||
 						args.code_edit !== undefined
 					) {
 						nativeArgs = {
@@ -1032,7 +1135,7 @@ export class NativeToolCallParser {
 
 			// Preserve original name for API history when an alias was used
 			if (toolCall.name !== resolvedName) {
-				result.originalName = toolCall.name
+				result.originalName = String(toolCall.name)
 			}
 
 			// kilocode_change start: Preserve extra_content for Gemini 3 thought_signature support

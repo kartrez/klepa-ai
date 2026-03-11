@@ -31,7 +31,7 @@ export class ExecuteCommandTool extends BaseTool<"execute_command"> {
 
 	parseLegacy(params: Partial<Record<string, string>>): ExecuteCommandParams {
 		return {
-			command: params.command || "",
+			command: params.command || params.cmd || params.text || "",
 			cwd: params.cwd,
 		}
 	}

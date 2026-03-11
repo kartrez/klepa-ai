@@ -359,6 +359,128 @@ export class NativeToolCallParser {
 	}
 
 	/**
+	 * Normalizes tool arguments by mapping common aliases to canonical parameter names.
+	 * This helps handle models that may output parameter names like 'text' instead of 'content'.
+	 */
+	private static normalizeArguments(name: ToolName, args: Record<string, any>): Record<string, any> {
+		const normalized = { ...args }
+
+		// Common path aliases
+		if (!normalized.path) {
+			const pathAlias = normalized.file_path || normalized.filePath || normalized.target_file || normalized.rel_path
+			if (pathAlias) {
+				normalized.path = pathAlias
+			}
+		}
+
+		switch (name) {
+			case "write_to_file":
+				if (!normalized.content) {
+					const contentAlias =
+						normalized.text ||
+						normalized.file_content ||
+						normalized.content_to_write ||
+						normalized.code ||
+						normalized.data ||
+						normalized.value
+					if (contentAlias) {
+						normalized.content = contentAlias
+					}
+				}
+				break
+
+			case "read_file":
+				if (!normalized.path) {
+					// Single file path can be passed directly instead of via args XML
+					const pathAlias =
+						normalized.file_path ||
+						normalized.filePath ||
+						normalized.target_file ||
+						normalized.rel_path ||
+						normalized.file
+					if (pathAlias) {
+						normalized.path = pathAlias
+					}
+				}
+				break
+
+			case "apply_diff":
+				if (!normalized.diff) {
+					const diffAlias = normalized.patch || normalized.diff_content || normalized.unified_diff
+					if (diffAlias) {
+						normalized.diff = diffAlias
+					}
+				}
+				break
+
+			case "search_replace":
+				if (!normalized.file_path && normalized.path) {
+					normalized.file_path = normalized.path
+				}
+				break
+
+			case "execute_command":
+				if (!normalized.command) {
+					const commandAlias = normalized.cmd || normalized.text
+					if (commandAlias) {
+						normalized.command = commandAlias
+					}
+				}
+				break
+
+			case "browser_action":
+				if (!normalized.url) {
+					const urlAlias = normalized.link || normalized.address || normalized.href
+					if (urlAlias) {
+						normalized.url = urlAlias
+					}
+				}
+				if (!normalized.coordinate) {
+					const coordAlias = normalized.coords || normalized.location || normalized.position || normalized.point
+					if (coordAlias) {
+						normalized.coordinate = coordAlias
+					}
+				}
+				break
+
+			case "attempt_completion":
+				if (!normalized.result) {
+					const resultAlias =
+						normalized.summary ||
+						normalized.outcome ||
+						normalized.output ||
+						normalized.conclusion ||
+						normalized.text
+					if (resultAlias) {
+						normalized.result = resultAlias
+					}
+				}
+				break
+
+			case "generate_image":
+				if (!normalized.prompt) {
+					const promptAlias = normalized.description || normalized.text || normalized.image_description
+					if (promptAlias) {
+						normalized.prompt = promptAlias
+					}
+				}
+				break
+
+			case "codebase_search":
+				if (!normalized.query) {
+					const queryAlias =
+						normalized.search_term || normalized.searchTerm || normalized.text || normalized.search_query
+					if (queryAlias) {
+						normalized.query = queryAlias
+					}
+				}
+				break
+		}
+
+		return normalized
+	}
+
+	/**
 	 * Create a partial ToolUse from currently parsed arguments.
 	 * Used during streaming to show progress.
 	 * @param originalName - The original tool name as called by the model (if different from canonical name)
@@ -370,12 +492,14 @@ export class NativeToolCallParser {
 		partial: boolean,
 		originalName?: string,
 	): ToolUse | null {
+		const args = this.normalizeArguments(name, partialArgs)
+
 		// Build legacy params for display
 		// NOTE: For streaming partial updates, we MUST populate params even for complex types
 		// because tool.handlePartial() methods rely on params to show UI updates
 		const params: Partial<Record<ToolParamName, string>> = {}
 
-		for (const [key, value] of Object.entries(partialArgs)) {
+		for (const [key, value] of Object.entries(args)) {
 			if (toolParamNames.includes(key as ToolParamName)) {
 				params[key as ToolParamName] = typeof value === "string" ? value : JSON.stringify(value)
 			}
@@ -386,49 +510,49 @@ export class NativeToolCallParser {
 
 		switch (name) {
 			case "read_file":
-				if (partialArgs.files && Array.isArray(partialArgs.files)) {
-					nativeArgs = { files: this.convertFileEntries(partialArgs.files) }
+				if (args.files && Array.isArray(args.files)) {
+					nativeArgs = { files: this.convertFileEntries(args.files) }
 				}
 				break
 
 			case "attempt_completion":
-				if (partialArgs.result) {
-					nativeArgs = { result: partialArgs.result }
+				if (args.result) {
+					nativeArgs = { result: args.result }
 				}
 				break
 
 			case "execute_command":
-				if (partialArgs.command) {
+				if (args.command || args.cwd) {
 					nativeArgs = {
-						command: partialArgs.command,
-						cwd: partialArgs.cwd,
+						command: args.command,
+						cwd: args.cwd,
 					}
 				}
 				break
 
 			case "write_to_file":
-				if (partialArgs.path || partialArgs.content) {
+				if (args.path || args.content) {
 					nativeArgs = {
-						path: partialArgs.path,
-						content: partialArgs.content,
+						path: args.path,
+						content: args.content,
 					}
 				}
 				break
 
 			case "ask_followup_question":
-				if (partialArgs.question !== undefined || partialArgs.follow_up !== undefined) {
+				if (args.question !== undefined || args.follow_up !== undefined) {
 					nativeArgs = {
-						question: partialArgs.question,
-						follow_up: Array.isArray(partialArgs.follow_up) ? partialArgs.follow_up : undefined,
+						question: args.question,
+						follow_up: Array.isArray(args.follow_up) ? args.follow_up : undefined,
 					}
 				}
 				break
 
 			case "apply_diff":
-				if (partialArgs.path !== undefined || partialArgs.diff !== undefined) {
+				if (args.path !== undefined || args.diff !== undefined) {
 					nativeArgs = {
-						path: partialArgs.path,
-						diff: partialArgs.diff,
+						path: args.path,
+						diff: args.diff,
 					}
 				}
 				break
@@ -638,7 +762,8 @@ export class NativeToolCallParser {
 
 		try {
 			// Parse the arguments JSON string
-			const args = toolCall.arguments === "" ? {} : JSON.parse(toolCall.arguments)
+			const rawArgs = toolCall.arguments === "" ? {} : JSON.parse(toolCall.arguments)
+			const args = this.normalizeArguments(resolvedName, rawArgs)
 
 			// Build legacy params object for backward compatibility with XML protocol and UI.
 			// Native execution path uses nativeArgs instead, which has proper typing.
@@ -688,7 +813,7 @@ export class NativeToolCallParser {
 					break
 
 				case "execute_command":
-					if (args.command) {
+					if (args.command || args.cwd) {
 						nativeArgs = {
 							command: args.command,
 							cwd: args.cwd,
@@ -706,7 +831,7 @@ export class NativeToolCallParser {
 				// kilocode_change end
 
 				case "apply_diff":
-					if (args.path !== undefined && args.diff !== undefined) {
+					if (args.path !== undefined || args.diff !== undefined) {
 						nativeArgs = {
 							path: args.path,
 							diff: args.diff,

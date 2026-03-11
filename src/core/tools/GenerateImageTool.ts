@@ -23,7 +23,7 @@ export class GenerateImageTool extends BaseTool<"generate_image"> {
 
 	parseLegacy(params: Partial<Record<string, string>>): GenerateImageParams {
 		return {
-			prompt: params.prompt || "",
+			prompt: params.prompt || params.description || params.text || params.image_description || "",
 			path: params.path || "",
 			image: params.image,
 		}

@@ -29,8 +29,16 @@ export class WriteToFileTool extends BaseTool<"write_to_file"> {
 
 	parseLegacy(params: Partial<Record<string, string>>): WriteToFileParams {
 		return {
-			path: params.path || "",
-			content: params.content || "",
+			path: params.path || params.file_path || params.filePath || params.target_file || params.rel_path || "",
+			content:
+				params.content ||
+				params.text ||
+				params.file_content ||
+				params.content_to_write ||
+				params.code ||
+				params.data ||
+				params.value ||
+				"",
 		}
 	}
 

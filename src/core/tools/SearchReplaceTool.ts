@@ -26,7 +26,7 @@ export class SearchReplaceTool extends BaseTool<"search_replace"> {
 
 	parseLegacy(params: Partial<Record<string, string>>): SearchReplaceParams {
 		return {
-			file_path: params.file_path || "",
+			file_path: params.file_path || params.path || "",
 			old_string: params.old_string || "",
 			new_string: params.new_string || "",
 		}

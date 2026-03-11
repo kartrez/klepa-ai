@@ -51,7 +51,7 @@ export class ReadFileTool extends BaseTool<"read_file"> {
 
 	parseLegacy(params: Partial<Record<string, string>>): { files: FileEntry[] } {
 		const argsXmlTag = params.args
-		const legacyPath = params.path
+		const legacyPath = params.path || params.file_path || params.filePath || params.target_file || params.rel_path || params.file
 		const legacyStartLineStr = params.start_line
 		const legacyEndLineStr = params.end_line
 

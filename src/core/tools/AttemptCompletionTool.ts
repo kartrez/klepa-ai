@@ -67,7 +67,14 @@ export class AttemptCompletionTool extends BaseTool<"attempt_completion"> {
 
 	parseLegacy(params: Partial<Record<string, string>>): AttemptCompletionParams {
 		return {
-			result: params.result || "",
+			result:
+				params.result ||
+				params.summary ||
+				params.outcome ||
+				params.output ||
+				params.conclusion ||
+				params.text ||
+				"",
 			command: params.command,
 		}
 	}

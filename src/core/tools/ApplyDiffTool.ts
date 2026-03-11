@@ -27,8 +27,8 @@ export class ApplyDiffTool extends BaseTool<"apply_diff"> {
 
 	parseLegacy(params: Partial<Record<string, string>>): ApplyDiffParams {
 		return {
-			path: params.path || "",
-			diff: params.diff || "",
+			path: params.path || params.file_path || params.filePath || params.target_file || params.rel_path || "",
+			diff: params.diff || params.patch || params.diff_content || params.unified_diff || "",
 		}
 	}
 

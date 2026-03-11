@@ -22,7 +22,7 @@ export class CodebaseSearchTool extends BaseTool<"codebase_search"> {
 	readonly name = "codebase_search" as const
 
 	parseLegacy(params: Partial<Record<string, string>>): CodebaseSearchParams {
-		let query = params.query
+		let query = params.query || params.search_term || params.searchTerm || params.text || params.search_query
 		let directoryPrefix = params.path
 
 		if (directoryPrefix) {

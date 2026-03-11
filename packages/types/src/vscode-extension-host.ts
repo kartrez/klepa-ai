@@ -136,7 +136,13 @@ export interface LanguageModelChatSelector {
  * Extension -> Webview | CLI
  */
 export interface ExtensionMessage {
+	authenticated?: boolean
 	type:
+		| "oca/status"
+		| "oca/login-success"
+		| "oca/login-error"
+		| "oca/logout-success"
+		| "oca/show-auth-url"
 		| "action"
 		| "state"
 		| "selectedImages"
@@ -712,6 +718,9 @@ export type UpdateGlobalStateMessage<K extends keyof GlobalState = keyof GlobalS
 
 export interface WebviewMessage {
 	type:
+		| "oca/status"
+		| "oca/login"
+		| "oca/logout"
 		| "updateTodoList"
 		| "deleteMultipleTasksWithIds"
 		| "currentApiConfigName"

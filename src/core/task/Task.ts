@@ -4842,21 +4842,21 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 					askResponse = await this.ask(
 						"promotion_model_sign_up_required_prompt",
 						JSON.stringify({
-							modelId: apiConfiguration.kilocodeModel,
+							modelId: apiConfiguration?.kilocodeModel,
 						}),
 					)
 				} else if (isUnauthorizedPaidModelError(error) || isUnauthorizedGenericError(error)) {
 					askResponse = await this.ask(
 						"unauthorized_prompt",
 						JSON.stringify({
-							modelId: apiConfiguration.kilocodeModel,
+							modelId: apiConfiguration?.kilocodeModel,
 						}),
 					)
 				} else {
 					askResponse = await this.ask(
 						"invalid_model",
 						JSON.stringify({
-							modelId: apiConfiguration.kilocodeModel,
+							modelId: apiConfiguration?.kilocodeModel,
 							error: {
 								status: error.status,
 								message: error.message,

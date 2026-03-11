@@ -8,7 +8,7 @@ import { ReplaceAll, Users } from "lucide-react"
 const tips = [
 	{
 		icon: <Users className="size-4 shrink-0 mt-0.5" />,
-		href: buildDocLink("basic-usage/using-modes", "tips"),
+		href: buildDocLink("overview"),
 		titleKey: "rooTips.customizableModes.title",
 		descriptionKey: "rooTips.customizableModes.description",
 	},
@@ -48,7 +48,7 @@ const RooTips = () => {
 						DocsLink: (
 							<VSCodeLink
 								className="text-muted-foreground underline"
-								href={buildDocLink("", "welcome")}
+								href={buildDocLink("")}
 							/>
 						),
 					}}

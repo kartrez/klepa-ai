@@ -783,6 +783,7 @@ export class AgentManagerProvider implements vscode.Disposable {
 		prompt: string,
 		options: {
 			parallelMode?: boolean
+			yoloMode?: boolean
 			label?: string
 			gitUrl?: string
 			existingBranch?: string

@@ -703,6 +703,7 @@ export const providerSettingsSchema = z.object({
 	...ovhcloudSchema.shape,
 	...inceptionSchema.shape,
 	...aihubmixSchema.shape,
+	...apertisSchema.shape,
 	// kilocode_change end
 	...openAiCodexSchema.shape,
 	...openAiNativeSchema.shape,
@@ -735,9 +736,8 @@ export const providerSettingsSchema = z.object({
 	...qwenCodeSchema.shape,
 	...rooSchema.shape,
 	...vercelAiGatewaySchema.shape,
-	...sapAiCoreSchema.shape, // kilocode_change
+	...sapAiCoreSchema.shape,
 	...codebaseIndexProviderSchema.shape,
-	...inceptionSchema.shape,
 })
 
 export type ProviderSettings = z.infer<typeof providerSettingsSchema>

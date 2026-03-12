@@ -209,7 +209,7 @@ export class ReadFileTool extends BaseTool<"read_file"> {
 			}
 
 			if (filesToApprove.length > 1) {
-				const { maxReadFileLine = 1000 /*kilocode_change*/ } = (await task.providerRef.deref()?.getState()) ?? {}
+				const { maxReadFileLine = 1500 /*kilocode_change*/ } = (await task.providerRef.deref()?.getState()) ?? {}
 
 				const batchFiles = filesToApprove.map((fileResult) => {
 					const relPath = fileResult.path
@@ -297,7 +297,7 @@ export class ReadFileTool extends BaseTool<"read_file"> {
 				const relPath = fileResult.path
 				const fullPath = path.resolve(task.cwd, relPath)
 				const isOutsideWorkspace = isPathOutsideWorkspace(fullPath)
-				const { maxReadFileLine = 1000 /*kilocode_change*/ } = (await task.providerRef.deref()?.getState()) ?? {}
+				const { maxReadFileLine = 1500 /*kilocode_change*/ } = (await task.providerRef.deref()?.getState()) ?? {}
 
 				let lineSnippet = ""
 				if (fileResult.lineRanges && fileResult.lineRanges.length > 0) {

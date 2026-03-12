@@ -428,7 +428,7 @@ export const EVALS_SETTINGS: RooCodeSettings = {
 	maxWorkspaceFiles: 200,
 	maxGitStatusFiles: 20,
 	showRooIgnoredFiles: true,
-	maxReadFileLine: 500 /*kilocode_change*/, // -1 to enable full file reading.
+	maxReadFileLine: 1500 /*kilocode_change*/, // -1 to enable full file reading.
 
 	includeDiagnosticMessages: true,
 	maxDiagnosticMessages: 50,

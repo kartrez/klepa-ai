@@ -55,6 +55,7 @@ import { ManagedIndexer } from "./services/code-index/managed/ManagedIndexer" //
 import { flushModels, getModels, initializeModelCacheRefresh, refreshModels } from "./api/providers/fetchers/modelCache"
 import { kilo_initializeSessionManager } from "./shared/kilocode/cli-sessions/extension/session-manager-utils" // kilocode_change
 import { fetchKilocodeNotificationsOnStartup } from "./core/kilocode/webview/webviewMessageHandlerUtils" // kilocode_change
+import { UriEventHandler } from "./core/auth/UriEventHandler" // kilocode_change
 
 // kilocode_change start
 async function findKilocodeTokenFromAnyProfile(provider: ClineProvider): Promise<string | undefined> {
@@ -498,6 +499,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.workspace.registerTextDocumentContentProvider(DIFF_VIEW_URI_SCHEME, diffContentProvider),
 	)
+
+	const uriHandler = new UriEventHandler(context);
+	// Регистрируем обработчик URI
+	context.subscriptions.push(
+		vscode.window.registerUriHandler(uriHandler)
+	);
 
 	context.subscriptions.push(vscode.window.registerUriHandler({ handleUri }))
 

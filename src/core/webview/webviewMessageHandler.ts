@@ -7,6 +7,35 @@ import pWaitFor from "p-wait-for"
 import * as vscode from "vscode"
 // kilocode_change start
 import axios from "axios"
+
+// kilocode_change start - IDE detection for Telegram auth
+/**
+ * Определяет текущую IDE на основе vscode.env.appName
+ */
+function detectIdeType(): string {
+	const appName = vscode.env.appName?.toLowerCase() || ""
+
+	if (appName.includes("cursor")) return "cursor"
+	if (appName.includes("windsurf")) return "windsurf"
+	if (appName.includes("vscodium")) return "vscodium"
+	if (appName.includes("insiders")) return "vscode-insiders"
+	if (appName.includes("visual studio code")) return "vscode"
+	if (appName.includes("jetbrains")) return "jetbrains"
+	if (appName.includes("qoder")) return "qoder"
+
+	// Проверяем для обёрток (Klepa CLI, JetBrains и т.д.)
+	if (appName.includes("wrapper")) {
+		const wrapperMatch = appName.split("|")
+		if (wrapperMatch.length >= 3) {
+			const wrapperCode = wrapperMatch[2]?.trim() || ""
+			if (wrapperCode === "cli") return "kilocode-cli"
+			return "jetbrains"
+		}
+	}
+
+	return "vscode"
+}
+// kilocode_change end
 import {
 	fastApplyApiProviderSchema,
 	isGlobalStateKey
@@ -4665,7 +4694,8 @@ export const webviewMessageHandler = async (
 			break
 		}
 		case "telegramAuthButtonClicked": {
-			const authUrl = 'https://gpt-chat.by/vscode-auth'
+			const ideType = detectIdeType()
+			const authUrl = `https://gpt-chat.by/vscode-auth?ide=${encodeURIComponent(ideType)}`
 			try {
 				await vscode.env.openExternal(vscode.Uri.parse(authUrl))
 				await updateGlobalState("hasCompletedOnboarding", true)

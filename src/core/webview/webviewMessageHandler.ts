@@ -18,10 +18,10 @@ function detectIdeType(): string {
 	if (appName.includes("cursor")) return "cursor"
 	if (appName.includes("windsurf")) return "windsurf"
 	if (appName.includes("vscodium")) return "vscodium"
+	if (appName.includes("qoder")) return "qoder"
 	if (appName.includes("insiders")) return "vscode-insiders"
 	if (appName.includes("visual studio code")) return "vscode"
 	if (appName.includes("jetbrains")) return "jetbrains"
-	if (appName.includes("qoder")) return "qoder"
 
 	// Проверяем для обёрток (Klepa CLI, JetBrains и т.д.)
 	if (appName.includes("wrapper")) {

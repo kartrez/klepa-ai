@@ -33,7 +33,7 @@ function detectIdeType(): string {
 		}
 	}
 
-	return "vscode"
+	return ""
 }
 // kilocode_change end
 import {

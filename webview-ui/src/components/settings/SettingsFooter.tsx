@@ -11,6 +11,7 @@ type SettingsFooterProps = HTMLAttributes<HTMLDivElement> & {
 
 export const SettingsFooter = ({ version, className, ...props }: SettingsFooterProps) => (
 	<div className={cn("text-vscode-descriptionForeground p-5", className)} {...props}>
+		<p className="italic">IDE: {vscode.env.appName}</p>
 		<p className="italic">Klepa AI v{version}</p>
 		<div className="flex justify-between items-center gap-3">
 			<p>Reset all global state and secret storage in the extension.</p>

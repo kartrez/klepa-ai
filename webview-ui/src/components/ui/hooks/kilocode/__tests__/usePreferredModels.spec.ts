@@ -46,6 +46,19 @@ describe("getGroupedModelIds", () => {
 		expect(result.restModelIds).toEqual(["model-b", "model-d"])
 	})
 
+	it("treats recommended models as preferred", () => {
+		const models: Record<string, ModelInfo> = {
+			"model-a": createModelInfo({ recommended: true }),
+			"model-b": createModelInfo(),
+			"model-c": createModelInfo({ recommended: true }),
+		}
+
+		const result = getGroupedModelIds(models)
+
+		expect(result.preferredModelIds).toEqual(["model-a", "model-c"])
+		expect(result.restModelIds).toEqual(["model-b"])
+	})
+
 	it("sorts preferred models by preferredIndex", () => {
 		const models: Record<string, ModelInfo> = {
 			"model-z": createModelInfo({ preferredIndex: 2 }),
@@ -98,7 +111,7 @@ describe("getGroupedModelIds", () => {
 describe("useGroupedModelIds", () => {
 	it("returns grouped model IDs", () => {
 		const models: Record<string, ModelInfo> = {
-			"pref-model": createModelInfo({ preferredIndex: 0 }),
+			"pref-model": createModelInfo({ recommended: true }),
 			"rest-model": createModelInfo(),
 		}
 

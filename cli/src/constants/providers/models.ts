@@ -100,6 +100,7 @@ export interface ModelInfo {
 	cachableFields?: string[]
 	displayName?: string | null
 	preferredIndex?: number | null
+	recommended?: boolean
 	deprecated?: boolean
 	isFree?: boolean
 	supportsNativeTools?: boolean
@@ -520,7 +521,7 @@ export function sortModelsByPreference(models: ModelRecord): string[] {
 
 	// First add the preferred models
 	for (const [key, model] of Object.entries(models)) {
-		if (Number.isInteger(model.preferredIndex)) {
+		if (model.recommended === true || Number.isInteger(model.preferredIndex)) {
 			preferredModelIds.push(key)
 		}
 	}
@@ -530,7 +531,10 @@ export function sortModelsByPreference(models: ModelRecord): string[] {
 		const modelA = models[a]
 		const modelB = models[b]
 		if (!modelA || !modelB) return 0
-		return (modelA.preferredIndex ?? 0) - (modelB.preferredIndex ?? 0)
+		const aIdx = Number.isInteger(modelA.preferredIndex) ? (modelA.preferredIndex ?? 0) : Number.POSITIVE_INFINITY
+		const bIdx = Number.isInteger(modelB.preferredIndex) ? (modelB.preferredIndex ?? 0) : Number.POSITIVE_INFINITY
+		if (aIdx !== bIdx) return aIdx - bIdx
+		return a.localeCompare(b)
 	})
 
 	// Then add the rest

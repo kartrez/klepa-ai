@@ -17,6 +17,7 @@ import {
 	CommandInput,
 	CommandItem,
 	CommandList,
+	CommandSeparator,
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
@@ -220,7 +221,7 @@ export const ModelPicker = ({
 												data-testid={`model-option-${model}`}
 												className="font-semibold">
 												<span className="truncate" title={model}>
-													{model}
+													★ {model}
 												</span>
 												<Check
 													className={cn(
@@ -232,6 +233,7 @@ export const ModelPicker = ({
 										))}
 									</CommandGroup>
 								)}
+								{preferredModelIds.length > 0 && restModelIds.length > 0 && <CommandSeparator />}
 								{restModelIds.length > 0 && (
 									<CommandGroup heading={t("settings:modelPicker.allModels")}>
 										{restModelIds.map((model) => (

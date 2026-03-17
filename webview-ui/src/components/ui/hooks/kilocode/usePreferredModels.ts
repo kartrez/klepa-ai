@@ -18,7 +18,7 @@ export const getGroupedModelIds = (models: Record<string, ModelInfo> | null): Gr
 
 	// First add the preferred models
 	for (const [key, model] of Object.entries(models)) {
-		if (Number.isInteger(model.preferredIndex)) {
+		if (model.recommended === true || Number.isInteger(model.preferredIndex)) {
 			preferredModelIds.push(key)
 		}
 	}
@@ -26,7 +26,10 @@ export const getGroupedModelIds = (models: Record<string, ModelInfo> | null): Gr
 	preferredModelIds.sort((a, b) => {
 		const modelA = models[a]
 		const modelB = models[b]
-		return (modelA.preferredIndex ?? 0) - (modelB.preferredIndex ?? 0)
+		const aIdx = Number.isInteger(modelA.preferredIndex) ? (modelA.preferredIndex ?? 0) : Number.POSITIVE_INFINITY
+		const bIdx = Number.isInteger(modelB.preferredIndex) ? (modelB.preferredIndex ?? 0) : Number.POSITIVE_INFINITY
+		if (aIdx !== bIdx) return aIdx - bIdx
+		return a.localeCompare(b)
 	})
 
 	// Then add the rest

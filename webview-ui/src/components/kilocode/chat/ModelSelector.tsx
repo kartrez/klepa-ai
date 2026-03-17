@@ -57,7 +57,7 @@ export const ModelSelector = ({
 			preferredModelIds.forEach((modelId) => {
 				result.push({
 					value: modelId,
-					label: providerModels[modelId]?.displayName ?? prettyModelName(modelId),
+					label: `★ ${providerModels[modelId]?.displayName ?? prettyModelName(modelId)}`,
 					type: DropdownOptionType.ITEM,
 				})
 			})
@@ -65,6 +65,13 @@ export const ModelSelector = ({
 
 		// Add "All models" section
 		if (restModelIds.length > 0) {
+			if (preferredModelIds.length > 0) {
+				result.push({
+					value: "__sep__",
+					label: "—",
+					type: DropdownOptionType.SEPARATOR,
+				})
+			}
 			result.push({
 				value: "__label_all__",
 				label: t("settings:modelPicker.allModels"),

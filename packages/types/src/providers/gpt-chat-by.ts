@@ -12,10 +12,10 @@ export const gptChatByModels = {
 		contextWindow: 150_000,
 		supportsImages: false,
 		supportsPromptCache: true,
-		supportsNativeTools: false,
+		supportsNativeTools: true,
 		inputPrice: 0,
 		outputPrice: 0,
-		description: `Mimo v2 Flash.`,
+		description: `GPT Chat BY Free model`,
 		isFree: true,
 	},
 	"openai/gpt-oss-120b": {

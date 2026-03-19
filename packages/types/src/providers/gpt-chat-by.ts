@@ -29,19 +29,17 @@ export const gptChatByModels = {
 		cacheWritesPrice: 0,
 		cacheReadsPrice: 0,
 		description: "Extremely capable general-purpose LLM with strong, controllable reasoning capabilities",
-		recommended: true,
 	},
 	"qwen/coder-480B": {
 		maxTokens: 32768,
 		contextWindow: 262144,
 		supportsImages: false,
-		supportsPromptCache: true,
+		supportsPromptCache: false,
 		supportsNativeTools: true,
 		defaultToolProtocol: "native",
 		inputPrice: 0.22 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		outputPrice: GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `Qwen Coder - High-performance coding model with 1M context window for large codebases.`,
-		recommended: true,
 	},
 	"qwen/plus-3.5": {
 		maxTokens: 65_000,
@@ -89,6 +87,7 @@ export const gptChatByModels = {
 		inputPrice: 0.25 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		outputPrice: 1.5 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `Gemini 3.1 Flash Lite Preview.`,
+		recommended: true,
 	},
 	"google/gemini-3-pro": {
 		maxTokens: 65_536,
@@ -198,6 +197,7 @@ export const gptChatByModels = {
 		inputPrice: 0.4 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		outputPrice: 2 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `Xiaomi mimi-v2-omni`,
+		recommended: true,
 	},
 	"mimo/v2-pro": {
 		maxTokens: 130_000,

@@ -17,13 +17,14 @@ export async function browserActionTool(
 	removeClosingTag: RemoveClosingTag,
 ) {
 	const action: BrowserAction | undefined = block.params.action as BrowserAction
-	const url: string | undefined = block.params.url || block.params.link || block.params.address || block.params.href
+	const params = block.params as Record<string, string | undefined>
+	const url: string | undefined = params.url || params.link || params.address || params.href
 	const coordinate: string | undefined =
-		block.params.coordinate ||
-		block.params.coords ||
-		block.params.location ||
-		block.params.position ||
-		block.params.point
+		params.coordinate ||
+		params.coords ||
+		params.location ||
+		params.position ||
+		params.point
 	const text: string | undefined = block.params.text
 	const size: string | undefined = block.params.size
 	const filePath: string | undefined = block.params.path

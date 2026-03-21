@@ -93,6 +93,7 @@ const App = () => {
 		renderContext,
 		mdmCompliant,
 		apiConfiguration, // kilocode_change
+		showWelcome,
 		hasCompletedOnboarding, // kilocode_change: Track onboarding state
 		taskHistoryFullLength, // kilocode_change: Used to detect existing users
 	} = useExtensionState()
@@ -348,17 +349,13 @@ const App = () => {
 		return null
 	}
 
-	// kilocode_change start: Show OnboardingView for new users who haven't completed onboarding
-	const showOnboarding = hasCompletedOnboarding !== true
+	// Show auth onboarding when settings are empty or token is missing
+	const showOnboarding = showWelcome || !apiConfiguration?.gptChatByApiKey?.trim()
 
 	// Do not conditionally load ChatView, it's expensive and there's state we
 	// don't want to lose (user input, disableInput, askResponse promise, etc.)
 	return showOnboarding ? (
-		<OnboardingView
-			onSelectFreeModels={handleSelectFreeModels}
-			onSelectPremiumModels={handleSelectPremiumModels}
-			onSelectBYOK={handleByAuth}
-		/>
+		<OnboardingView />
 	) : (
 		// kilocode_change end
 		<>

@@ -3,116 +3,87 @@
 
 import { render, screen, fireEvent } from "@/utils/test-utils"
 import OnboardingView from "../OnboardingView"
+import { vscode } from "@/utils/vscode"
 
 // Mock Logo component
 vi.mock("../../common/Logo", () => ({
 	default: () => <div data-testid="kilo-logo">Kilo Logo</div>,
 }))
 
-describe("OnboardingView", () => {
-	const mockOnSelectFreeModels = vi.fn()
-	const mockOnSelectPremiumModels = vi.fn()
-	const mockOnSelectBYOK = vi.fn()
+vi.mock("@/utils/vscode", () => ({
+	vscode: {
+		postMessage: vi.fn(),
+	},
+}))
 
+const mockSetApiConfiguration = vi.fn()
+
+vi.mock("@/context/ExtensionStateContext", () => ({
+	useExtensionState: () => ({
+		apiConfiguration: {},
+		currentApiConfigName: "default",
+		setApiConfiguration: mockSetApiConfiguration,
+	}),
+}))
+
+describe("OnboardingView", () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
 	})
 
 	it("renders the Kilo logo", () => {
-		render(
-			<OnboardingView
-				onSelectFreeModels={mockOnSelectFreeModels}
-				onSelectPremiumModels={mockOnSelectPremiumModels}
-				onSelectBYOK={mockOnSelectBYOK}
-			/>,
-		)
+		render(<OnboardingView />)
 
 		expect(screen.getByTestId("kilo-logo")).toBeInTheDocument()
 	})
 
-	it("renders the title", () => {
-		render(
-			<OnboardingView
-				onSelectFreeModels={mockOnSelectFreeModels}
-				onSelectPremiumModels={mockOnSelectPremiumModels}
-				onSelectBYOK={mockOnSelectBYOK}
-			/>,
-		)
+	it("renders the title and auth actions", () => {
+		render(<OnboardingView />)
 
 		// The translation key is returned as-is by the test-utils mock
 		expect(screen.getByText("kilocode:onboarding.title")).toBeInTheDocument()
+		expect(screen.getByText("Войти по токену")).toBeInTheDocument()
+		expect(screen.getByText("Получить токен")).toBeInTheDocument()
 	})
 
-	it("renders all three options", () => {
-		render(
-			<OnboardingView
-				onSelectFreeModels={mockOnSelectFreeModels}
-				onSelectPremiumModels={mockOnSelectPremiumModels}
-				onSelectBYOK={mockOnSelectBYOK}
-			/>,
-		)
+	it("sends telegram auth message when telegram option is clicked", () => {
+		const mockPostMessage = vi.mocked(vscode.postMessage)
+		render(<OnboardingView />)
 
-		expect(screen.getByText("kilocode:onboarding.freeModels.title")).toBeInTheDocument()
-		expect(screen.getByText("kilocode:onboarding.freeModels.description")).toBeInTheDocument()
+		const telegramButton = screen.getByText("kilocode:settings.provider.loginTelegram").closest("button")
+		expect(telegramButton).toBeInTheDocument()
+		fireEvent.click(telegramButton!)
 
-		expect(screen.getByText("kilocode:onboarding.premiumModels.title")).toBeInTheDocument()
-		expect(screen.getByText("kilocode:onboarding.premiumModels.description")).toBeInTheDocument()
-
-		expect(screen.getByText("kilocode:onboarding.byok.title")).toBeInTheDocument()
-		expect(screen.getByText("kilocode:onboarding.byok.description")).toBeInTheDocument()
+		expect(mockPostMessage).toHaveBeenCalledWith({ type: "telegramAuthButtonClicked" })
 	})
 
-	it("calls onSelectFreeModels when Free models option is clicked", () => {
-		render(
-			<OnboardingView
-				onSelectFreeModels={mockOnSelectFreeModels}
-				onSelectPremiumModels={mockOnSelectPremiumModels}
-				onSelectBYOK={mockOnSelectBYOK}
-			/>,
-		)
+	it("shows validation error when token login is submitted without token", () => {
+		render(<OnboardingView />)
 
-		const freeModelsButton = screen.getByText("kilocode:onboarding.freeModels.title").closest("button")
-		expect(freeModelsButton).toBeInTheDocument()
-		fireEvent.click(freeModelsButton!)
-
-		expect(mockOnSelectFreeModels).toHaveBeenCalledTimes(1)
-		expect(mockOnSelectPremiumModels).not.toHaveBeenCalled()
-		expect(mockOnSelectBYOK).not.toHaveBeenCalled()
+		fireEvent.click(screen.getByText("Войти по токену"))
+		expect(screen.getByText("settings:validation.apiKey")).toBeInTheDocument()
 	})
 
-	it("calls onSelectPremiumModels when Premium models option is clicked", () => {
-		render(
-			<OnboardingView
-				onSelectFreeModels={mockOnSelectFreeModels}
-				onSelectPremiumModels={mockOnSelectPremiumModels}
-				onSelectBYOK={mockOnSelectBYOK}
-			/>,
-		)
+	it("saves token and posts upsert message when token is provided", () => {
+		const mockPostMessage = vi.mocked(vscode.postMessage)
+		render(<OnboardingView />)
 
-		const premiumModelsButton = screen.getByText("kilocode:onboarding.premiumModels.title").closest("button")
-		expect(premiumModelsButton).toBeInTheDocument()
-		fireEvent.click(premiumModelsButton!)
+		fireEvent.input(screen.getByPlaceholderText("settings:placeholders.apiKey"), {
+			target: { value: "test-token" },
+		})
+		fireEvent.click(screen.getByText("Войти по токену"))
 
-		expect(mockOnSelectPremiumModels).toHaveBeenCalledTimes(1)
-		expect(mockOnSelectFreeModels).not.toHaveBeenCalled()
-		expect(mockOnSelectBYOK).not.toHaveBeenCalled()
-	})
-
-	it("calls onSelectBYOK when BYOK option is clicked", () => {
-		render(
-			<OnboardingView
-				onSelectFreeModels={mockOnSelectFreeModels}
-				onSelectPremiumModels={mockOnSelectPremiumModels}
-				onSelectBYOK={mockOnSelectBYOK}
-			/>,
-		)
-
-		const byokButton = screen.getByText("kilocode:onboarding.byok.title").closest("button")
-		expect(byokButton).toBeInTheDocument()
-		fireEvent.click(byokButton!)
-
-		expect(mockOnSelectBYOK).toHaveBeenCalledTimes(1)
-		expect(mockOnSelectFreeModels).not.toHaveBeenCalled()
-		expect(mockOnSelectPremiumModels).not.toHaveBeenCalled()
+		expect(mockSetApiConfiguration).toHaveBeenCalledWith({
+			apiProvider: "gpt-chat-by",
+			gptChatByApiKey: "test-token",
+		})
+		expect(mockPostMessage).toHaveBeenCalledWith({
+			type: "upsertApiConfiguration",
+			text: "default",
+			apiConfiguration: {
+				apiProvider: "gpt-chat-by",
+				gptChatByApiKey: "test-token",
+			},
+		})
 	})
 })

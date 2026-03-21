@@ -3919,10 +3919,10 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 						this.consecutiveNoToolUseCount++
 
 						// Only show error and count toward mistake limit after 2 consecutive failures
-						if (this.consecutiveNoToolUseCount > 1 && this.apiConfiguration?.apiModelId !== "memo/free") {
+						if (this.consecutiveNoToolUseCount > 3) {
 							// await this.say("error", "MODEL_NO_TOOLS_USED")
 							// Only count toward mistake limit after second consecutive failure
-							if (!wasModelTemporarilyChanged) {
+							if (!wasModelTemporarilyChanged  && this.apiConfiguration?.apiModelId !== "memo/free") {
 								if (!originalApiConfig) {
 									originalApiConfig = { ...this.apiConfiguration }
 								}

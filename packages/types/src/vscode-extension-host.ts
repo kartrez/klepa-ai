@@ -1128,6 +1128,7 @@ export type UserOrganizationWithApiKey = {
 }
 
 export type ProfileData = {
+	token: string
 	telegram: {
 		id: string
 		firstname: string

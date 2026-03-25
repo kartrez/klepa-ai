@@ -197,7 +197,6 @@ export const gptChatByModels = {
 		inputPrice: 0.4 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		outputPrice: 2 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `Xiaomi mimi-v2-omni`,
-		recommended: true,
 	},
 	"mimo/v2-pro": {
 		maxTokens: 130_000,

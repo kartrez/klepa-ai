@@ -103,7 +103,9 @@ export async function buildNativeToolsArrayWithRestrictions(options: BuildToolsO
 	} = options
 
 	// kilocode_change start: no-mode should have no tools to minimize token consumption
-	if (mode === "no-mode") {
+	// NOTE: `mode` may be undefined in some flows (fallback), so use effective mode slug.
+	const effectiveModeSlug = mode ?? defaultModeSlug
+	if (effectiveModeSlug === "no-mode") {
 		return {
 			tools: [],
 			allowedFunctionNames: [],

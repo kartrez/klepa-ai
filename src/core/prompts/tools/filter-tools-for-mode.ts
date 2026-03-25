@@ -241,13 +241,16 @@ export function filterNativeToolsForMode(
 	mcpHub?: McpHub,
 ): OpenAI.Chat.ChatCompletionTool[] {
 	// kilocode_change start: no-mode should have no tools to minimize token consumption
-	if (mode === "no-mode") {
+	// IMPORTANT: `mode` can be undefined (fallback), but `no-mode` should be determined
+	// by effective mode slug, not by raw input.
+	const effectiveModeSlug = mode ?? defaultModeSlug
+	if (effectiveModeSlug === "no-mode") {
 		return []
 	}
 	// kilocode_change end
 
 	// Get mode configuration and all tools for this mode
-	const modeSlug = mode ?? defaultModeSlug
+	const modeSlug = effectiveModeSlug
 	let modeConfig = getModeBySlug(modeSlug, customModes)
 
 	// Fallback to default mode if current mode config is not found

@@ -98,10 +98,10 @@ export class NativeToolCallParser {
 
 		let tracked = this.rawChunkTracker.get(index)
 
-		// Initialize new tool call tracking when we receive an id or if we have a name/args for a new index
-		if (!tracked && (id || name || args != null)) {
+		// Initialize new tool call tracking when we receive an id
+		if (id && !tracked) {
 			tracked = {
-				id: id || `call_${index}_${Date.now()}`,
+				id,
 				name: name || "",
 				hasStarted: false,
 				deltaBuffer: [],
@@ -111,14 +111,7 @@ export class NativeToolCallParser {
 		}
 
 		if (!tracked) {
-			// If we don't have a tracked tool call for this index and no ID was provided,
-			// we can't do anything with this chunk.
 			return events
-		}
-
-		// Update id if present in chunk and was previously auto-generated
-		if (id && tracked.id.startsWith("call_")) {
-			tracked.id = id
 		}
 
 		// Update name if present in chunk and not yet set
@@ -154,8 +147,7 @@ export class NativeToolCallParser {
 		}
 
 		// Emit delta event for argument chunks
-		// Use != null to catch empty strings which are valid deltas
-		if (args != null) {
+		if (args) {
 			if (tracked.hasStarted) {
 				events.push({
 					type: "tool_call_delta",

@@ -241,10 +241,6 @@ describe("NativeToolCallParser", () => {
 
 	// kilocode_change start
 	describe("processRawChunk", () => {
-		beforeEach(() => {
-			NativeToolCallParser.clearRawChunkState()
-		})
-
 		it("should coerce numeric tool call id to string", () => {
 			const events = NativeToolCallParser.processRawChunk({
 				index: 0,
@@ -262,56 +258,15 @@ describe("NativeToolCallParser", () => {
 			expect(typeof events[0].id).toBe("string")
 		})
 
-		it("should generate temporary id if id is undefined", () => {
+		it("should leave undefined id as undefined", () => {
 			const events = NativeToolCallParser.processRawChunk({
 				index: 0,
 				id: undefined,
 				name: "read_file",
 			})
 
-			expect(events).toHaveLength(1)
-			expect(events[0].type).toBe("tool_call_start")
-			expect(events[0].id).toMatch(/^call_0_\d+$/)
-			expect(events[0].name).toBe("read_file")
-		})
-
-		it("should update temporary id when real id arrives", () => {
-			// First chunk with no id
-			NativeToolCallParser.processRawChunk({
-				index: 0,
-				id: undefined,
-				name: "read_file",
-			})
-
-			// Second chunk with real id
-			const events = NativeToolCallParser.processRawChunk({
-				index: 0,
-				id: "call_real_123",
-			})
-
-			// Should not emit start again, but we can't easily check internal state here
-			// without more complex test setup. But we can check if it doesn't crash.
+			// No id means no tracking is initialized, so no events emitted
 			expect(events).toHaveLength(0)
-		})
-
-		it("should handle empty string arguments", () => {
-			NativeToolCallParser.processRawChunk({
-				index: 0,
-				id: "call_1",
-				name: "read_file",
-			})
-
-			const events = NativeToolCallParser.processRawChunk({
-				index: 0,
-				arguments: "",
-			})
-
-			expect(events).toHaveLength(1)
-			expect(events[0]).toMatchObject({
-				type: "tool_call_delta",
-				id: "call_1",
-				delta: "",
-			})
 		})
 
 		it("should pass through string id unchanged", () => {

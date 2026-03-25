@@ -193,7 +193,7 @@ export const gptChatByModels = {
 		contextWindow: 260_000,
 		supportsImages: true,
 		supportsPromptCache: true,
-		supportsNativeTools: false,
+		supportsNativeTools: true,
 		inputPrice: 0.4 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		outputPrice: 2 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `Xiaomi mimi-v2-omni`,

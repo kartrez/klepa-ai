@@ -3983,7 +3983,18 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				} else {
 					// If there's no assistant_responses, that means we got no text
 					// or tool_use content blocks from API which we should assume is
-					// an error.
+					// an error, unless the model returned tool_calls in a native/tool-compatible
+					// assistant response without text content.
+					const hasToolCalls = Boolean(
+						currentAssistantResponse?.tool_calls?.length ||
+						currentAssistantResponse?.content?.some((block: any) => block?.type === "tool_use"),
+					)
+
+					if (hasToolCalls) {
+						// Treat tool-call-only assistant responses as valid assistant messages.
+						this.consecutiveNoAssistantMessagesCount = 0
+						continue
+					}
 
 					// kilocode_change start
 					TelemetryService.instance.captureEvent(TelemetryEventName.NO_ASSISTANT_MESSAGES)

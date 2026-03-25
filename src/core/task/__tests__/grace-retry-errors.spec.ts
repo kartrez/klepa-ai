@@ -11,6 +11,13 @@ import { Task } from "../Task"
 import { ClineProvider } from "../../webview/ClineProvider"
 import { ContextProxy } from "../../config/ContextProxy"
 
+const isToolCallOnlyAssistantResponse = (assistantResponse: any) => {
+	return Boolean(
+		assistantResponse?.tool_calls?.length ||
+		assistantResponse?.content?.some((block: any) => block?.type === "tool_use"),
+	)
+}
+
 // Mock @roo-code/core
 vi.mock("@roo-code/core", () => ({
 	customToolRegistry: {
@@ -402,6 +409,35 @@ describe("Grace Retry Error Handling", () => {
 			}
 
 			expect(task.consecutiveNoAssistantMessagesCount).toBe(0)
+		})
+
+		it("should treat tool_call-only assistant responses as valid", () => {
+			const assistantResponse = {
+				role: "assistant",
+				content: null,
+				tool_calls: [
+					{
+						id: "call_123",
+						type: "function",
+						function: {
+							name: "list_files",
+							arguments: "{}",
+						},
+					},
+				],
+			}
+
+			expect(isToolCallOnlyAssistantResponse(assistantResponse)).toBe(true)
+		})
+
+		it("should not treat empty assistant responses as valid", () => {
+			const assistantResponse = {
+				role: "assistant",
+				content: null,
+				tool_calls: [],
+			}
+
+			expect(isToolCallOnlyAssistantResponse(assistantResponse)).toBe(false)
 		})
 	})
 

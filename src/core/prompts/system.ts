@@ -76,6 +76,10 @@ async function generatePrompt(
 	skillsManager?: SkillsManager,
 	clineProviderState?: ClineProviderState, // kilocode_change
 ): Promise<string> {
+	if (mode === "no-mode") {
+		return ""
+	}
+
 	if (!context) {
 		throw new Error("Extension context is required for generating system prompt")
 	}

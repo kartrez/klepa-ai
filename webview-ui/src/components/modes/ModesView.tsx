@@ -708,22 +708,6 @@ const ModesView = ({ hideHeader = false }: { hideHeader?: boolean }) => {
 						</div>
 					</div>
 
-					<div className="text-sm text-vscode-descriptionForeground mb-6">
-						{/* kilocode_change - add KiloShareModesBanner */}
-						<KiloShareModesBanner />
-
-						<Trans i18nKey="prompts:modes.createModeHelpText">
-							<VSCodeLink
-								href={buildDocLink("overview")}
-								style={{ display: "inline" }}
-								aria-label="Learn about using modes"></VSCodeLink>
-							<VSCodeLink
-								href={buildDocLink("overview")}
-								style={{ display: "inline" }}
-								aria-label="Learn about customizing modes"></VSCodeLink>
-						</Trans>
-					</div>
-
 					<div className="flex items-center gap-1 mb-3">
 						{isRenamingMode ? (
 							<>

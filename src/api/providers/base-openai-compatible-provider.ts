@@ -143,66 +143,78 @@ export abstract class BaseOpenAiCompatibleProvider<ModelName extends string>
 
 		let lastUsage: OpenAI.CompletionUsage | undefined
 		const activeToolCallIds = new Set<string>()
+		let streamFinishedNormally = false
 
-		for await (const chunk of stream) {
-			verifyFinishReason(chunk.choices?.[0]) // kilocode_change
+		try {
+			for await (const chunk of stream) {
+				verifyFinishReason(chunk.choices?.[0]) // kilocode_change
 
-			// Check for provider-specific error responses (e.g., MiniMax base_resp)
-			const chunkAny = chunk as any
-			if (chunkAny.base_resp?.status_code && chunkAny.base_resp.status_code !== 0) {
-				throw new Error(
-					`${this.providerName} API Error (${chunkAny.base_resp.status_code}): ${chunkAny.base_resp.status_msg || "Unknown error"}`,
-				)
-			}
-
-			const delta = chunk.choices?.[0]?.delta
-			const finishReason = chunk.choices?.[0]?.finish_reason
-
-			if (delta?.content) {
-				for (const processedChunk of matcher.update(delta.content)) {
-					yield processedChunk
+				// Check for provider-specific error responses (e.g., MiniMax base_resp)
+				const chunkAny = chunk as any
+				if (chunkAny.base_resp?.status_code && chunkAny.base_resp.status_code !== 0) {
+					throw new Error(
+						`${this.providerName} API Error (${chunkAny.base_resp.status_code}): ${chunkAny.base_resp.status_msg || "Unknown error"}`,
+					)
 				}
-			}
 
-			if (delta) {
-				for (const key of ["reasoning_content", "reasoning"] as const) {
-					if (key in delta) {
-						const reasoning_content = ((delta as any)[key] as string | undefined) || ""
-						if (reasoning_content?.trim()) {
-							yield { type: "reasoning", text: reasoning_content }
+				const delta = chunk.choices?.[0]?.delta
+				const finishReason = chunk.choices?.[0]?.finish_reason
+
+				if (delta?.content) {
+					for (const processedChunk of matcher.update(delta.content)) {
+						yield processedChunk
+					}
+				}
+
+				if (delta) {
+					for (const key of ["reasoning_content", "reasoning"] as const) {
+						if (key in delta) {
+							const reasoning_content = ((delta as any)[key] as string | undefined) || ""
+							if (reasoning_content?.trim()) {
+								yield { type: "reasoning", text: reasoning_content }
+							}
+							break
 						}
-						break
 					}
+				}
+
+				// Emit raw tool call chunks - NativeToolCallParser handles state management
+				if (delta?.tool_calls) {
+					for (const toolCall of delta.tool_calls) {
+						if (toolCall.id) {
+							activeToolCallIds.add(toolCall.id)
+						}
+						yield {
+							type: "tool_call_partial",
+							index: toolCall.index,
+							id: toolCall.id,
+							name: toolCall.function?.name,
+							arguments: toolCall.function?.arguments,
+						}
+					}
+				}
+
+				// Emit tool_call_end events when finish_reason is "tool_calls"
+				// This ensures tool calls are finalized even if the stream doesn't properly close
+				if (finishReason === "tool_calls" && activeToolCallIds.size > 0) {
+					for (const id of activeToolCallIds) {
+						yield { type: "tool_call_end", id }
+					}
+					activeToolCallIds.clear()
+				}
+
+				if (chunk.usage) {
+					lastUsage = chunk.usage
 				}
 			}
 
-			// Emit raw tool call chunks - NativeToolCallParser handles state management
-			if (delta?.tool_calls) {
-				for (const toolCall of delta.tool_calls) {
-					if (toolCall.id) {
-						activeToolCallIds.add(toolCall.id)
-					}
-					yield {
-						type: "tool_call_partial",
-						index: toolCall.index,
-						id: toolCall.id,
-						name: toolCall.function?.name,
-						arguments: toolCall.function?.arguments,
-					}
-				}
-			}
-
-			// Emit tool_call_end events when finish_reason is "tool_calls"
-			// This ensures tool calls are finalized even if the stream doesn't properly close
-			if (finishReason === "tool_calls" && activeToolCallIds.size > 0) {
+			streamFinishedNormally = true
+		} finally {
+			if (!streamFinishedNormally && activeToolCallIds.size > 0) {
 				for (const id of activeToolCallIds) {
 					yield { type: "tool_call_end", id }
 				}
 				activeToolCallIds.clear()
-			}
-
-			if (chunk.usage) {
-				lastUsage = chunk.usage
 			}
 		}
 

@@ -221,7 +221,7 @@ describe("OpenAiHandler", () => {
 		})
 
 		it("should handle tool calls in streaming responses", async () => {
-			mockCreate.mockImplementation(async (options) => {
+			mockCreate.mockImplementation(async () => {
 				return {
 					[Symbol.asyncIterator]: async function* () {
 						yield {
@@ -270,10 +270,8 @@ describe("OpenAiHandler", () => {
 				chunks.push(chunk)
 			}
 
-			// Provider now yields tool_call_partial chunks, NativeToolCallParser handles reassembly
 			const toolCallPartialChunks = chunks.filter((chunk) => chunk.type === "tool_call_partial")
 			expect(toolCallPartialChunks).toHaveLength(3)
-			// First chunk has id and name
 			expect(toolCallPartialChunks[0]).toEqual({
 				type: "tool_call_partial",
 				index: 0,
@@ -281,7 +279,6 @@ describe("OpenAiHandler", () => {
 				name: "test_tool",
 				arguments: "",
 			})
-			// Subsequent chunks have arguments
 			expect(toolCallPartialChunks[1]).toEqual({
 				type: "tool_call_partial",
 				index: 0,
@@ -297,9 +294,53 @@ describe("OpenAiHandler", () => {
 				arguments: '"value"}',
 			})
 
-			// Verify tool_call_end event is emitted when finish_reason is "tool_calls"
 			const toolCallEndChunks = chunks.filter((chunk) => chunk.type === "tool_call_end")
 			expect(toolCallEndChunks).toHaveLength(1)
+		})
+
+		it("should finalize active tool calls on stream completion when finish_reason is missing", async () => {
+			mockCreate.mockImplementation(async () => {
+				return {
+					[Symbol.asyncIterator]: async function* () {
+						yield {
+							choices: [
+								{
+									delta: {
+										tool_calls: [
+											{
+												index: 0,
+												id: "call_fallback",
+												function: { name: "fallback_tool", arguments: '{"test":' },
+											},
+										],
+									},
+									finish_reason: null,
+								},
+							],
+						}
+						yield {
+							choices: [
+								{
+									delta: {
+										tool_calls: [{ index: 0, function: { arguments: '"fallback"}' } }],
+									},
+									finish_reason: null,
+								},
+							],
+						}
+					},
+				}
+			})
+
+			const stream = handler.createMessage(systemPrompt, messages)
+			const chunks: any[] = []
+			for await (const chunk of stream) {
+				chunks.push(chunk)
+			}
+
+			const toolCallEndChunks = chunks.filter((chunk) => chunk.type === "tool_call_end")
+			expect(toolCallEndChunks).toHaveLength(1)
+			expect(toolCallEndChunks[0]).toEqual({ type: "tool_call_end", id: "call_fallback" })
 		})
 
 		it("should yield tool calls even when finish_reason is not set (fallback behavior)", async () => {

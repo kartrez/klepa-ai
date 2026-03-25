@@ -344,6 +344,7 @@ export const gptChatByModels = {
 	 	inputPrice: 0.2 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 	 	outputPrice: 1.25 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 	 	description: `Open AI gpt 5.4 Nano`,
+		recommended: true,
 	},
 	"openai/gpt-5.4-mini": {
 		maxTokens: 128_000,
@@ -354,6 +355,7 @@ export const gptChatByModels = {
 		inputPrice: 0.75 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		outputPrice: 4.5 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `Open AI gpt 5.4 Mini`,
+		recommended: true,
 	},
 	"openai/gpt-5.4": {
 		maxTokens: 128_000,
@@ -364,6 +366,7 @@ export const gptChatByModels = {
 		inputPrice: 2.5 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		outputPrice: 15 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `Open AI gpt 5.4`,
+		recommended: true,
 	},
 } as const satisfies Record<string, ModelInfo>
 

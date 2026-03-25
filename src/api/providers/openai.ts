@@ -460,40 +460,28 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 
 	private async *handleStreamResponse(stream: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>): ApiStream {
 		const activeToolCallIds = new Set<string>()
-		let streamFinishedNormally = false
 
-		try {
-			for await (const chunk of stream) {
-				const delta = chunk.choices?.[0]?.delta
-				const finishReason = chunk.choices?.[0]?.finish_reason
+		for await (const chunk of stream) {
+			const delta = chunk.choices?.[0]?.delta
+			const finishReason = chunk.choices?.[0]?.finish_reason
 
-				if (delta) {
-					if (delta.content) {
-						yield {
-							type: "text",
-							text: delta.content,
-						}
-					}
-
-					yield* this.processToolCalls(delta, finishReason, activeToolCallIds)
-				}
-
-				if (chunk.usage) {
+			if (delta) {
+				if (delta.content) {
 					yield {
-						type: "usage",
-						inputTokens: chunk.usage.prompt_tokens || 0,
-						outputTokens: chunk.usage.completion_tokens || 0,
+						type: "text",
+						text: delta.content,
 					}
 				}
+
+				yield* this.processToolCalls(delta, finishReason, activeToolCallIds)
 			}
 
-			streamFinishedNormally = true
-		} finally {
-			if (!streamFinishedNormally && activeToolCallIds.size > 0) {
-				for (const id of activeToolCallIds) {
-					yield { type: "tool_call_end", id }
+			if (chunk.usage) {
+				yield {
+					type: "usage",
+					inputTokens: chunk.usage.prompt_tokens || 0,
+					outputTokens: chunk.usage.completion_tokens || 0,
 				}
-				activeToolCallIds.clear()
 			}
 		}
 	}

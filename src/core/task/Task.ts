@@ -4726,30 +4726,28 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 			// kilocode_change start: hard-guard no-mode to avoid any tool calls
 			const effectiveModeSlug = mode ?? defaultModeSlug
-			if (effectiveModeSlug === "no-mode") {
-				allTools = []
-				allowedFunctionNames = []
-			} else {
-					const toolsResult = await buildNativeToolsArrayWithRestrictions({
-						provider,
-						cwd: this.cwd,
-						mode,
-						customModes: state?.customModes,
-						experiments: state?.experiments,
-						apiConfiguration,
-						maxReadFileLine: state?.maxReadFileLine ?? 500 /*kilocode_change*/,
-						maxConcurrentFileReads: state?.maxConcurrentFileReads ?? 5,
-						browserToolEnabled: state?.browserToolEnabled ?? true,
-						// kilocode_change start
-						state,
-						// kilocode_change end
-						modelInfo,
-						diffEnabled: this.diffEnabled,
-						includeAllToolsWithRestrictions: supportsAllowedFunctionNames,
-					})
-					allTools = toolsResult.tools
-					allowedFunctionNames = toolsResult.allowedFunctionNames
-				}
+			const isNoMode = effectiveModeSlug === "no-mode"
+			if (!isNoMode) {
+				const toolsResult = await buildNativeToolsArrayWithRestrictions({
+					provider,
+					cwd: this.cwd,
+					mode,
+					customModes: state?.customModes,
+					experiments: state?.experiments,
+					apiConfiguration,
+					maxReadFileLine: state?.maxReadFileLine ?? 500 /*kilocode_change*/,
+					maxConcurrentFileReads: state?.maxConcurrentFileReads ?? 5,
+					browserToolEnabled: state?.browserToolEnabled ?? true,
+					// kilocode_change start
+					state,
+					// kilocode_change end
+					modelInfo,
+					diffEnabled: this.diffEnabled,
+					includeAllToolsWithRestrictions: supportsAllowedFunctionNames,
+				})
+				allTools = toolsResult.tools
+				allowedFunctionNames = toolsResult.allowedFunctionNames
+			}
 			// kilocode_change end
 		}
 
@@ -4762,7 +4760,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			taskId: this.taskId,
 			suppressPreviousResponseId: this.skipPrevResponseIdOnce,
 			// Include tools and tool protocol when using native protocol and model supports it
-			...(shouldIncludeTools
+			...(shouldIncludeTools && allTools.length > 0
 				? {
 						tools: allTools,
 						tool_choice: "auto",

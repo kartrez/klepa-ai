@@ -144,7 +144,7 @@ export const DEFAULT_MODES: readonly ModeConfig[] = [
 		slug: "no-mode",
 		name: "No Agent Mode",
 		iconName: "codicon-empty-window",
-		description: "No Agent context (reduces token consumption)",
+		description: "Minimal context mode - no system prompt, no tools, no rules (reduces token consumption)",
 		roleDefinition:
 			"You are Klepa AI, a highly skilled software engineer with extensive knowledge in many programming languages, frameworks, design patterns, and best practices.",
 		whenToUse:

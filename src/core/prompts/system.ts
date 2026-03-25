@@ -168,6 +168,7 @@ ${await addCustomInstructions(baseInstructions, globalCustomInstructions || "", 
 	localRulesToggleState: context.workspaceState.get("localRulesToggles"), // kilocode_change
 	globalRulesToggleState: context.globalState.get("globalRulesToggles"), // kilocode_change
 	settings,
+	skipRules: mode === "no-mode",
 })}`
 
 	// kilocode_change start: Append custom system prompt from CLI if provided

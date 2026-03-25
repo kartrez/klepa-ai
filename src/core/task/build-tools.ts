@@ -102,6 +102,15 @@ export async function buildNativeToolsArrayWithRestrictions(options: BuildToolsO
 		includeAllToolsWithRestrictions,
 	} = options
 
+	// kilocode_change start: no-mode should have no tools to minimize token consumption
+	if (mode === "no-mode") {
+		return {
+			tools: [],
+			allowedFunctionNames: [],
+		}
+	}
+	// kilocode_change end
+
 	const mcpHub = provider.getMcpHub()
 
 	// Get CodeIndexManager for feature checking.

@@ -392,10 +392,17 @@ export async function addCustomInstructions(
 		localRulesToggleState?: ClineRulesToggles
 		globalRulesToggleState?: ClineRulesToggles
 		settings?: SystemPromptSettings
+		skipRules?: boolean
 	} = {},
 	// kilocode_change end
 ): Promise<string> {
 	const sections = []
+
+	// kilocode_change start: no-mode should skip all rules to minimize token consumption
+	if (options.skipRules) {
+		return ""
+	}
+	// kilocode_change end
 
 	// Get the enableSubfolderRules setting (default: false)
 	const enableSubfolderRules = options.settings?.enableSubfolderRules ?? false

@@ -240,6 +240,12 @@ export function filterNativeToolsForMode(
 	// kilocode_change end
 	mcpHub?: McpHub,
 ): OpenAI.Chat.ChatCompletionTool[] {
+	// kilocode_change start: no-mode should have no tools to minimize token consumption
+	if (mode === "no-mode") {
+		return []
+	}
+	// kilocode_change end
+
 	// Get mode configuration and all tools for this mode
 	const modeSlug = mode ?? defaultModeSlug
 	let modeConfig = getModeBySlug(modeSlug, customModes)
@@ -483,6 +489,12 @@ export function filterMcpToolsForMode(
 	customModes: ModeConfig[] | undefined,
 	experiments: Record<string, boolean> | undefined,
 ): OpenAI.Chat.ChatCompletionTool[] {
+	// kilocode_change start: no-mode should have no MCP tools to minimize token consumption
+	if (mode === "no-mode") {
+		return []
+	}
+	// kilocode_change end
+
 	const modeSlug = mode ?? defaultModeSlug
 
 	// MCP tools are always in the mcp group, check if use_mcp_tool is allowed

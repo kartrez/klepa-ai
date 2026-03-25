@@ -4724,25 +4724,33 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				throw new Error("Provider reference lost during tool building")
 			}
 
-			const toolsResult = await buildNativeToolsArrayWithRestrictions({
-				provider,
-				cwd: this.cwd,
-				mode,
-				customModes: state?.customModes,
-				experiments: state?.experiments,
-				apiConfiguration,
-				maxReadFileLine: state?.maxReadFileLine ?? 500 /*kilocode_change*/,
-				maxConcurrentFileReads: state?.maxConcurrentFileReads ?? 5,
-				browserToolEnabled: state?.browserToolEnabled ?? true,
-				// kilocode_change start
-				state,
-				// kilocode_change end
-				modelInfo,
-				diffEnabled: this.diffEnabled,
-				includeAllToolsWithRestrictions: supportsAllowedFunctionNames,
-			})
-			allTools = toolsResult.tools
-			allowedFunctionNames = toolsResult.allowedFunctionNames
+			// kilocode_change start: hard-guard no-mode to avoid any tool calls
+			const effectiveModeSlug = mode ?? defaultModeSlug
+			if (effectiveModeSlug === "no-mode") {
+				allTools = []
+				allowedFunctionNames = []
+			} else {
+					const toolsResult = await buildNativeToolsArrayWithRestrictions({
+						provider,
+						cwd: this.cwd,
+						mode,
+						customModes: state?.customModes,
+						experiments: state?.experiments,
+						apiConfiguration,
+						maxReadFileLine: state?.maxReadFileLine ?? 500 /*kilocode_change*/,
+						maxConcurrentFileReads: state?.maxConcurrentFileReads ?? 5,
+						browserToolEnabled: state?.browserToolEnabled ?? true,
+						// kilocode_change start
+						state,
+						// kilocode_change end
+						modelInfo,
+						diffEnabled: this.diffEnabled,
+						includeAllToolsWithRestrictions: supportsAllowedFunctionNames,
+					})
+					allTools = toolsResult.tools
+					allowedFunctionNames = toolsResult.allowedFunctionNames
+				}
+			// kilocode_change end
 		}
 
 		// Parallel tool calls are disabled - feature is on hold

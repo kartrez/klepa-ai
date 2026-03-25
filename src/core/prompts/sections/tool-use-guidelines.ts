@@ -38,6 +38,9 @@ export function getToolUseGuidelinesSection(
 			)
 		}
 
+		// NOTE: we intentionally do NOT add any hard requirement like "must call a tool per response"
+		// here. That requirement lives in higher-level prompt sections and should not force tool calls
+		// in modes where tools are meant to be unavailable (e.g. no-mode).
 		guidelinesList.push(
 			`${itemNumber++}. CRITICAL: You must use the API's native tool format. Do NOT simply write text describing the tool use (e.g., "[Tool Use: ...]" or JSON blocks in text). The system will strictly reject any text that mimics a tool call. You must use the proper API structure for function calling.`,
 		)

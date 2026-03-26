@@ -13,6 +13,11 @@ import { ClineProvider } from "./ClineProvider"
 
 export const generateSystemPrompt = async (provider: ClineProvider, message: WebviewMessage) => {
 	const state = await provider.getState() // kilocode_change
+	const mode = message.mode ?? defaultModeSlug
+
+	if (mode === "no-mode") {
+		return ""
+	}
 
 	const {
 		apiConfiguration,

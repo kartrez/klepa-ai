@@ -140,17 +140,17 @@ export const DEFAULT_MODE_SLUG = "code"
  */
 
 export const DEFAULT_MODES: readonly ModeConfig[] = [
-	{
-		slug: "no-mode",
-		name: "No Agent Mode",
-		iconName: "codicon-empty-window",
-		description: "Minimal context mode - no system prompt, no tools, no rules (reduces token consumption)",
-		roleDefinition:
-			"You are Klepa AI, a highly skilled software engineer with extensive knowledge in many programming languages, frameworks, design patterns, and best practices.",
-		whenToUse:
-			"Use this mode when you need to write, modify, or refactor code. Ideal for implementing features, fixing bugs, creating new files, or making code improvements across any programming language or framework.",
-		groups: ["read", "edit", "command", "mcp"],
-	},
+	// {
+	// 	slug: "no-mode",
+	// 	name: "No Agent Mode",
+	// 	iconName: "codicon-empty-window",
+	// 	description: "Minimal context mode - no system prompt, no tools, no rules (reduces token consumption)",
+	// 	roleDefinition:
+	// 		"You are Klepa AI, a highly skilled software engineer with extensive knowledge in many programming languages, frameworks, design patterns, and best practices.",
+	// 	whenToUse:
+	// 		"Use this mode when you need to write, modify, or refactor code. Ideal for implementing features, fixing bugs, creating new files, or making code improvements across any programming language or framework.",
+	// 	groups: ["read", "edit", "command", "mcp"],
+	// },
 	{
 		slug: "architect",
 		// kilocode_change start

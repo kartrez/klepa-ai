@@ -1444,6 +1444,12 @@ export const ChatRowContent = ({
 						</div>
 					)
 				case "error":
+					if (
+						message.text === "MODEL_NO_ASSISTANT_MESSAGES" ||
+						(message.text || "").includes("did not provide any assistant messages")
+					) {
+						return null
+					}
 					// kilocode_change start: Show login button for KiloCode auth errors
 					const isKiloCodeAuthError =
 						apiConfiguration?.apiProvider === "kilocode" &&

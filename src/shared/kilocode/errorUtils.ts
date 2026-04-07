@@ -49,7 +49,8 @@ export function isAlphaPeriodEndedError(error: any) {
 	)
 }
 
-function isOpenRouterInvalidModelError(error: any) {
+// kilocode_change: exported for similar-model fallback classification (single source of truth with isAnyRecognizedKiloCodeError)
+export function isOpenRouterInvalidModelError(error: any) {
 	return !!(error && error.status === 400 && (error.message?.indexOf("not a valid model") ?? -1) >= 0)
 }
 

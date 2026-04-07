@@ -98,6 +98,12 @@ import { sanitizeToolUseId } from "../../utils/tool-id"
 // prompts
 import { formatResponse } from "../prompts/responses"
 import { SYSTEM_PROMPT } from "../prompts/system"
+import {
+	applyPickedModelIdToSettings,
+	pickSimilarFallbackModelId,
+	resolveModelCatalogForFallback,
+} from "./pickSimilarFallbackModel" // kilocode_change
+import { shouldAttemptSimilarModelFallback } from "./similarModelFallbackErrorClassification" // kilocode_change
 import { buildNativeToolsArrayWithRestrictions } from "./build-tools"
 
 // core modules
@@ -348,6 +354,10 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 	// API
 	apiConfiguration: ProviderSettings
 	api: ApiHandler
+	// kilocode_change start: temporary model swap (similar-model fallback or MODEL_NO_TOOLS hard switch)
+	private temporaryModelSwapOriginal: ProviderSettings | null = null
+	private temporaryModelSwapActive = false
+	// kilocode_change end
 	private static lastGlobalApiRequestTime?: number
 	private autoApprovalHandler: AutoApprovalHandler
 
@@ -2685,9 +2695,6 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 		const stack: StackItem[] = [{ userContent, includeFileDetails, retryAttempt: 0 }]
 
-		let originalApiConfig: ProviderSettings | null = null
-		let wasModelTemporarilyChanged = false
-
 		while (stack.length > 0) {
 			const currentItem = stack.pop()!
 			const currentUserContent = currentItem.userContent
@@ -2700,25 +2707,20 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			}
 
 			if (
-				wasModelTemporarilyChanged &&
+				this.temporaryModelSwapActive &&
 				!this.didToolFailInCurrentTurn &&
-				this.assistantMessageContent.some((block) => block.type === "tool_use")
+				this.assistantMessageContent.some(
+					(block) =>
+						block.type === "tool_use" ||
+						block.type === "mcp_tool_use" ||
+						(block.type === "text" && block.content.trim().length > 0),
+				)
 			) {
-				// Восстанавливаем оригинальную конфигурацию
-				if (originalApiConfig) {
-					this.updateApiConfiguration(originalApiConfig)
-					await this.say(
-						"text",
-						`Reverted to original model '${originalApiConfig.apiModelId}' after successful tool use.`,
-						undefined,
-						false,
-						undefined,
-						undefined,
-						{ isNonInteractive: true },
-					)
+				if (this.temporaryModelSwapOriginal) {
+					this.updateApiConfiguration(this.temporaryModelSwapOriginal)
 				}
-				wasModelTemporarilyChanged = false
-				originalApiConfig = null // очищаем
+				this.temporaryModelSwapActive = false
+				this.temporaryModelSwapOriginal = null
 			}
 
 			if (this.consecutiveMistakeLimit > 0 && this.consecutiveMistakeCount >= this.consecutiveMistakeLimit) {
@@ -3648,8 +3650,20 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 								`[Task#${this.taskId}.${this.instanceId}] Stream failed, will retry: ${streamingFailedMessage}`,
 							)
 
-							// Apply exponential backoff similar to first-chunk errors when auto-resubmit is enabled
 							const stateForBackoff = await this.providerRef.deref()?.getState()
+							if (stateForBackoff?.autoApprovalEnabled) {
+								const swapped = await this.trySimilarModelFallbackAfterClassifiedError(error)
+								if (swapped) {
+									stack.push({
+										userContent: currentUserContent,
+										includeFileDetails: false,
+										retryAttempt: currentItem.retryAttempt ?? 0,
+									})
+									continue
+								}
+							}
+
+							// Apply exponential backoff similar to first-chunk errors when auto-resubmit is enabled
 							if (stateForBackoff?.autoApprovalEnabled) {
 								await this.backoffAndAnnounce(currentItem.retryAttempt ?? 0, error)
 
@@ -3922,9 +3936,9 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 						if (this.consecutiveNoToolUseCount > 3) {
 							// await this.say("error", "MODEL_NO_TOOLS_USED")
 							// Only count toward mistake limit after second consecutive failure
-							if (!wasModelTemporarilyChanged  && this.apiConfiguration?.apiModelId !== "memo/free") {
-								if (!originalApiConfig) {
-									originalApiConfig = { ...this.apiConfiguration }
+							if (!this.temporaryModelSwapActive && this.apiConfiguration?.apiModelId !== "memo/free") {
+								if (!this.temporaryModelSwapOriginal) {
+									this.temporaryModelSwapOriginal = { ...this.apiConfiguration }
 								}
 								const provider = this.providerRef.deref()
 								const state = await provider?.getState()
@@ -3936,16 +3950,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 									toolProtocol: "native",
 								} as ProviderSettings)
 
-								await this.say(
-									"text",
-									`Switched to "openai/gpt-oss-120b" due to MODEL_NO_TOOLS_USED error.`,
-									undefined,
-									false,
-									undefined,
-									undefined,
-									{ isNonInteractive: true },
-								)
-								wasModelTemporarilyChanged = true
+								this.temporaryModelSwapActive = true
 							}
 							this.consecutiveMistakeCount++
 						}
@@ -3990,6 +3995,15 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 					// kilocode_change end
 					// Increment consecutive no-assistant-messages counter
 					this.consecutiveNoAssistantMessagesCount++
+
+					// kilocode_change start: switch to a similar model (cost → cache → vision) once per streak
+					if (this.consecutiveNoAssistantMessagesCount >= 1 && !this.temporaryModelSwapActive) {
+						const applied = await this.tryApplySimilarModelFromCatalog()
+						if (applied) {
+							this.consecutiveNoAssistantMessagesCount = 0
+						}
+					}
+					// kilocode_change end
 
 					// Only show error and count toward mistake limit after 2 consecutive failures
 					// This provides a "grace retry" - first failure retries silently
@@ -4435,6 +4449,50 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 	private hasExceededChutesTerminatedRetryLimit(error: unknown, retryAttempt: number): boolean {
 		return this.isChutesTerminatedError(error) && retryAttempt >= MAX_CHUTES_TERMINATED_RETRY_ATTEMPTS
+	}
+
+	/** One swap per streak; uses catalog from {@link resolveModelCatalogForFallback}. */
+	private async tryApplySimilarModelFromCatalog(): Promise<boolean> {
+		if (this.temporaryModelSwapActive) {
+			return false
+		}
+		const currentModelId = getModelId(this.apiConfiguration)
+		if (!currentModelId) {
+			return false
+		}
+		try {
+			const catalog = await resolveModelCatalogForFallback(this.apiConfiguration)
+			const picked = pickSimilarFallbackModelId(currentModelId, this.api.getModel().info, catalog)
+			if (!picked) {
+				return false
+			}
+			const nextConfig = applyPickedModelIdToSettings(this.apiConfiguration, picked)
+			if (!nextConfig) {
+				return false
+			}
+			if (!this.temporaryModelSwapOriginal) {
+				this.temporaryModelSwapOriginal = { ...this.apiConfiguration }
+			}
+			this.updateApiConfiguration(nextConfig)
+			this.temporaryModelSwapActive = true
+			console.log(
+				`[Task#${this.taskId}.${this.instanceId}] Similar model fallback: ${currentModelId} -> ${picked}`,
+			)
+			return true
+		} catch (error) {
+			console.error(
+				`[Task#${this.taskId}.${this.instanceId}] Failed to apply similar model fallback:`,
+				error,
+			)
+			return false
+		}
+	}
+
+	private async trySimilarModelFallbackAfterClassifiedError(error: unknown): Promise<boolean> {
+		if (!shouldAttemptSimilarModelFallback(error)) {
+			return false
+		}
+		return this.tryApplySimilarModelFromCatalog()
 	}
 	// kilocode_change end
 
@@ -4892,6 +4950,13 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			// outer request loop, which applies a bounded retry cap.
 			if (this.isChutesTerminatedError(error)) {
 				throw error
+			}
+			// kilocode_change end
+			// kilocode_change start: similar model fallback on first-chunk failure (explicit allow/deny classification)
+			if (await this.trySimilarModelFallbackAfterClassifiedError(error)) {
+				this.currentRequestAbortController = undefined
+				yield* this.attemptApiRequest(retryAttempt)
+				return
 			}
 			// kilocode_change end
 			// note that this api_req_failed ask is unique in that we only present this option if the api hasn't streamed any content yet (ie it fails on the first chunk due), as it would allow them to hit a retry button. However if the api failed mid-stream, it could be in any arbitrary state where some tools may have executed, so that error is handled differently and requires cancelling the task entirely.

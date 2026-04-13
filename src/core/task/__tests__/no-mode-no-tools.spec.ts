@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
 import { buildNativeToolsArrayWithRestrictions } from "../build-tools"
+import { buildNoModeNativeTools } from "../../modes/nano/client-context"
 
 // Mock vscode
 vi.mock("vscode", () => ({
@@ -22,7 +23,7 @@ vi.mock("../../../services/code-index/manager", () => ({
 	},
 }))
 
-describe("no-mode no tools", () => {
+describe("nano mode limited tools", () => {
 	let mockProvider: any
 
 	beforeEach(() => {
@@ -35,22 +36,23 @@ describe("no-mode no tools", () => {
 		}
 	})
 
-	it("should return empty tools array for no-mode", async () => {
-		const result = await buildNativeToolsArrayWithRestrictions({
-			provider: mockProvider,
-			cwd: "/test/cwd",
-			mode: "no-mode",
-			customModes: undefined,
-			experiments: undefined,
-			apiConfiguration: undefined,
+	it("should return limited tools array for nano mode client builder", async () => {
+		const tools = buildNoModeNativeTools({
+			mcpHub: undefined,
 			maxReadFileLine: 1000,
 			maxConcurrentFileReads: 5,
-			browserToolEnabled: true,
 			diffEnabled: true,
 		})
 
-		expect(result.tools).toEqual([])
-		expect(result.allowedFunctionNames).toEqual([])
+		const toolNames = tools
+			.map((tool) => ("function" in tool && tool.function ? tool.function.name : undefined))
+			.filter((name): name is string => !!name)
+
+		expect(toolNames).toContain("read_file")
+		expect(toolNames).toContain("write_to_file")
+		expect(toolNames).toContain("apply_diff")
+		expect(toolNames).toContain("attempt_completion")
+		expect(toolNames).not.toContain("execute_command")
 	})
 
 	it("should return non-empty tools array for code mode", async () => {

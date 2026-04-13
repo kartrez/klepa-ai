@@ -3288,7 +3288,15 @@ export class ClineProvider
 
 		console.log(`[cancelTask] cancelling task ${task.taskId}.${task.instanceId}`)
 
-		const { historyItem, uiMessagesFilePath } = await this.getTaskWithId(task.taskId)
+		let historyItem: HistoryItem | undefined
+		try {
+			;({ historyItem } = await this.getTaskWithId(task.taskId, false))
+		} catch (error) {
+			// If task persistence is missing/corrupted, still allow cancellation to complete.
+			this.log(
+				`[cancelTask] Task history unavailable for ${task.taskId}, proceeding without rehydrate: ${error instanceof Error ? error.message : String(error)}`,
+			)
+		}
 
 		// Preserve parent and root task information for history item.
 		const rootTask = task.rootTask
@@ -3347,7 +3355,12 @@ export class ClineProvider
 		}
 
 		// Clears task again, so we need to abortTask manually above.
-		await this.createTaskWithHistoryItem({ ...historyItem, rootTask, parentTask })
+		// If persisted task history is unavailable, just clear the active task to avoid a stuck UI.
+		if (historyItem) {
+			await this.createTaskWithHistoryItem({ ...historyItem, rootTask, parentTask })
+		} else {
+			await this.clearTask()
+		}
 	}
 
 	// Clear the current task without treating it as a subtask.

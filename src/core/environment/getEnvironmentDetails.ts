@@ -27,7 +27,6 @@ import { formatReminderSection } from "./reminder"
 import { OpenRouterHandler } from "../../api/providers/openrouter"
 import { TelemetryService } from "@roo-code/telemetry"
 import { t } from "../../i18n"
-import { NativeOllamaHandler } from "../../api/providers/native-ollama"
 
 // Multiplier for fetching extra files when filtering is enabled to ensure enough non-ignored files; only applied when showRooIgnoredFiles is false.
 const FILE_LIST_OVER_FETCH_MULTIPLIER = 3
@@ -52,7 +51,19 @@ function trimFileList(fileListStr: string, maxFiles: number) {
 
 	return lines.join("\n") + "\n\n" + truncationMsg
 }
-// kilocode_change end
+
+function buildNoModeEnvironmentString(
+	baseLines: string[],
+	visibleLines: string[],
+): string {
+	const lines: string[] = [...baseLines]
+
+	if (visibleLines.length > 0) {
+		lines.push("\n# VSCode Visible Files")
+		lines.push(visibleLines.join("\n"))
+	}
+	return `<environment_details>\n${lines.join("\n")}\n</environment_details>`
+}
 
 export async function getEnvironmentDetails(cline: Task, includeFileDetails: boolean = false) {
 	let details = ""
@@ -63,7 +74,9 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 		terminalOutputLineLimit = 500,
 		terminalOutputCharacterLimit = DEFAULT_TERMINAL_OUTPUT_CHARACTER_LIMIT,
 		maxWorkspaceFiles = 200,
+		showRooIgnoredFiles = false,
 	} = state ?? {}
+	const requestedMode = state?.mode ?? defaultModeSlug
 
 	// It could be useful for cline to know if the user went from one or no
 	// file to another between messages, so we always include this context.
@@ -72,6 +85,41 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 		.filter(Boolean)
 		.map((absolutePath) => path.relative(cline.cwd, absolutePath))
 		.slice(0, maxWorkspaceFiles)
+
+	if (requestedMode === "nano") {
+		const visibleLines = visibleFilePaths.map((relativePath) => relativePath.toPosix()).filter(Boolean)
+		const { id: modelId, info: modelInfo } = cline.api.getModel()
+		const toolProtocol = resolveToolProtocol(state?.apiConfiguration ?? {}, modelInfo, cline.taskToolProtocol)
+
+		const compactDetails: string[] = [
+			"# Current Mode",
+			`<slug>${requestedMode}</slug>`,
+			`<model>${modelId}</model>`,
+			`<tool_format>${toolProtocol}</tool_format>`,
+			`<workspace>${cline.cwd.toPosix()}</workspace>`,
+		]
+
+		if (includeFileDetails) {
+			const maxFiles = maxWorkspaceFiles ?? 200
+			if (maxFiles > 0) {
+				const fetchLimit = showRooIgnoredFiles ? maxFiles : maxFiles * FILE_LIST_OVER_FETCH_MULTIPLIER
+				const [files, didHitLimit] = await listFiles(cline.cwd, true, fetchLimit)
+				const result = formatResponse.formatFilesList(
+					cline.cwd,
+					files,
+					didHitLimit,
+					cline.rooIgnoreController,
+					showRooIgnoredFiles,
+				)
+
+				compactDetails.push("")
+				compactDetails.push(`# Current Workspace Directory (${cline.cwd.toPosix()}) Files`)
+				compactDetails.push(showRooIgnoredFiles ? result : trimFileList(result, maxFiles))
+			}
+		}
+
+		return buildNoModeEnvironmentString(compactDetails, visibleLines)
+	}
 
 	// Filter paths through rooIgnoreController
 	const allowedVisibleFiles = cline.rooIgnoreController
@@ -102,6 +150,9 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 		details += "\n\n# VSCode Open Tabs"
 		details += `\n${allowedOpenTabs}`
 	}
+
+	// Add recently modified files early so nano mode can return before heavy context gathering.
+	const recentlyModifiedFiles = cline.fileContextTracker.getAndClearRecentlyModifiedFiles()
 
 	// Get task-specific and background terminals.
 	const busyTerminals = [
@@ -204,7 +255,6 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 	// console.log(`[Task#getEnvironmentDetails] terminalDetails: ${terminalDetails}`)
 
 	// Add recently modified files section.
-	const recentlyModifiedFiles = cline.fileContextTracker.getAndClearRecentlyModifiedFiles()
 
 	if (recentlyModifiedFiles.length > 0) {
 		details +=

@@ -6,6 +6,7 @@ import { defaultModeSlug } from "../../../shared/modes"
 import type { CodeIndexManager } from "../../../services/code-index/manager"
 import type { McpHub } from "../../../services/mcp/McpHub"
 import { isToolAllowedForMode } from "../../../core/tools/validateToolUse"
+import { NANO_MODE_ALLOWED_TOOL_SET } from "../../modes/nano/constants"
 
 // kilocode_change start
 import { ClineProviderState } from "../../webview/ClineProvider"
@@ -240,13 +241,8 @@ export function filterNativeToolsForMode(
 	// kilocode_change end
 	mcpHub?: McpHub,
 ): OpenAI.Chat.ChatCompletionTool[] {
-	// kilocode_change start: no-mode should have no tools to minimize token consumption
-	// IMPORTANT: `mode` can be undefined (fallback), but `no-mode` should be determined
-	// by effective mode slug, not by raw input.
+	// kilocode_change start: use effective mode slug consistently
 	const effectiveModeSlug = mode ?? defaultModeSlug
-	if (effectiveModeSlug === "no-mode") {
-		return []
-	}
 	// kilocode_change end
 
 	// Get mode configuration and all tools for this mode
@@ -352,6 +348,14 @@ export function filterNativeToolsForMode(
 	if (!mcpHub || !hasAnyMcpResources(mcpHub)) {
 		allowedToolNames.delete("access_mcp_resource")
 	}
+
+	// kilocode_change start - enforce narrow nano toolset
+	if (effectiveModeSlug === "nano") {
+		allowedToolNames = new Set(
+			Array.from(allowedToolNames).filter((toolName) => NANO_MODE_ALLOWED_TOOL_SET.has(toolName)),
+		)
+	}
+	// kilocode_change end
 
 	// Filter native tools based on allowed tool names and apply alias renames
 	const filteredTools: OpenAI.Chat.ChatCompletionTool[] = []
@@ -492,12 +496,6 @@ export function filterMcpToolsForMode(
 	customModes: ModeConfig[] | undefined,
 	experiments: Record<string, boolean> | undefined,
 ): OpenAI.Chat.ChatCompletionTool[] {
-	// kilocode_change start: no-mode should have no MCP tools to minimize token consumption
-	if (mode === "no-mode") {
-		return []
-	}
-	// kilocode_change end
-
 	const modeSlug = mode ?? defaultModeSlug
 
 	// MCP tools are always in the mcp group, check if use_mcp_tool is allowed

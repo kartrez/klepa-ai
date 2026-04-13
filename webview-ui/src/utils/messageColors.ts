@@ -1,4 +1,4 @@
-import type { ClineMessage } from "@roo-code/types"
+import type { ClineApiReqInfo, ClineMessage } from "@roo-code/types"
 
 export interface TaskTimelineMessageTypeConfig {
 	color: string
@@ -6,8 +6,7 @@ export interface TaskTimelineMessageTypeConfig {
 }
 
 export const taskTimelineColorPalette = {
-	USER_INTERACTION:
-		"bg-[color-mix(in_srgb,var(--vscode-editor-findMatchBackground)_50%,var(--vscode-errorForeground))]", // Tan/orange-ish
+	USER_INTERACTION: "bg-[var(--vscode-charts-purple)]", // User messages (non-error)
 	SYSTEM_READ: "bg-[var(--vscode-textLink-foreground)]", // Light blue for file reads
 	SYSTEM_WRITE: "bg-[var(--vscode-focusBorder)]", // Dark blue for file writes
 	SYSTEM_GENERAL_TOOL: "bg-[var(--vscode-activityBarBadge-background)]", // Blue for browser/server tools
@@ -50,6 +49,10 @@ export const TASK_TIMELINE_MESSAGE_TYPES: Record<string, TaskTimelineMessageType
 		color: taskTimelineColorPalette.ASSISTANT_QUESTION,
 		translationKey: "kilocode:taskTimeline.tooltip.messageTypes.followup",
 	},
+	"ask:api_req_failed": {
+		color: taskTimelineColorPalette.ERROR,
+		translationKey: "kilocode:taskTimeline.tooltip.messageTypes.api_request_failed",
+	},
 
 	// Say types that should be shown (everything except the filtered ones)
 	"say:text": {
@@ -87,6 +90,20 @@ export const TASK_TIMELINE_MESSAGE_TYPES: Record<string, TaskTimelineMessageType
 	"say:checkpoint_saved": {
 		color: taskTimelineColorPalette.SUCCESS,
 		translationKey: "kilocode:taskTimeline.tooltip.messageTypes.checkpoint_saved",
+	},
+	"say:api_req_started": {
+		// Actual status color for API request bars is resolved dynamically in
+		// getTaskTimelineMessageColor based on cost/cancelReason.
+		color: taskTimelineColorPalette.ASSISTANT_MUTTERING,
+		translationKey: "kilocode:taskTimeline.tooltip.messageTypes.api_request",
+	},
+	"say:api_req_retry_delayed": {
+		color: taskTimelineColorPalette.ERROR,
+		translationKey: "kilocode:taskTimeline.tooltip.messageTypes.api_request_failed",
+	},
+	"say:api_req_rate_limit_wait": {
+		color: taskTimelineColorPalette.ASSISTANT_MUTTERING,
+		translationKey: "kilocode:taskTimeline.tooltip.messageTypes.api_request",
 	},
 	"say:condense_context": {
 		color: taskTimelineColorPalette.ASSISTANT_MUTTERING,
@@ -168,6 +185,24 @@ export function getTaskTimelineMessageColor(message: ClineMessage | ClineMessage
 
 	const singleMessage = message as ClineMessage
 	const messageKey = getTaskTimelineMessageTypeKey(singleMessage)
+
+	// Special handling for API request status bars
+	if (singleMessage.type === "say" && singleMessage.say === "api_req_started") {
+		try {
+			const info: ClineApiReqInfo = singleMessage.text ? JSON.parse(singleMessage.text) : {}
+			const hasCancelReason = info.cancelReason !== undefined && info.cancelReason !== null
+			if (hasCancelReason) {
+				return info.cancelReason === "user_cancelled"
+					? taskTimelineColorPalette.ASSISTANT_MUTTERING
+					: taskTimelineColorPalette.ERROR
+			}
+
+			const isSuccessful = info.cost !== undefined || info.usageMissing === true
+			return isSuccessful ? taskTimelineColorPalette.SUCCESS : taskTimelineColorPalette.ASSISTANT_MUTTERING
+		} catch {
+			return taskTimelineColorPalette.ASSISTANT_MUTTERING
+		}
+	}
 
 	// Special handling for file operations
 	if (singleMessage.type === "ask") {

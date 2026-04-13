@@ -237,6 +237,8 @@
 				"browser_action_result": "browser action result",
 				"browser_action": "browser action",
 				"checkpoint_saved": "checkpoint saved",
+				"api_request": "API request",
+				"api_request_failed": "API request failed",
 				"command": "command execution",
 				"command_output": "command output",
 				"completion_result": "completion result",

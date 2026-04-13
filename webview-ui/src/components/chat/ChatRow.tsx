@@ -373,6 +373,10 @@ export const ChatRowContent = ({
 						/>
 					</div>
 				)
+				const isApiReqSuccessful =
+					apiReqCancelReason === undefined &&
+					apiRequestFailedMessage === undefined &&
+					(cost !== null && cost !== undefined ? true : usageMissing === true)
 				return [
 					apiReqCancelReason !== null && apiReqCancelReason !== undefined ? (
 						apiReqCancelReason === "user_cancelled" ? (
@@ -380,6 +384,8 @@ export const ChatRowContent = ({
 						) : (
 							getIconSpan("error", errorColor)
 						)
+					) : isApiReqSuccessful ? (
+						getIconSpan("check", successColor)
 					) : cost !== null && cost !== undefined ? (
 						getIconSpan("arrow-swap", normalColor)
 					) : apiRequestFailedMessage ? (
@@ -399,6 +405,10 @@ export const ChatRowContent = ({
 								{t("chat:apiRequest.streamingFailed")}
 							</span>
 						)
+					) : isApiReqSuccessful ? (
+						<StandardTooltip content={inferenceProvider && `Inference Provider: ${inferenceProvider}`}>
+							<span style={{ color: successColor }}>{t("chat:apiRequest.title")}</span>
+						</StandardTooltip>
 					) : cost !== null && cost !== undefined ? (
 						// kilocode_change start: tooltip
 						<StandardTooltip content={inferenceProvider && `Inference Provider: ${inferenceProvider}`}>
@@ -1180,12 +1190,18 @@ export const ChatRowContent = ({
 					// Determine if the API request is in progress
 					const isApiRequestInProgress =
 						apiReqCancelReason === undefined && apiRequestFailedMessage === undefined && cost === undefined
+					const isApiRequestSuccessful =
+						apiReqCancelReason === undefined &&
+						apiRequestFailedMessage === undefined &&
+						(cost !== undefined || usageMissing === true)
 
 					return (
 						<>
 							<div
 								className={`group text-sm transition-opacity ${
-									isApiRequestInProgress ? "opacity-100" : "opacity-40 hover:opacity-100"
+									isApiRequestInProgress || isApiRequestSuccessful
+										? "opacity-100"
+										: "opacity-40 hover:opacity-100"
 								}`}
 								style={{
 									...headerStyle,

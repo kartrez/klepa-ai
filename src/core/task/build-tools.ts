@@ -4,7 +4,6 @@ import type OpenAI from "openai"
 
 import type { ProviderSettings, ModeConfig, ModelInfo } from "@roo-code/types"
 import { customToolRegistry, formatNative } from "@roo-code/core"
-import { defaultModeSlug } from "../../shared/modes"
 
 import type { ClineProvider } from "../webview/ClineProvider"
 import { getRooDirectoriesForCwd } from "../../services/roo-config/index.js"
@@ -102,17 +101,6 @@ export async function buildNativeToolsArrayWithRestrictions(options: BuildToolsO
 		diffEnabled,
 		includeAllToolsWithRestrictions,
 	} = options
-
-	// kilocode_change start: no-mode should have no tools to minimize token consumption
-	// NOTE: `mode` may be undefined in some flows (fallback), so use effective mode slug.
-	const effectiveModeSlug = mode ?? defaultModeSlug
-	if (effectiveModeSlug === "no-mode") {
-		return {
-			tools: [],
-			allowedFunctionNames: [],
-		}
-	}
-	// kilocode_change end
 
 	const mcpHub = provider.getMcpHub()
 

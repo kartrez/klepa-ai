@@ -15,11 +15,6 @@ export const generateSystemPrompt = async (provider: ClineProvider, message: Web
 	const state = await provider.getState() // kilocode_change
 	const resolvedMode = message.mode ?? defaultModeSlug
 
-	if (resolvedMode === "no-mode") {
-		return ""
-	}
-
-
 	const {
 		apiConfiguration,
 		customModePrompts,

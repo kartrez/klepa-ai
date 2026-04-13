@@ -4325,7 +4325,17 @@ export const webviewMessageHandler = async (
 
 		case "queueMessage": {
 			const resolved = await resolveIncomingImages({ text: message.text, images: message.images })
-			provider.getCurrentTask()?.messageQueueService.addMessage(resolved.text, resolved.images)
+			const currentTask = provider.getCurrentTask()
+			currentTask?.messageQueueService.addMessage(resolved.text, resolved.images)
+
+			if (currentTask) {
+				const currentMode = await currentTask.getTaskMode()
+				// nano mode can end without an interactive ask, so drain queued messages
+				// immediately when no request is currently streaming.
+				if (currentMode === "nano" && !currentTask.isStreaming && !currentTask.isWaitingForFirstChunk) {
+					currentTask.processQueuedMessages()
+				}
+			}
 			break
 		}
 		case "removeQueuedMessage": {

@@ -6,12 +6,13 @@ import * as path from "path"
 import * as vscode from "vscode"
 import { Anthropic } from "@anthropic-ai/sdk"
 
-import type { GlobalState, ProviderSettings, ModelInfo } from "@roo-code/types"
+import { gptChatByDefaultModelId, type GlobalState, type ProviderSettings, type ModelInfo } from "@roo-code/types"
 import { TelemetryService } from "@roo-code/telemetry"
 
 import { Task } from "../Task"
 import { ClineProvider } from "../../webview/ClineProvider"
 import { ApiStreamChunk } from "../../../api/transform/stream"
+import * as ApiModule from "../../../api"
 import { ContextProxy } from "../../config/ContextProxy"
 import { processUserContentMentions } from "../../mentions/processUserContentMentions"
 import { MultiSearchReplaceDiffStrategy } from "../../diff/strategies/multi-search-replace"
@@ -2321,5 +2322,106 @@ describe("pushToolResultToUserContent", () => {
 		expect(task.userMessageContent[0].type).toBe("text")
 		expect(task.userMessageContent[1].type).toBe("image")
 		expect(task.userMessageContent[2]).toEqual(toolResult)
+	})
+
+	it("should use apiModelId when building nano mode api handler", async () => {
+		const selectedModelId = "qwen/plus-3.5"
+		const mockStream = {
+			async *[Symbol.asyncIterator]() {
+				yield { type: "text", text: "ok" } as ApiStreamChunk
+			},
+		} as any
+
+		const mockApiHandler = {
+			createMessage: vi.fn().mockReturnValue(mockStream),
+			getModel: vi.fn().mockReturnValue({
+				id: selectedModelId,
+				info: {
+					supportsNativeTools: true,
+					supportsImages: false,
+					contextWindow: 128_000,
+					maxTokens: 8_000,
+				},
+			}),
+			countTokens: vi.fn().mockResolvedValue(1),
+		} as any
+
+		const buildApiHandlerSpy = vi.spyOn(ApiModule, "buildApiHandler").mockReturnValue(mockApiHandler)
+		mockProvider.getState = vi.fn().mockResolvedValue({
+			mode: "nano",
+			mcpEnabled: false,
+			autoApprovalEnabled: true,
+			apiConfiguration: {
+				...mockApiConfig,
+				apiModelId: selectedModelId,
+			},
+		})
+
+		const task = new Task({
+			provider: mockProvider,
+			context: mockProvider.context,
+			apiConfiguration: mockApiConfig,
+			task: "test nano mode",
+			startTask: false,
+		})
+
+		const iterator = task.attemptApiRequest(0, { skipProviderRateLimit: true })
+		await iterator.next()
+
+		expect(
+			buildApiHandlerSpy.mock.calls.some(
+				([config]) => config?.apiProvider === "gpt-chat-by" && config?.apiModelId === selectedModelId,
+			),
+		).toBe(true)
+	})
+
+	it("should fallback to gpt-chat-by default model when apiModelId is empty", async () => {
+		const mockStream = {
+			async *[Symbol.asyncIterator]() {
+				yield { type: "text", text: "ok" } as ApiStreamChunk
+			},
+		} as any
+
+		const mockApiHandler = {
+			createMessage: vi.fn().mockReturnValue(mockStream),
+			getModel: vi.fn().mockReturnValue({
+				id: gptChatByDefaultModelId,
+				info: {
+					supportsNativeTools: true,
+					supportsImages: false,
+					contextWindow: 128_000,
+					maxTokens: 8_000,
+				},
+			}),
+			countTokens: vi.fn().mockResolvedValue(1),
+		} as any
+
+		const buildApiHandlerSpy = vi.spyOn(ApiModule, "buildApiHandler").mockReturnValue(mockApiHandler)
+		mockProvider.getState = vi.fn().mockResolvedValue({
+			mode: "nano",
+			mcpEnabled: false,
+			autoApprovalEnabled: true,
+			apiConfiguration: {
+				...mockApiConfig,
+				apiModelId: "",
+			},
+		})
+
+		const task = new Task({
+			provider: mockProvider,
+			context: mockProvider.context,
+			apiConfiguration: mockApiConfig,
+			task: "test nano mode fallback",
+			startTask: false,
+		})
+
+		const iterator = task.attemptApiRequest(0, { skipProviderRateLimit: true })
+		await iterator.next()
+
+		expect(
+			buildApiHandlerSpy.mock.calls.some(
+				([config]) => config?.apiProvider === "gpt-chat-by" && config?.apiModelId === gptChatByDefaultModelId,
+			),
+		).toBe(true)
 	})
 })

@@ -54,6 +54,7 @@ import {
 	MIN_CHECKPOINT_TIMEOUT_SECONDS,
 	TOOL_PROTOCOL,
 	ConsecutiveMistakeError,
+	gptChatByDefaultModelId,
 } from "@roo-code/types"
 import { TelemetryService } from "@roo-code/telemetry"
 import { CloudService, BridgeOrchestrator } from "@roo-code/cloud"
@@ -98,6 +99,7 @@ import { sanitizeToolUseId } from "../../utils/tool-id"
 // prompts
 import { formatResponse } from "../prompts/responses"
 import { SYSTEM_PROMPT } from "../prompts/system"
+import { buildNoModeSystemPrompt, buildNoModeNativeTools } from "../modes/nano/client-context"
 import {
 	applyPickedModelIdToSettings,
 	pickSimilarFallbackModelId,
@@ -174,6 +176,9 @@ const FORCED_CONTEXT_REDUCTION_PERCENT = 75 // Keep 75% of context (remove 25%) 
 const MAX_CONTEXT_WINDOW_RETRIES = 3 // Maximum retries for context window errors
 // kilocode_change start
 const MAX_CHUTES_TERMINATED_RETRY_ATTEMPTS = 2 // Allow up to 2 retries (3 total attempts) before failing fast
+// kilocode_change end
+// kilocode_change start - dedicated no-mode direct client configuration
+const NO_MODE_PROVIDER: ProviderSettings["apiProvider"] = "gpt-chat-by"
 // kilocode_change end
 
 export interface TaskOptions extends CreateTaskOptions {
@@ -2676,6 +2681,14 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				// the user hits max requests and denies resetting the count.
 				break
 			} else {
+				// nano mode is text-first and does not require a follow-up "no tools used" loop.
+				const currentMode = (await this.providerRef.deref()?.getState())?.mode ?? defaultModeSlug
+				if (currentMode === "nano") {
+					// Flush queued user messages so the next message can start a fresh turn.
+					this.processQueuedMessages()
+					break
+				}
+
 				// Use the task's locked protocol, NOT the current settings (fallback to xml if not set)
 				nextUserContent = [{ type: "text", text: formatResponse.noToolsUsed(this._taskToolProtocol ?? "xml") }]
 			}
@@ -2791,7 +2804,9 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				includeDiagnosticMessages = true,
 				maxDiagnosticMessages = 50,
 				maxReadFileLine = 500 /*kilocode_change*/,
+				mode,
 			} = (await this.providerRef.deref()?.getState()) ?? {}
+			const isNoModeRequest = (mode ?? defaultModeSlug) === "nano"
 
 			// kilocode_change start
 			const [parsedUserContent, needsRulesFileCheck] = await processKiloUserContentMentions({
@@ -3617,6 +3632,28 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 					// Cline instance to finish aborting (error is thrown here when
 					// any function in the for loop throws due to this.abort).
 					if (!this.abandoned) {
+						const hasAssistantOutput =
+							assistantMessage.length > 0 ||
+							this.assistantMessageContent.some(
+								(block) => block.type === "text" || block.type === "tool_use" || block.type === "mcp_tool_use",
+							)
+
+						const isNoModeStream = (mode ?? defaultModeSlug) === "nano"
+
+						// In nano mode (text-first), if we already received assistant output,
+						// treat this as a post-stream processing hiccup instead of a failed API request.
+						if (!this.abort && isNoModeStream && hasAssistantOutput) {
+							console.warn(
+								`[Task#${this.taskId}.${this.instanceId}] Non-fatal stream post-processing error after assistant output:`,
+								error,
+							)
+							usageMissing = true
+							updateApiReqMsg()
+							await this.saveClineMessages()
+							await this.providerRef.deref()?.postStateToWebview()
+							return false
+						}
+
 						// Determine cancellation reason
 						const cancelReason: ClineApiReqCancelReason = this.abort ? "user_cancelled" : "streaming_failed"
 
@@ -3777,6 +3814,8 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				const hasToolUses = this.assistantMessageContent.some(
 					(block) => block.type === "tool_use" || block.type === "mcp_tool_use",
 				)
+				const isNoModeLoop = (mode ?? defaultModeSlug) === "nano"
+				const shouldIgnoreNoModeToolUses = isNoModeLoop && hasTextContent && hasToolUses
 
 				if (hasTextContent || hasToolUses) {
 					// Reset counter when we get a successful response with content
@@ -3811,9 +3850,11 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 					// Duplicate tool_use IDs cause Anthropic API 400 errors:
 					// "tool_use ids must be unique"
 					const seenToolUseIds = new Set<string>()
-					const toolUseBlocks = this.assistantMessageContent.filter(
-						(block) => block.type === "tool_use" || block.type === "mcp_tool_use",
-					)
+					const toolUseBlocks = shouldIgnoreNoModeToolUses
+						? []
+						: this.assistantMessageContent.filter(
+								(block) => block.type === "tool_use" || block.type === "mcp_tool_use",
+							)
 					for (const block of toolUseBlocks) {
 						if (block.type === "mcp_tool_use") {
 							// McpToolUse already has the original tool name (e.g., "mcp_serverName_toolName")
@@ -3919,11 +3960,21 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 					// If the model did not tool use, then we need to tell it to
 					// either use a tool or attempt_completion.
-					const didToolUse = this.assistantMessageContent.some(
+					if (shouldIgnoreNoModeToolUses) {
+						// nano mode is text-first: ignore tool calls that arrive together
+						// with a text answer to avoid unnecessary follow-up API/tool loops.
+						this.userMessageContent = []
+					}
+
+					const didToolUse = !shouldIgnoreNoModeToolUses && this.assistantMessageContent.some(
 						(block) => block.type === "tool_use" || block.type === "mcp_tool_use",
 					)
 
 					if (!didToolUse) {
+						// nano mode intentionally allows text-only answers without forcing tool retries.
+						if (isNoModeLoop) {
+							this.consecutiveNoToolUseCount = 0
+						} else {
 						// Check for hallucinated tool use pattern
 						const hallucinatedTool = this.assistantMessageContent.find(
 							(block) => block.type === "text" && block.content.trim().match(/^\[Tool Use: .+\]/i),
@@ -3967,6 +4018,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 							type: "text",
 							text: responseText,
 						})
+						}
 					} else {
 						// Reset counter when tools are used successfully
 						this.consecutiveNoToolUseCount = 0
@@ -4101,6 +4153,29 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				// If we reach here without continuing, return false (will always be false for now)
 				return false
 			} catch (error) {
+				// Ensure pending api_req_started entries are finalized so UI loaders don't hang.
+				const lastApiReqIndex = findLastIndex(this.clineMessages, (m) => m.say === "api_req_started")
+				if (lastApiReqIndex >= 0 && this.clineMessages[lastApiReqIndex]) {
+					try {
+						const existingData = JSON.parse(this.clineMessages[lastApiReqIndex].text || "{}")
+						// Only finalize genuinely pending requests. If a request already has
+						// cost or cancelReason, it has already been completed/finalized.
+						const isAlreadyFinalized =
+							existingData?.cost !== undefined || existingData?.cancelReason !== undefined
+						if (!isAlreadyFinalized) {
+							this.clineMessages[lastApiReqIndex].text = JSON.stringify({
+								...existingData,
+								cancelReason: "streaming_failed",
+								streamingFailedMessage: error instanceof Error ? error.message : String(error),
+							} satisfies ClineApiReqInfo)
+							await this.saveClineMessages()
+							await this.providerRef.deref()?.postStateToWebview()
+						}
+					} catch (parseError) {
+						console.error("Failed to finalize api_req_started after loop error:", parseError)
+					}
+				}
+
 				// This should never happen since the only thing that can throw an
 				// error is the attemptApiRequest, which is wrapped in a try catch
 				// that sends an ask where if noButtonClicked, will clear current
@@ -4298,6 +4373,66 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				state, // kilocode_change
 			)
 		})()
+	}
+
+	private async getNoModeSystemPrompt(activeApi: ApiHandler): Promise<string> {
+		const provider = this.providerRef.deref()
+		if (!provider) {
+			throw new Error("Provider not available")
+		}
+
+		const state = await provider.getState()
+		const {
+			mcpEnabled,
+			customModePrompts,
+			customModes,
+			customInstructions,
+			experiments,
+			enableMcpServerCreation,
+			language,
+			maxConcurrentFileReads,
+			apiConfiguration,
+			enableSubfolderRules,
+		} = state ?? {}
+
+		let mcpHub: McpHub | undefined
+		if (mcpEnabled ?? true) {
+			mcpHub = await McpServerManager.getInstance(provider.context, provider)
+			if (!mcpHub) {
+				throw new Error("Failed to get MCP hub from server manager")
+			}
+			await pWaitFor(() => !mcpHub!.isConnecting, { timeout: 10_000 }).catch(() => {
+				console.error("MCP servers failed to connect in time")
+			})
+		}
+
+		const toolProtocol = resolveToolProtocol(apiConfiguration ?? this.apiConfiguration, activeApi.getModel().info, this._taskToolProtocol)
+
+		return buildNoModeSystemPrompt({
+			context: provider.context,
+			cwd: this.cwd,
+			mcpHub: mcpEnabled ? mcpHub : undefined,
+			modelInfo: activeApi.getModel().info,
+			diffStrategy: this.diffEnabled ? this.diffStrategy : undefined,
+			customModePrompts,
+			customModes,
+			globalCustomInstructions: customInstructions,
+			experiments,
+			enableMcpServerCreation,
+			language,
+			rooIgnoreInstructions: this.rooIgnoreController?.getInstructions(),
+			settings: {
+				maxConcurrentFileReads: maxConcurrentFileReads ?? 5,
+				todoListEnabled: apiConfiguration?.todoListEnabled ?? true,
+				useAgentRules: vscode.workspace.getConfiguration(Package.name).get<boolean>("useAgentRules") ?? true,
+				enableSubfolderRules: enableSubfolderRules ?? false,
+				newTaskRequireTodos: vscode.workspace.getConfiguration(Package.name).get<boolean>("newTaskRequireTodos", false),
+				toolProtocol,
+				isStealthModel: activeApi.getModel().info?.isStealthModel,
+			},
+			skillsManager: provider.getSkillsManager(),
+			clineProviderState: state,
+		})
 	}
 
 	private getCurrentProfileId(state: any): string {
@@ -4512,6 +4647,25 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			profileThresholds = {},
 		} = state ?? {}
 
+		// kilocode_change start - configure dedicated nano mode client
+		const effectiveModeSlug = mode ?? defaultModeSlug
+		const isNoMode = effectiveModeSlug === "nano"
+		const noModeApiModelId =
+			[apiConfiguration?.apiModelId, this.apiConfiguration?.apiModelId, gptChatByDefaultModelId].find(
+				(modelId) => typeof modelId === "string" && modelId.trim().length > 0,
+			) ?? gptChatByDefaultModelId
+		const effectiveApiConfiguration = (
+			isNoMode
+				? {
+						...(apiConfiguration ?? this.apiConfiguration),
+						apiProvider: NO_MODE_PROVIDER,
+						apiModelId: noModeApiModelId,
+					}
+				: (apiConfiguration ?? this.apiConfiguration)
+		) as ProviderSettings
+		const activeApi = isNoMode ? buildApiHandler(effectiveApiConfiguration) : this.api
+		// kilocode_change end
+
 		// Get condensing configuration for automatic triggers.
 		const customCondensingPrompt = state?.customCondensingPrompt
 		const condensingApiConfigId = state?.condensingApiConfigId
@@ -4549,25 +4703,25 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		// in the caller.
 		Task.lastGlobalApiRequestTime = performance.now()
 
-		const systemPrompt = await this.getSystemPrompt()
+		const systemPrompt = isNoMode ? await this.getNoModeSystemPrompt(activeApi) : await this.getSystemPrompt()
 		const { contextTokens } = this.getTokenUsage()
 
 		if (contextTokens) {
 			// kilocode_change start: Initialize and adjust virtual quota fallback handler
-			if (this.api instanceof VirtualQuotaFallbackHandler) {
-				await this.api.initialize()
-				await this.api.adjustActiveHandler("Pre-Request Adjustment")
+			if (activeApi instanceof VirtualQuotaFallbackHandler) {
+				await activeApi.initialize()
+				await activeApi.adjustActiveHandler("Pre-Request Adjustment")
 			}
 			// kilocode_change end
-			const modelInfo = this.api.getModel().info
+			const modelInfo = activeApi.getModel().info
 
 			const maxTokens = getModelMaxOutputTokens({
-				modelId: this.api.getModel().id,
+				modelId: activeApi.getModel().id,
 				model: modelInfo,
-				settings: this.apiConfiguration,
+				settings: effectiveApiConfiguration,
 			})
 
-			const contextWindow = this.api.contextWindow ?? modelInfo.contextWindow // kilocode_change
+			const contextWindow = activeApi.contextWindow ?? modelInfo.contextWindow // kilocode_change
 
 			// Get the current profile ID using the helper method
 			const currentProfileId = this.getCurrentProfileId(state)
@@ -4584,8 +4738,8 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			let lastMessageTokens = 0
 			if (lastMessageContent) {
 				lastMessageTokens = Array.isArray(lastMessageContent)
-					? await this.api.countTokens(lastMessageContent)
-					: await this.api.countTokens([{ type: "text", text: lastMessageContent as string }])
+					? await activeApi.countTokens(lastMessageContent)
+					: await activeApi.countTokens([{ type: "text", text: lastMessageContent as string }])
 			}
 
 			const contextManagementWillRun = willManageContext({
@@ -4613,7 +4767,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				totalTokens: contextTokens,
 				maxTokens,
 				contextWindow,
-				apiHandler: this.api,
+				apiHandler: activeApi,
 				autoCondenseContext,
 				autoCondenseContextPercent,
 				systemPrompt,
@@ -4684,7 +4838,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		// being used with an Anthropic extended thinking model. If so, uncondense by removing
 		// the invalid summary and restoring the condensed messages, then re-condense with the
 		// current model (which will produce valid thinking blocks).
-		const currentModelInfo = this.api.getModel().info
+		const currentModelInfo = activeApi.getModel().info
 		const uncondenseResult = uncondenseForExtendedThinking(this.apiConversationHistory, currentModelInfo)
 		if (uncondenseResult.didUncondense) {
 			console.log(
@@ -4695,7 +4849,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 			// After uncondensing, immediately re-condense with the current model to avoid context overflow.
 			// The current model (with extended thinking) will produce valid thinking blocks.
-			const prevContextTokens = await this.api.countTokens(
+			const prevContextTokens = await activeApi.countTokens(
 				this.apiConversationHistory.flatMap((m) =>
 					typeof m.content === "string" ? [{ type: "text" as const, text: m.content }] : m.content,
 				),
@@ -4704,8 +4858,8 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 			const recondenseResult = await summarizeConversation(
 				this.apiConversationHistory,
-				this.api,
-				await this.getSystemPrompt(),
+				activeApi,
+				systemPrompt,
 				this.taskId,
 				prevContextTokens,
 				true, // isAutomaticTrigger
@@ -4733,7 +4887,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		// enabling accurate rewind operations while still sending condensed history to the API.
 		const effectiveHistory = getEffectiveApiHistory(this.apiConversationHistory)
 		const messagesSinceLastSummary = getMessagesSinceLastSummary(effectiveHistory)
-		const messagesWithoutImages = maybeRemoveImageBlocks(messagesSinceLastSummary, this.api)
+		const messagesWithoutImages = maybeRemoveImageBlocks(messagesSinceLastSummary, activeApi)
 		const cleanConversationHistory = this.buildCleanConversationHistory(messagesWithoutImages as ApiMessage[])
 
 		// kilocode_change start
@@ -4758,7 +4912,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		// 2. Model supports native tools
 		// CRITICAL: Use the task's locked protocol to ensure tasks that started with XML
 		// tools continue using XML even if NTC settings have since changed.
-		const modelInfo = this.api.getModel().info
+		const modelInfo = activeApi.getModel().info
 		const taskProtocol = this._taskToolProtocol ?? "xml"
 		const shouldIncludeTools = taskProtocol === TOOL_PROTOCOL.NATIVE && (modelInfo.supportsNativeTools ?? false)
 
@@ -4774,7 +4928,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		// but uses allowedFunctionNames to restrict which tools can be called.
 		// Other providers (Anthropic, OpenAI, etc.) don't support this feature yet,
 		// so they continue to receive only the filtered tools for the current mode.
-		const supportsAllowedFunctionNames = apiConfiguration?.apiProvider === "gemini"
+		const supportsAllowedFunctionNames = !isNoMode && effectiveApiConfiguration?.apiProvider === "gemini"
 
 		if (shouldIncludeTools) {
 			const provider = this.providerRef.deref()
@@ -4782,17 +4936,23 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				throw new Error("Provider reference lost during tool building")
 			}
 
-			// kilocode_change start: hard-guard no-mode to avoid any tool calls
-			const effectiveModeSlug = mode ?? defaultModeSlug
-			const isNoMode = effectiveModeSlug === "no-mode"
-			if (!isNoMode) {
+			if (isNoMode) {
+				allTools = buildNoModeNativeTools({
+					mcpHub: provider.getMcpHub(),
+					maxReadFileLine: state?.maxReadFileLine ?? 500,
+					maxConcurrentFileReads: state?.maxConcurrentFileReads ?? 5,
+					modelInfo,
+					diffEnabled: this.diffEnabled,
+					state,
+				})
+			} else {
 				const toolsResult = await buildNativeToolsArrayWithRestrictions({
 					provider,
 					cwd: this.cwd,
 					mode,
 					customModes: state?.customModes,
 					experiments: state?.experiments,
-					apiConfiguration,
+					apiConfiguration: effectiveApiConfiguration,
 					maxReadFileLine: state?.maxReadFileLine ?? 500 /*kilocode_change*/,
 					maxConcurrentFileReads: state?.maxConcurrentFileReads ?? 5,
 					browserToolEnabled: state?.browserToolEnabled ?? true,
@@ -4806,7 +4966,6 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				allTools = toolsResult.tools
 				allowedFunctionNames = toolsResult.allowedFunctionNames
 			}
-			// kilocode_change end
 		}
 
 		// Parallel tool calls are disabled - feature is on hold
@@ -4841,7 +5000,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		this.skipPrevResponseIdOnce = false
 
 		// The provider accepts reasoning items alongside standard messages; cast to the expected parameter type.
-		const stream = this.api.createMessage(
+		const stream = activeApi.createMessage(
 			systemPrompt,
 			cleanConversationHistory as unknown as Anthropic.Messages.MessageParam[],
 			metadata,
@@ -4881,7 +5040,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		} catch (error) {
 			this.isWaitingForFirstChunk = false
 			// kilocode_change start
-			if (apiConfiguration?.apiProvider !== "gpt-chat-by" && isAnyRecognizedKiloCodeError(error)) {
+			if (effectiveApiConfiguration?.apiProvider !== "gpt-chat-by" && isAnyRecognizedKiloCodeError(error)) {
 				const defaultFreeModel = "mimo/free"
 				this.updateApiConfiguration({
 					...state?.apiConfiguration,
@@ -5433,7 +5592,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				const queued = this.messageQueueService.dequeueMessage()
 				if (queued) {
 					setTimeout(() => {
-						this.submitUserMessage(queued.text, queued.images).catch((err) =>
+						this.submitQueuedMessage(queued.text, queued.images).catch((err) =>
 							console.error(`[Task] Failed to submit queued message:`, err),
 						)
 					}, 0)
@@ -5442,5 +5601,34 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		} catch (e) {
 			console.error(`[Task] Queue processing error:`, e)
 		}
+	}
+
+	private async submitQueuedMessage(text: string, images?: string[]): Promise<void> {
+		const normalizedText = (text ?? "").trim()
+		const normalizedImages = images ?? []
+
+		if (!normalizedText && normalizedImages.length === 0) {
+			return
+		}
+
+		const currentMode = (await this.providerRef.deref()?.getState())?.mode ?? defaultModeSlug
+		if (currentMode !== "nano") {
+			await this.submitUserMessage(normalizedText, normalizedImages)
+			return
+		}
+
+		this.emit(RooCodeEventName.TaskUserMessage, this.taskId)
+		await this.say("user_feedback", normalizedText, normalizedImages)
+		void this.checkpointSave(false, true)
+
+		const newUserContent = addOrMergeUserContent([], [
+			{
+				type: "text",
+				text: `\n\nNew instructions for task continuation:\n<user_message>\n${normalizedText}\n</user_message>`,
+			},
+			...formatResponse.imageBlocks(normalizedImages),
+		])
+
+		await this.initiateTaskLoop(newUserContent)
 	}
 }

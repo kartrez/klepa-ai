@@ -5,6 +5,7 @@ import { customToolRegistry } from "@roo-code/core"
 import { type Mode, FileRestrictionError, getModeBySlug, getGroupName } from "../../shared/modes"
 import { EXPERIMENT_IDS } from "../../shared/experiments"
 import { TOOL_GROUPS, ALWAYS_AVAILABLE_TOOLS } from "../../shared/tools"
+import { NANO_MODE_ALLOWED_TOOL_SET } from "../modes/nano/constants"
 
 /**
  * Checks if a tool name is a valid, known tool.
@@ -87,6 +88,10 @@ export function isToolAllowedForMode(
 	experiments?: Record<string, boolean>,
 	includedTools?: string[], // Opt-in tools explicitly included (e.g., from modelInfo)
 ): boolean {
+	if (modeSlug === "nano") {
+		return tool.startsWith("mcp_") || NANO_MODE_ALLOWED_TOOL_SET.has(tool)
+	}
+
 	// Always allow these tools
 	if (ALWAYS_AVAILABLE_TOOLS.includes(tool as any)) {
 		return true

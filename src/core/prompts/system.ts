@@ -76,10 +76,6 @@ async function generatePrompt(
 	skillsManager?: SkillsManager,
 	clineProviderState?: ClineProviderState, // kilocode_change
 ): Promise<string> {
-	if (mode === "no-mode") {
-		return ""
-	}
-
 	if (!context) {
 		throw new Error("Extension context is required for generating system prompt")
 	}
@@ -172,7 +168,6 @@ ${await addCustomInstructions(baseInstructions, globalCustomInstructions || "", 
 	localRulesToggleState: context.workspaceState.get("localRulesToggles"), // kilocode_change
 	globalRulesToggleState: context.globalState.get("globalRulesToggles"), // kilocode_change
 	settings,
-	skipRules: mode === "no-mode",
 })}`
 
 	// kilocode_change start: Append custom system prompt from CLI if provided
@@ -214,10 +209,6 @@ export const SYSTEM_PROMPT = async (
 
 	const mode =
 		getModeBySlug(inputMode, customModes)?.slug || modes.find((m) => m.slug === inputMode)?.slug || defaultModeSlug // kilocode_change: don't try to use non-existent modes
-
-	if (mode === "no-mode") {
-		return ''
-	}
 
 	// Try to load custom system prompt from file
 	const variablesForPrompt: PromptVariables = {

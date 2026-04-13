@@ -8,6 +8,7 @@ import { extractTextFromFile } from "../../../integrations/misc/extract-text"
 import { parseSourceCodeDefinitionsForFile } from "../../../services/tree-sitter"
 import { isBinaryFile } from "isbinaryfile"
 import { ReadFileToolUse, ToolParamName, ToolResponse } from "../../../shared/tools"
+import { defaultModeSlug } from "../../../shared/modes"
 import { readFileTool } from "../ReadFileTool"
 
 vi.mock("path", async () => {
@@ -213,6 +214,7 @@ function createMockCline(): any {
 	const mockCline: any = {
 		cwd: "/",
 		task: "Test",
+		getTaskMode: vi.fn().mockResolvedValue(defaultModeSlug),
 		providerRef: mockProvider,
 		rooIgnoreController: {
 			validateAccess: vi.fn().mockReturnValue(true),
@@ -2011,5 +2013,42 @@ describe("read_file tool concurrent file reads limit", () => {
 		// Should use default limit of 5 and reject 6 files
 		expect(toolResult).toContain("Error: Too many files requested")
 		expect(toolResult).toContain("but the concurrent file reads limit is 5")
+	})
+
+	it("should apply nano concurrent-read floor so default setting allows larger batches", async () => {
+		mockCline.getTaskMode.mockResolvedValue("nano")
+		mockProvider.getState.mockResolvedValue({
+			maxReadFileLine: -1,
+			maxConcurrentFileReads: 5,
+			maxImageFileSize: 20,
+			maxTotalImageSize: 20,
+		})
+
+		const files = Array.from({ length: 9 }, (_, i) => `<file><path>file${i + 1}.txt</path></file>`)
+		const toolUse: ReadFileToolUse = {
+			type: "tool_use",
+			name: "read_file",
+			params: { args: files.join("") },
+			partial: false,
+		}
+
+		mockReadFileWithTokenBudget.mockResolvedValue({
+			content: "test content",
+			tokenCount: 10,
+			lineCount: 1,
+			complete: true,
+		})
+
+		await readFileTool.handle(mockCline, toolUse, {
+			askApproval: mockCline.ask,
+			handleError: vi.fn(),
+			pushToolResult: (result: ToolResponse) => {
+				toolResult = result
+			},
+			removeClosingTag: (_: ToolParamName, content?: string) => content ?? "",
+			toolProtocol: "xml",
+		})
+
+		expect(toolResult).not.toContain("Error: Too many files requested")
 	})
 })

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
 import { SYSTEM_PROMPT } from "../system"
-import { buildNoModeSystemPrompt } from "../../modes/nano/client-context"
+import { buildNanoModeSystemPrompt } from "../../modes/nano/client-context"
 
 // Mock vscode
 vi.mock("vscode", () => ({
@@ -32,7 +32,7 @@ describe("nano mode minimal context", () => {
 	})
 
 	it("should build dedicated nano mode system prompt", async () => {
-		const prompt = await buildNoModeSystemPrompt({
+		const prompt = await buildNanoModeSystemPrompt({
 			context: mockContext,
 			cwd: "/test/cwd",
 			settings: {
@@ -47,12 +47,13 @@ describe("nano mode minimal context", () => {
 		expect(prompt).not.toBe("")
 		expect(prompt).toContain("Nano mode")
 		expect(prompt).toContain("read_file")
+		expect(prompt).toContain("list_files")
 		expect(prompt).toContain("write_to_file")
 		expect(prompt).toContain("apply_diff")
 	})
 
 	it("should omit detailed tool hints for native-tools models", async () => {
-		const prompt = await buildNoModeSystemPrompt({
+		const prompt = await buildNanoModeSystemPrompt({
 			context: mockContext,
 			cwd: "/test/cwd",
 			modelInfo: { supportsNativeTools: true } as any,

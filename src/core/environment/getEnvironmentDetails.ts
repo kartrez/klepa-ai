@@ -22,6 +22,7 @@ import { getGitStatus } from "../../utils/git"
 
 import { Task } from "../task/Task"
 import { formatReminderSection } from "./reminder"
+import { estimateNanoEnvironmentTokens, NANO_ENV_MAX_ESTIMATED_TOKENS } from "../modes/nano/context-policy"
 
 // kilocode_change start
 import { OpenRouterHandler } from "../../api/providers/openrouter"
@@ -87,11 +88,11 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 		.slice(0, maxWorkspaceFiles)
 
 	if (requestedMode === "nano") {
-		const visibleLines = visibleFilePaths.map((relativePath) => relativePath.toPosix()).filter(Boolean)
+		const fullVisibleLines = visibleFilePaths.map((relativePath) => relativePath.toPosix()).filter(Boolean)
 		const { id: modelId, info: modelInfo } = cline.api.getModel()
 		const toolProtocol = resolveToolProtocol(state?.apiConfiguration ?? {}, modelInfo, cline.taskToolProtocol)
 
-		const compactDetails: string[] = [
+		const baseCompact: string[] = [
 			"# Current Mode",
 			`<slug>${requestedMode}</slug>`,
 			`<model>${modelId}</model>`,
@@ -99,10 +100,17 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 			`<workspace>${cline.cwd.toPosix()}</workspace>`,
 		]
 
-		if (includeFileDetails) {
-			const maxFiles = maxWorkspaceFiles ?? 200
-			if (maxFiles > 0) {
-				const fetchLimit = showRooIgnoredFiles ? maxFiles : maxFiles * FILE_LIST_OVER_FETCH_MULTIPLIER
+		let maxFilesBudget = maxWorkspaceFiles ?? 200
+		let useVisible = true
+		let built = ""
+
+		// Degrade: shrink workspace file list, then drop visible files until under token budget.
+		for (let iter = 0; iter < 24; iter++) {
+			const compactDetails = [...baseCompact]
+			if (includeFileDetails && maxFilesBudget > 0) {
+				const fetchLimit = showRooIgnoredFiles
+					? maxFilesBudget
+					: maxFilesBudget * FILE_LIST_OVER_FETCH_MULTIPLIER
 				const [files, didHitLimit] = await listFiles(cline.cwd, true, fetchLimit)
 				const result = formatResponse.formatFilesList(
 					cline.cwd,
@@ -111,14 +119,27 @@ export async function getEnvironmentDetails(cline: Task, includeFileDetails: boo
 					cline.rooIgnoreController,
 					showRooIgnoredFiles,
 				)
-
 				compactDetails.push("")
 				compactDetails.push(`# Current Workspace Directory (${cline.cwd.toPosix()}) Files`)
-				compactDetails.push(showRooIgnoredFiles ? result : trimFileList(result, maxFiles))
+				compactDetails.push(showRooIgnoredFiles ? result : trimFileList(result, maxFilesBudget))
 			}
+			const vis = useVisible ? fullVisibleLines : []
+			built = buildNoModeEnvironmentString(compactDetails, vis)
+			if (estimateNanoEnvironmentTokens(built) <= NANO_ENV_MAX_ESTIMATED_TOKENS) {
+				break
+			}
+			if (includeFileDetails && maxFilesBudget > 24) {
+				maxFilesBudget = Math.max(24, Math.floor(maxFilesBudget / 2))
+				continue
+			}
+			if (useVisible) {
+				useVisible = false
+				continue
+			}
+			break
 		}
 
-		return buildNoModeEnvironmentString(compactDetails, visibleLines)
+		return built
 	}
 
 	// Filter paths through rooIgnoreController

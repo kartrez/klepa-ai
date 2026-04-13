@@ -99,7 +99,11 @@ import { sanitizeToolUseId } from "../../utils/tool-id"
 // prompts
 import { formatResponse } from "../prompts/responses"
 import { SYSTEM_PROMPT } from "../prompts/system"
-import { buildNoModeSystemPrompt, buildNoModeNativeTools } from "../modes/nano/client-context"
+import { buildNanoModeSystemPrompt, buildNoModeNativeTools } from "../modes/nano/client-context"
+import {
+	getNanoEffectiveCondensePercent,
+	stripEnvironmentDetailsFromOlderUserTurns,
+} from "../modes/nano/context-policy"
 import {
 	applyPickedModelIdToSettings,
 	pickSimilarFallbackModelId,
@@ -362,6 +366,8 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 	// kilocode_change start: temporary model swap (similar-model fallback or MODEL_NO_TOOLS hard switch)
 	private temporaryModelSwapOriginal: ProviderSettings | null = null
 	private temporaryModelSwapActive = false
+	/** Reuse nano `<environment_details>` on stream retries (same user turn). */
+	private cachedNanoEnvironmentDetails?: string
 	// kilocode_change end
 	private static lastGlobalApiRequestTime?: number
 	private autoApprovalHandler: AutoApprovalHandler
@@ -2806,7 +2812,10 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				maxReadFileLine = 500 /*kilocode_change*/,
 				mode,
 			} = (await this.providerRef.deref()?.getState()) ?? {}
-			const isNoModeRequest = (mode ?? defaultModeSlug) === "nano"
+			const isNanoModeRequest = (mode ?? defaultModeSlug) === "nano"
+			if (isNanoModeRequest && (currentItem.retryAttempt ?? 0) === 0 && !currentItem.userMessageWasRemoved) {
+				this.cachedNanoEnvironmentDetails = undefined
+			}
 
 			// kilocode_change start
 			const [parsedUserContent, needsRulesFileCheck] = await processKiloUserContentMentions({
@@ -2830,7 +2839,18 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			}
 			// kilocode_change end
 
-			const environmentDetails = await getEnvironmentDetails(this, currentIncludeFileDetails)
+			let environmentDetails: string
+			if (isNanoModeRequest && (currentItem.retryAttempt ?? 0) > 0 && this.cachedNanoEnvironmentDetails) {
+				console.debug(
+					`[Task#${this.taskId}] nano: reusing cached environment_details (retry ${currentItem.retryAttempt ?? 0})`,
+				)
+				environmentDetails = this.cachedNanoEnvironmentDetails
+			} else {
+				environmentDetails = await getEnvironmentDetails(this, currentIncludeFileDetails)
+			}
+			if (isNanoModeRequest) {
+				this.cachedNanoEnvironmentDetails = environmentDetails
+			}
 
 			// Remove any existing environment_details blocks before adding fresh ones.
 			// This prevents duplicate environment details when resuming tasks with XML tool calls,
@@ -3815,7 +3835,9 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 					(block) => block.type === "tool_use" || block.type === "mcp_tool_use",
 				)
 				const isNoModeLoop = (mode ?? defaultModeSlug) === "nano"
-				const shouldIgnoreNoModeToolUses = isNoModeLoop && hasTextContent && hasToolUses
+				// kilocode_change: Do not strip tool_use / tool results in Nano when the model sends
+				// text and tools in one message. That optimization dropped tool_result payloads after
+				// user approval and stopped the agent until the user sent a new chat message.
 
 				if (hasTextContent || hasToolUses) {
 					// Reset counter when we get a successful response with content
@@ -3850,11 +3872,9 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 					// Duplicate tool_use IDs cause Anthropic API 400 errors:
 					// "tool_use ids must be unique"
 					const seenToolUseIds = new Set<string>()
-					const toolUseBlocks = shouldIgnoreNoModeToolUses
-						? []
-						: this.assistantMessageContent.filter(
-								(block) => block.type === "tool_use" || block.type === "mcp_tool_use",
-							)
+					const toolUseBlocks = this.assistantMessageContent.filter(
+						(block) => block.type === "tool_use" || block.type === "mcp_tool_use",
+					)
 					for (const block of toolUseBlocks) {
 						if (block.type === "mcp_tool_use") {
 							// McpToolUse already has the original tool name (e.g., "mcp_serverName_toolName")
@@ -3960,13 +3980,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 					// If the model did not tool use, then we need to tell it to
 					// either use a tool or attempt_completion.
-					if (shouldIgnoreNoModeToolUses) {
-						// nano mode is text-first: ignore tool calls that arrive together
-						// with a text answer to avoid unnecessary follow-up API/tool loops.
-						this.userMessageContent = []
-					}
-
-					const didToolUse = !shouldIgnoreNoModeToolUses && this.assistantMessageContent.some(
+					const didToolUse = this.assistantMessageContent.some(
 						(block) => block.type === "tool_use" || block.type === "mcp_tool_use",
 					)
 
@@ -4375,7 +4389,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		})()
 	}
 
-	private async getNoModeSystemPrompt(activeApi: ApiHandler): Promise<string> {
+	private async getNanoModeSystemPrompt(activeApi: ApiHandler): Promise<string> {
 		const provider = this.providerRef.deref()
 		if (!provider) {
 			throw new Error("Provider not available")
@@ -4408,7 +4422,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 		const toolProtocol = resolveToolProtocol(apiConfiguration ?? this.apiConfiguration, activeApi.getModel().info, this._taskToolProtocol)
 
-		return buildNoModeSystemPrompt({
+		return buildNanoModeSystemPrompt({
 			context: provider.context,
 			cwd: this.cwd,
 			mcpHub: mcpEnabled ? mcpHub : undefined,
@@ -4649,13 +4663,16 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 		// kilocode_change start - configure dedicated nano mode client
 		const effectiveModeSlug = mode ?? defaultModeSlug
-		const isNoMode = effectiveModeSlug === "nano"
+		const isNanoMode = effectiveModeSlug === "nano"
+		const condensePercentForContext = isNanoMode
+			? getNanoEffectiveCondensePercent(autoCondenseContextPercent)
+			: autoCondenseContextPercent
 		const noModeApiModelId =
 			[apiConfiguration?.apiModelId, this.apiConfiguration?.apiModelId, gptChatByDefaultModelId].find(
 				(modelId) => typeof modelId === "string" && modelId.trim().length > 0,
 			) ?? gptChatByDefaultModelId
 		const effectiveApiConfiguration = (
-			isNoMode
+			isNanoMode
 				? {
 						...(apiConfiguration ?? this.apiConfiguration),
 						apiProvider: NO_MODE_PROVIDER,
@@ -4663,7 +4680,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 					}
 				: (apiConfiguration ?? this.apiConfiguration)
 		) as ProviderSettings
-		const activeApi = isNoMode ? buildApiHandler(effectiveApiConfiguration) : this.api
+		const activeApi = isNanoMode ? buildApiHandler(effectiveApiConfiguration) : this.api
 		// kilocode_change end
 
 		// Get condensing configuration for automatic triggers.
@@ -4703,7 +4720,16 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		// in the caller.
 		Task.lastGlobalApiRequestTime = performance.now()
 
-		const systemPrompt = isNoMode ? await this.getNoModeSystemPrompt(activeApi) : await this.getSystemPrompt()
+		const systemPrompt = isNanoMode ? await this.getNanoModeSystemPrompt(activeApi) : await this.getSystemPrompt()
+		if (isNanoMode) {
+			const strippedOlderEnv = stripEnvironmentDetailsFromOlderUserTurns(this.apiConversationHistory)
+			if (strippedOlderEnv !== this.apiConversationHistory) {
+				console.debug(
+					`[Task#${this.taskId}] nano: removed stale environment_details from older user turns before request`,
+				)
+				await this.overwriteApiConversationHistory(strippedOlderEnv)
+			}
+		}
 		const { contextTokens } = this.getTokenUsage()
 
 		if (contextTokens) {
@@ -4747,7 +4773,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				contextWindow,
 				maxTokens,
 				autoCondenseContext,
-				autoCondenseContextPercent,
+				autoCondenseContextPercent: condensePercentForContext,
 				profileThresholds,
 				currentProfileId,
 				lastMessageTokens,
@@ -4769,7 +4795,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				contextWindow,
 				apiHandler: activeApi,
 				autoCondenseContext,
-				autoCondenseContextPercent,
+				autoCondenseContextPercent: condensePercentForContext,
 				systemPrompt,
 				taskId: this.taskId,
 				customCondensingPrompt,
@@ -4928,7 +4954,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		// but uses allowedFunctionNames to restrict which tools can be called.
 		// Other providers (Anthropic, OpenAI, etc.) don't support this feature yet,
 		// so they continue to receive only the filtered tools for the current mode.
-		const supportsAllowedFunctionNames = !isNoMode && effectiveApiConfiguration?.apiProvider === "gemini"
+		const supportsAllowedFunctionNames = !isNanoMode && effectiveApiConfiguration?.apiProvider === "gemini"
 
 		if (shouldIncludeTools) {
 			const provider = this.providerRef.deref()
@@ -4936,7 +4962,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				throw new Error("Provider reference lost during tool building")
 			}
 
-			if (isNoMode) {
+			if (isNanoMode) {
 				allTools = buildNoModeNativeTools({
 					mcpHub: provider.getMcpHub(),
 					maxReadFileLine: state?.maxReadFileLine ?? 500,

@@ -12,6 +12,7 @@ import { getModeBySlug, getModeSelection, getGroupName, modes } from "../../../s
 import { type SystemPromptSettings } from "../../prompts/types"
 import {
 	getReadFileDescription,
+	getListFilesDescription,
 	getWriteToFileDescription,
 	getAskFollowupQuestionDescription,
 	getAttemptCompletionDescription,
@@ -29,7 +30,7 @@ function hasAnyMcpResources(mcpHub: McpHub): boolean {
 	return mcpHub.getServers().some((server) => server.resources && server.resources.length > 0)
 }
 
-function getNoModePromptComponent(
+function getNanoModePromptComponent(
 	customModePrompts: CustomModePrompts | undefined,
 ): CustomModePrompts[string] | undefined {
 	const component = customModePrompts?.[NO_MODE_SLUG]
@@ -47,6 +48,7 @@ function getNoModeToolCatalogXml(cwd: string, diffStrategy: DiffStrategy | undef
 
 	const descriptions = [
 		getReadFileDescription(toolArgs),
+		getListFilesDescription(toolArgs),
 		getWriteToFileDescription(toolArgs),
 		diffStrategy ? diffStrategy.getToolDescription({ cwd, toolOptions: undefined }) : "",
 		getAskFollowupQuestionDescription(),
@@ -120,7 +122,7 @@ export interface BuildNoModeSystemPromptOptions {
 	clineProviderState?: ClineProviderState
 }
 
-export async function buildNoModeSystemPrompt(options: BuildNoModeSystemPromptOptions): Promise<string> {
+export async function buildNanoModeSystemPrompt(options: BuildNoModeSystemPromptOptions): Promise<string> {
 	const {
 		context,
 		cwd,
@@ -137,7 +139,7 @@ export async function buildNoModeSystemPrompt(options: BuildNoModeSystemPromptOp
 		clineProviderState,
 	} = options
 
-	const promptComponent = getNoModePromptComponent(customModePrompts)
+	const promptComponent = getNanoModePromptComponent(customModePrompts)
 	const modeConfig = getModeBySlug(NO_MODE_SLUG, customModes) || modes.find((m) => m.slug === NO_MODE_SLUG)
 	const { roleDefinition, baseInstructions } = getModeSelection(NO_MODE_SLUG, promptComponent, customModes)
 	const hasMcpGroup = modeConfig?.groups.some((groupEntry) => getGroupName(groupEntry) === "mcp") ?? true

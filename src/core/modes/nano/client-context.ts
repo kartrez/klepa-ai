@@ -23,6 +23,7 @@ import { addCustomInstructions } from "../../prompts/sections"
 import type { ToolArgs } from "../../prompts/tools/types"
 import { getNativeTools, getMcpServerTools } from "../../prompts/tools/native-tools"
 import { NANO_MODE_ALLOWED_TOOL_SET, NANO_MODE_PRIMARY_TOOLS } from "./constants"
+import { NANO_MINI_SYSTEM_INSTRUCTIONS } from "./nano-system-instructions-mini"
 
 const NO_MODE_SLUG = "nano"
 
@@ -153,15 +154,28 @@ export async function buildNanoModeSystemPrompt(options: BuildNoModeSystemPrompt
 		? ""
 		: `\n\n${getNoModeToolCatalogXml(cwd, diffStrategy, shouldIncludeMcp ? mcpHub : undefined)}`
 
+	const customInstructionsSettings: SystemPromptSettings | undefined = hasNativeToolsSupport
+		? {
+				...(settings ?? {}),
+				// nano-native uses a small curated instruction block; keep AGENTS.md/rules opt-out to save tokens.
+				useAgentRules: false,
+		  }
+		: settings
+
 	const customInstructionsSection = await addCustomInstructions(baseInstructions, globalCustomInstructions || "", cwd, NO_MODE_SLUG, {
 		language: language ?? formatLanguage(vscode.env.language),
 		rooIgnoreInstructions,
 		localRulesToggleState: context.workspaceState.get("localRulesToggles"),
 		globalRulesToggleState: context.globalState.get("globalRulesToggles"),
-		settings,
+		settings: customInstructionsSettings,
 	})
 
-	const basePrompt = `${roleDefinition}
+	const nanoMiniSystemText = hasNativeToolsSupport ? NANO_MINI_SYSTEM_INSTRUCTIONS : ""
+	const combinedCustomInstructionsSection = hasNativeToolsSupport
+		? [nanoMiniSystemText, customInstructionsSection].filter(Boolean).join("\n\n")
+		: customInstructionsSection
+
+	const assembleBasePrompt = (mcpText: string, skillsText: string, customText: string) => `${roleDefinition}
 
 You are operating in Nano mode. Keep context usage ultra-minimal and responses concise for software development tasks.
 This mode is optimized to reduce context token usage by up to 75%, especially for models that do not support context caching.
@@ -172,13 +186,18 @@ When tools are available, execute exactly one clear action per step and avoid ve
 			: "\nUse the provided tool descriptions below and follow their format requirements exactly."
 	}${noModeToolCatalog}
 
-${mcpSection}
-${skillsSection ? `\n${skillsSection}` : ""}
+${mcpText}
+${skillsText ? `\n${skillsText}` : ""}
 
-${customInstructionsSection}`
+${customText}`
 
 	const appendSystemPrompt = clineProviderState?.appendSystemPrompt
-	return appendSystemPrompt ? `${basePrompt}\n\n${appendSystemPrompt}` : basePrompt
+	const buildFinal = (mcpText: string, skillsText: string, customText: string) => {
+		const core = assembleBasePrompt(mcpText, skillsText, customText)
+		return appendSystemPrompt ? `${core}\n\n${appendSystemPrompt}` : core
+	}
+
+	return buildFinal(mcpSection, skillsSection, combinedCustomInstructionsSection)
 }
 
 export interface BuildNoModeNativeToolsOptions {

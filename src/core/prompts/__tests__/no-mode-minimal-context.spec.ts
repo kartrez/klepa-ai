@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
+import fs from "fs/promises"
+import path from "path"
 
 import { SYSTEM_PROMPT } from "../system"
 import { buildNanoModeSystemPrompt } from "../../modes/nano/client-context"
+import { NANO_MINI_SYSTEM_INSTRUCTIONS_MARKER } from "../../modes/nano/nano-system-instructions-mini"
 
 // Mock vscode
 vi.mock("vscode", () => ({
@@ -68,6 +71,33 @@ describe("nano mode minimal context", () => {
 
 		expect(prompt).not.toContain("## read_file")
 		expect(prompt).not.toContain("## write_to_file")
+	})
+
+	it("should use mini nano system instructions for native-tools models", async () => {
+		const tmpDir = await fs.mkdtemp(path.join(process.cwd(), "tmp-nano-mini-agents-"))
+		try {
+			// Put a distinctive AGENTS.md string; nano-native should not include it.
+			await fs.writeFile(path.join(tmpDir, "AGENTS.md"), "AGENTS_SENTINEL_FOR_TEST_12345", "utf-8")
+
+			const prompt = await buildNanoModeSystemPrompt({
+				context: mockContext,
+				cwd: tmpDir,
+				modelInfo: { supportsNativeTools: true } as any,
+				settings: {
+					maxConcurrentFileReads: 5,
+					todoListEnabled: true,
+					useAgentRules: true,
+					newTaskRequireTodos: false,
+					toolProtocol: "native",
+				},
+			})
+
+			expect(prompt).toContain(NANO_MINI_SYSTEM_INSTRUCTIONS_MARKER)
+			expect(prompt).toContain("USER'S CUSTOM INSTRUCTIONS")
+			expect(prompt).not.toContain("AGENTS_SENTINEL_FOR_TEST_12345")
+		} finally {
+			await fs.rm(tmpDir, { recursive: true, force: true })
+		}
 	})
 
 	it("should return non-empty system prompt for code mode", async () => {

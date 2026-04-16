@@ -157,7 +157,6 @@ export const gptChatByModels = {
 				outputPrice: 18.0 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 			},
 		],
-		recommended: true,
 	},
 	"deepseek/deepseek-v3.2": {
 		maxTokens: 32768,
@@ -204,6 +203,7 @@ export const gptChatByModels = {
 		inputPrice: 0.3 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		outputPrice: 1.2 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `MiniMax M2.7`,
+		recommended: true,
 	},
 	"mimo/v2-omni": {
 		maxTokens: 65_000,
@@ -303,6 +303,7 @@ export const gptChatByModels = {
 		inputPrice: 1.4 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		outputPrice: 4.4 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `GLM-5.1 is Z.ai’s flagship open-source foundation model engineered for complex systems design and long-horizon agent workflows. `,
+		recommended: true,
 	},
 	"anthropic/claude-opus-4.6": {
 		maxTokens: 128_000, // Overridden to 8k if `enableReasoningEffort` is false.
@@ -329,7 +330,6 @@ export const gptChatByModels = {
 			},
 		],
 		description: `Anthropic claude opus 4.6. Top performance model`,
-		recommended: true,
 	},
 	"anthropic/claude-sonnet-4.6": {
 		maxTokens: 128_000,
@@ -349,7 +349,6 @@ export const gptChatByModels = {
 				cacheReadsPrice: 0.6, // $0.60 per million tokens (>200K context)
 			},
 		],
-		recommended: true,
 	},
 	"anthropic/claude-haiku-4.5": {
 		maxTokens: 64_000,
@@ -370,7 +369,6 @@ export const gptChatByModels = {
 	 	inputPrice: 0.2 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 	 	outputPrice: 1.25 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 	 	description: `Open AI gpt 5.4 Nano`,
-		recommended: true,
 	},
 	"openai/gpt-5.4-mini": {
 		maxTokens: 128_000,
@@ -392,7 +390,6 @@ export const gptChatByModels = {
 		inputPrice: 2.5 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		outputPrice: 15 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `Open AI gpt 5.4`,
-		recommended: true,
 	},
 	"x-ai/grok-4.20": {
 		maxTokens: 2_000_000,

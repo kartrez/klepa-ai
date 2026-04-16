@@ -2970,7 +2970,7 @@ export const webviewMessageHandler = async (
 				await provider.contextProxy.setValue("gptChatProfileHasSubscription", profile.hasSubscription)
 				if (!profile.hasSubscription) {
 					await provider.contextProxy.setValue("apiProvider", "gpt-chat-by")
-					await provider.contextProxy.setValue("apiModelId", "mimo/free")
+					await provider.contextProxy.setValue("apiModelId", "klepa/free")
 				}
 				await provider.postStateToWebview()
 				provider.postMessageToWebview({

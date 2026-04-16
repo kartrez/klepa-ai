@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react"
-import { SelectDropdown, DropdownOptionType, type DropdownOption } from "@/components/ui"
+import { SelectDropdown, DropdownOptionType, ToggleSwitch, StandardTooltip, type DropdownOption } from "@/components/ui"
 import { OPENROUTER_DEFAULT_PROVIDER_NAME, type ProviderSettings } from "@roo-code/types"
 import { vscode } from "@src/utils/vscode"
 import { OCAModelService } from "@src/services/OCAModelService"
@@ -17,6 +17,34 @@ interface ModelSelectorProps {
 	fallbackText: string
 	virtualQuotaActiveModel?: { id: string; name: string; activeProfileNumber?: number } // kilocode_change: Add virtual quota active model for UI display
 }
+
+// kilocode_change start
+const FREE_MODELS_SECTION_VALUE = "__label_free__"
+const RECOMMENDED_MODELS_SECTION_VALUE = "__label_recommended__"
+const ALL_MODELS_SECTION_VALUE = "__label_all__"
+const MODELS_SECTION_SEPARATOR_VALUE = "__sep__"
+
+const formatModelPriceValue = (price: unknown): string | null => {
+	const parsedPrice = typeof price === "number" ? price : Number(price)
+	if (!Number.isFinite(parsedPrice)) {
+		return null
+	}
+	return parsedPrice.toFixed(1)
+}
+
+const formatModelPriceLabel = (model: { inputPrice?: unknown; outputPrice?: unknown } | undefined): string | null => {
+	const inputPrice = formatModelPriceValue(model?.inputPrice)
+	const outputPrice = formatModelPriceValue(model?.outputPrice)
+	if (!inputPrice || !outputPrice) {
+		return null
+	}
+	return `${inputPrice}/${outputPrice}$`
+}
+
+const isFreeModel = (model: { isFree?: unknown } | undefined): boolean => {
+	return model?.isFree === true
+}
+// kilocode_change end
 
 export const ModelSelector = ({
 	currentApiConfigName,
@@ -42,19 +70,47 @@ export const ModelSelector = ({
 	const options = useMemo(() => {
 		const result: DropdownOption[] = []
 
-		// Check if selected model is missing from the lists
+		// kilocode_change start: group free/recommended/rest models
 		const allModelIds = [...preferredModelIds, ...restModelIds]
 		const isMissingSelectedModel = selectedModelId && !allModelIds.includes(selectedModelId)
+		const freeModelIdSet = new Set(allModelIds.filter((modelId) => isFreeModel(providerModels[modelId])))
+		const freeModelIds = allModelIds.filter((modelId) => freeModelIdSet.has(modelId))
+		const recommendedModelIds = preferredModelIds.filter((modelId) => !freeModelIdSet.has(modelId))
+		const allOtherModelIds = restModelIds.filter((modelId) => !freeModelIdSet.has(modelId))
+		// kilocode_change end
 
-		// Add "Recommended models" section if there are preferred models
-		if (preferredModelIds.length > 0) {
+		// kilocode_change start: free models section first
+		if (freeModelIds.length > 0) {
 			result.push({
-				value: "__label_recommended__",
+				value: FREE_MODELS_SECTION_VALUE,
+				label: t("settings:modelPicker.freeModels"),
+				type: DropdownOptionType.LABEL,
+			})
+
+			freeModelIds.forEach((modelId) => {
+				result.push({
+					value: modelId,
+					label: providerModels[modelId]?.displayName ?? prettyModelName(modelId),
+					type: DropdownOptionType.ITEM,
+				})
+			})
+		}
+
+		if (recommendedModelIds.length > 0) {
+			if (result.length > 0) {
+				result.push({
+					value: MODELS_SECTION_SEPARATOR_VALUE,
+					label: "—",
+					type: DropdownOptionType.SEPARATOR,
+				})
+			}
+			result.push({
+				value: RECOMMENDED_MODELS_SECTION_VALUE,
 				label: t("settings:modelPicker.recommendedModels"),
 				type: DropdownOptionType.LABEL,
 			})
 
-			preferredModelIds.forEach((modelId) => {
+			recommendedModelIds.forEach((modelId) => {
 				result.push({
 					value: modelId,
 					label: `★ ${providerModels[modelId]?.displayName ?? prettyModelName(modelId)}`,
@@ -64,16 +120,16 @@ export const ModelSelector = ({
 		}
 
 		// Add "All models" section
-		if (restModelIds.length > 0) {
-			if (preferredModelIds.length > 0) {
+		if (allOtherModelIds.length > 0) {
+			if (result.length > 0) {
 				result.push({
-					value: "__sep__",
+					value: MODELS_SECTION_SEPARATOR_VALUE,
 					label: "—",
 					type: DropdownOptionType.SEPARATOR,
 				})
 			}
 			result.push({
-				value: "__label_all__",
+				value: ALL_MODELS_SECTION_VALUE,
 				label: t("settings:modelPicker.allModels"),
 				type: DropdownOptionType.LABEL,
 			})
@@ -87,7 +143,7 @@ export const ModelSelector = ({
 				})
 			}
 
-			restModelIds.forEach((modelId) => {
+			allOtherModelIds.forEach((modelId) => {
 				result.push({
 					value: modelId,
 					label: providerModels[modelId]?.displayName ?? prettyModelName(modelId),
@@ -107,6 +163,25 @@ export const ModelSelector = ({
 	}, [preferredModelIds, restModelIds, providerModels, selectedModelId, t])
 
 	const disabled = isLoading || isError || isAutocomplete
+	// kilocode_change start
+	const isGptChatByProvider = provider === "gpt-chat-by"
+	const isAutoModeEnabled = isGptChatByProvider && selectedModelId === "klepa/auto"
+
+	const updateModelSelection = (modelId: string) => {
+		if (!currentApiConfigName) {
+			return
+		}
+		vscode.postMessage({
+			type: "upsertApiConfiguration",
+			text: currentApiConfigName,
+			apiConfiguration: {
+				...apiConfiguration,
+				[modelIdKey]: modelId,
+				openRouterSpecificProvider: OPENROUTER_DEFAULT_PROVIDER_NAME,
+			},
+		})
+	}
+	// kilocode_change end
 
 	useEffect(() => {
 		if (provider !== "oca") return
@@ -159,15 +234,7 @@ export const ModelSelector = ({
 				console.debug("ModelSelector: failure setting selected OCA model on change", err)
 			}
 		}
-		vscode.postMessage({
-			type: "upsertApiConfiguration",
-			text: currentApiConfigName,
-			apiConfiguration: {
-				...apiConfiguration,
-				[modelIdKey]: value,
-				openRouterSpecificProvider: OPENROUTER_DEFAULT_PROVIDER_NAME,
-			},
-		})
+		updateModelSelection(value)
 	}
 
 	const onAcknowledge = () => {
@@ -176,15 +243,7 @@ export const ModelSelector = ({
 			setPendingModelId(null)
 			return
 		}
-		vscode.postMessage({
-			type: "upsertApiConfiguration",
-			text: currentApiConfigName,
-			apiConfiguration: {
-				...apiConfiguration,
-				[modelIdKey]: pendingModelId,
-				openRouterSpecificProvider: OPENROUTER_DEFAULT_PROVIDER_NAME,
-			},
-		})
+		updateModelSelection(pendingModelId)
 		try {
 			if (provider === "oca") {
 				OCAModelService.setOcaSelectedModelId(pendingModelId)
@@ -217,6 +276,34 @@ export const ModelSelector = ({
 		return <span className="text-xs text-vscode-descriptionForeground opacity-70 truncate">{fallbackText}</span>
 	}
 
+	// kilocode_change start
+	const gptChatByManualOptions = options.filter((option) => option.value !== "klepa/auto")
+	// kilocode_change start
+	const renderModelItem = (option: DropdownOption) => (
+		<div className="flex w-full items-center gap-2 py-1.5 px-3 hover:bg-vscode-list-hoverBackground">
+			<span className="truncate">{option.label}</span>
+			<span className="ml-auto text-xs opacity-70 tabular-nums">
+				{formatModelPriceLabel(providerModels[option.value]) ?? ""}
+			</span>
+		</div>
+	)
+	// kilocode_change end
+
+	const handleAutoModeToggle = () => {
+		if (disabled) {
+			return
+		}
+		if (isAutoModeEnabled) {
+			const firstManualModel = Object.keys(providerModels || {}).find((modelId) => modelId !== "klepa/auto")
+			if (firstManualModel) {
+				updateModelSelection(firstManualModel)
+			}
+			return
+		}
+		updateModelSelection("klepa/auto")
+	}
+	// kilocode_change end
+
 	return (
 		<>
 			<OcaAcknowledgeModal
@@ -228,20 +315,65 @@ export const ModelSelector = ({
 					setPendingModelId(null)
 				}}
 			/>
-			<SelectDropdown
-				value={selectedModelId}
-				disabled={disabled}
-				title={t("chat:selectApiConfig")}
-				options={options}
-				onChange={onChange}
-				contentClassName="max-h-[400px] overflow-y-auto"
-				triggerClassName={cn(
-					"w-full text-ellipsis overflow-hidden p-0",
-					"bg-transparent border-transparent hover:bg-transparent hover:border-transparent",
-				)}
-				triggerIcon={false}
-				itemClassName="group"
-			/>
+			{/* kilocode_change start */}
+			{isGptChatByProvider ? (
+				<div className="flex items-center gap-2 min-w-0">
+					<StandardTooltip content={t("settings:modelPicker.autoModeTooltip")}>
+						<div className="flex items-center gap-2">
+							<span className="text-xs text-vscode-descriptionForeground whitespace-nowrap">Auto</span>
+							<ToggleSwitch
+								checked={isAutoModeEnabled}
+								onChange={handleAutoModeToggle}
+								disabled={disabled}
+								size="medium"
+								aria-label="Toggle auto mode"
+							/>
+						</div>
+					</StandardTooltip>
+					{!isAutoModeEnabled && gptChatByManualOptions.length > 0 ? (
+						<div className="min-w-0 flex-1">
+							<SelectDropdown
+								value={selectedModelId}
+								disabled={disabled}
+								title={t("chat:selectApiConfig")}
+								options={gptChatByManualOptions}
+								onChange={onChange}
+								contentClassName="max-h-[400px] overflow-y-auto"
+								triggerClassName={cn(
+									"w-full text-ellipsis overflow-hidden p-0",
+									"bg-transparent border-transparent hover:bg-transparent hover:border-transparent",
+								)}
+								triggerIcon={false}
+								itemClassName="group"
+								// kilocode_change: show input/output pricing on the right side
+								renderItem={renderModelItem}
+							/>
+						</div>
+					) : (
+						<span className="text-xs text-vscode-descriptionForeground opacity-70 truncate">
+							Auto
+						</span>
+					)}
+				</div>
+			) : (
+				<SelectDropdown
+					value={selectedModelId}
+					disabled={disabled}
+					title={t("chat:selectApiConfig")}
+					options={options}
+					onChange={onChange}
+					contentClassName="max-h-[400px] overflow-y-auto"
+					triggerClassName={cn(
+						"w-full text-ellipsis overflow-hidden p-0",
+						"bg-transparent border-transparent hover:bg-transparent hover:border-transparent",
+					)}
+					triggerIcon={false}
+					itemClassName="group"
+					// kilocode_change: show input/output pricing on the right side
+					renderItem={renderModelItem}
+				/>
+			)}
+			{/* kilocode_change end */}
 		</>
 	)
 }

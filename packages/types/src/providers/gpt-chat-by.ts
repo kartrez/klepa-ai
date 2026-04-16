@@ -2,21 +2,27 @@ import type { ModelInfo } from "../model.js"
 
 export type GptChatByModelId = keyof typeof gptChatByModels
 
-export const gptChatByDefaultModelId: GptChatByModelId = "mimo/free"
+export const gptChatByDefaultModelId: GptChatByModelId = "klepa/free"
 
 const GTP_CHAT_BY_TAKE_PROFIT_USD = 1.15;
 
 export const gptChatByModels = {
-	"mimo/free": {
+	"klepa/free": {
 		maxTokens: 16_384,
 		contextWindow: 150_000,
 		supportsImages: false,
 		supportsPromptCache: true,
 		supportsNativeTools: true,
-		inputPrice: 0,
-		outputPrice: 0,
-		description: `GPT Chat BY Free model`,
+		description: `Free model (low speed)`,
 		isFree: true,
+	},
+	"klepa/auto": {
+		maxTokens: 65_000,
+		contextWindow: 200_000,
+		supportsImages: true,
+		supportsPromptCache: true,
+		supportsNativeTools: true,
+		description: `Auto model. Balanced cost and quality, recommended for must tasks.`,
 	},
 	"openai/gpt-oss-120b": {
 		maxTokens: 16_384,
@@ -60,6 +66,18 @@ export const gptChatByModels = {
 		inputPrice: 0.6 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		outputPrice: 3.6 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `The Qwen3.5 397B native vision-language series Plus models are built on a hybrid architecture that integrates linear attention mechanisms with sparse mixture-of-experts models, achieving higher inference efficiency.`,
+	},
+	"google/gemma-4": {
+		maxTokens: 128_000,
+		contextWindow: 262_000,
+		supportsImages: true,
+		supportsNativeTools: true,
+		defaultToolProtocol: "native",
+		supportsPromptCache: true,
+		inputPrice: 0.08 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		outputPrice: 0.35 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		description: `Google: Gemma 4 26B A4B IT is an instruction-tuned Mixture-of-Experts (MoE) model from Google DeepMind.`,
+		recommended: true,
 	},
 	"google/gemini-3-flash": {
 		maxTokens: 65_536,
@@ -277,6 +295,16 @@ export const gptChatByModels = {
 		outputPrice: 2.56 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `GLM-5 is Z.ai’s flagship open-source foundation model engineered for complex systems design and long-horizon agent workflows. `,
 	},
+	"z-ai/glm-5.1": {
+		maxTokens: 65_000,
+		contextWindow: 200_000,
+		supportsImages: false,
+		supportsPromptCache: true,
+		supportsNativeTools: true,
+		inputPrice: 1.4 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		outputPrice: 4.4 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		description: `GLM-5.1 is Z.ai’s flagship open-source foundation model engineered for complex systems design and long-horizon agent workflows. `,
+	},
 	"anthropic/claude-opus-4.6": {
 		maxTokens: 128_000, // Overridden to 8k if `enableReasoningEffort` is false.
 		contextWindow: 200_000, // Default 200K, extendable to 1M with beta flag 'context-1m-2025-08-07'
@@ -365,6 +393,17 @@ export const gptChatByModels = {
 		inputPrice: 2.5 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		outputPrice: 15 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `Open AI gpt 5.4`,
+		recommended: true,
+	},
+	"x-ai/grok-4.20": {
+		maxTokens: 2_000_000,
+		contextWindow: 2_000_000,
+		supportsImages: true,
+		supportsPromptCache: true,
+		supportsNativeTools: true,
+		inputPrice: 2 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		outputPrice: 6 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		description: `Grok 4.20 is xAI's newest flagship model with industry-leading speed and agentic tool calling capabilities.`,
 		recommended: true,
 	},
 } as const satisfies Record<string, ModelInfo>

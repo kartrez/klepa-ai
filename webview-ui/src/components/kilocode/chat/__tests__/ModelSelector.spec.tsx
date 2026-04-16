@@ -1,6 +1,8 @@
 import { render, screen } from "@/utils/test-utils"
 import { ModelSelector } from "../ModelSelector"
 import type { ProviderSettings } from "@roo-code/types"
+import { vscode } from "@/utils/vscode"
+import userEvent from "@testing-library/user-event"
 
 vi.mock("@/utils/vscode", () => ({
 	vscode: {
@@ -23,13 +25,14 @@ vi.mock("@/components/ui/hooks/kilocode/usePreferredModels", () => ({
 
 // Create a mock function that can be controlled per test
 const mockUseProviderModels = vi.fn()
+const mockGetSelectedModelId = vi.fn()
 
 vi.mock("../../hooks/useProviderModels", () => ({
 	useProviderModels: (config: ProviderSettings) => mockUseProviderModels(config),
 }))
 
 vi.mock("../../hooks/useSelectedModel", () => ({
-	getSelectedModelId: () => "model-1",
+	getSelectedModelId: () => mockGetSelectedModelId(),
 	getModelIdKey: () => "apiModelId",
 }))
 
@@ -61,6 +64,7 @@ describe("ModelSelector", () => {
 			isLoading: false,
 			isError: false,
 		})
+		mockGetSelectedModelId.mockReturnValue("model-1")
 	})
 
 	test("renders dropdown for chat profile", () => {
@@ -201,6 +205,48 @@ describe("ModelSelector", () => {
 	})
 
 	describe("preferred models sections", () => {
+		// kilocode_change start
+		test("renders free models section first and shows rounded pricing", async () => {
+			const user = userEvent.setup()
+			mockUseGroupedModelIds.mockReturnValue({
+				preferredModelIds: ["preferred-paid", "preferred-free"],
+				restModelIds: ["free-rest", "regular-rest"],
+			})
+
+			mockUseProviderModels.mockReturnValue({
+				provider: "openai",
+				providerModels: {
+					"preferred-paid": { displayName: "Preferred Paid", inputPrice: 2.11, outputPrice: 8.44 },
+					"preferred-free": { displayName: "Preferred Free", inputPrice: 0, outputPrice: 0, isFree: true },
+					"free-rest": { displayName: "Rest Free", inputPrice: 0, outputPrice: 0, isFree: true },
+					"regular-rest": { displayName: "Rest Paid", inputPrice: 1.04, outputPrice: 3.96 },
+				},
+				providerDefaultModel: "preferred-paid",
+				isLoading: false,
+				isError: false,
+			})
+
+			render(
+				<ModelSelector
+					currentApiConfigName="test-profile"
+					apiConfiguration={{
+						apiProvider: "openai",
+						apiModelId: "preferred-paid",
+					}}
+					fallbackText="Select a model"
+				/>,
+			)
+
+			await user.click(screen.getByTestId("dropdown-trigger"))
+
+			expect(screen.getByText("settings:modelPicker.freeModels")).toBeInTheDocument()
+			expect(screen.getByText("settings:modelPicker.recommendedModels")).toBeInTheDocument()
+			expect(screen.getByText("settings:modelPicker.allModels")).toBeInTheDocument()
+			expect(screen.getByText("2.1/8.4$")).toBeInTheDocument()
+			expect(screen.getByText("0.0/0.0$")).toBeInTheDocument()
+		})
+		// kilocode_change end
+
 		test("builds options with section headers when preferred models exist", () => {
 			// Setup mock to return preferred models
 			mockUseGroupedModelIds.mockReturnValue({
@@ -292,5 +338,47 @@ describe("ModelSelector", () => {
 			const dropdownTrigger = screen.getByTestId("dropdown-trigger")
 			expect(dropdownTrigger).toBeInTheDocument()
 		})
+	})
+
+	test("gpt-chat-by auto toggle switches to klepa/auto", async () => {
+		const user = userEvent.setup()
+		mockUseProviderModels.mockReturnValue({
+			provider: "gpt-chat-by",
+			providerModels: {
+				"klepa/auto": { displayName: "Auto" },
+				"openai/gpt-oss-120b": { displayName: "OSS 120B" },
+			},
+			providerDefaultModel: "klepa/auto",
+			isLoading: false,
+			isError: false,
+		})
+		mockUseGroupedModelIds.mockReturnValue({
+			preferredModelIds: [],
+			restModelIds: ["klepa/auto", "openai/gpt-oss-120b"],
+		})
+		mockGetSelectedModelId.mockReturnValue("openai/gpt-oss-120b")
+
+		render(
+			<ModelSelector
+				currentApiConfigName="test-profile"
+				apiConfiguration={{
+					apiProvider: "gpt-chat-by",
+					apiModelId: "openai/gpt-oss-120b",
+				}}
+				fallbackText="Select a model"
+			/>,
+		)
+
+		await user.click(screen.getByRole("switch", { name: "Toggle auto mode" }))
+
+		expect(vscode.postMessage).toHaveBeenCalledWith(
+			expect.objectContaining({
+				type: "upsertApiConfiguration",
+				text: "test-profile",
+				apiConfiguration: expect.objectContaining({
+					apiModelId: "klepa/auto",
+				}),
+			}),
+		)
 	})
 })

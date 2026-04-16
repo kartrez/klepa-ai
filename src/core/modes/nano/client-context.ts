@@ -159,7 +159,6 @@ export async function buildNanoModeSystemPrompt(options: BuildNoModeSystemPrompt
 		localRulesToggleState: context.workspaceState.get("localRulesToggles"),
 		globalRulesToggleState: context.globalState.get("globalRulesToggles"),
 		settings,
-		skipRules: false,
 	})
 
 	const basePrompt = `${roleDefinition}

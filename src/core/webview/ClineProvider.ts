@@ -2699,7 +2699,7 @@ export class ClineProvider
 			).defaultModel, // kilocode_change
 			lastShownAnnouncementId: stateValues.lastShownAnnouncementId,
 			customInstructions: stateValues.customInstructions,
-			apiModelId: stateValues.apiModelId ?? "mimo/free",
+			apiModelId: stateValues.apiModelId ?? "klepa/free",
 			alwaysAllowReadOnly: stateValues.alwaysAllowReadOnly ?? true,
 			alwaysAllowReadOnlyOutsideWorkspace: stateValues.alwaysAllowReadOnlyOutsideWorkspace ?? false,
 			alwaysAllowWrite: stateValues.alwaysAllowWrite ?? true,

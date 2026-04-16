@@ -1123,6 +1123,8 @@
 		"noMatchFound": "No match found",
 		"useCustomModel": "Use custom: {{modelId}}",
 		"simplifiedExplanation": "You can adjust detailed model settings later.",
+		"freeModels": "Free models",
+		"autoModeTooltip": "Automatically selects a model based on task complexity",
 		"recommendedModels": "Recommended models",
 		"allModels": "All models"
 	},

@@ -5067,7 +5067,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			this.isWaitingForFirstChunk = false
 			// kilocode_change start
 			if (effectiveApiConfiguration?.apiProvider !== "gpt-chat-by" && isAnyRecognizedKiloCodeError(error)) {
-				const defaultFreeModel = "mimo/free"
+				const defaultFreeModel = "klepa/free"
 				this.updateApiConfiguration({
 					...state?.apiConfiguration,
 					apiProvider: "gpt-chat-by",

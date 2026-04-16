@@ -1,6 +1,6 @@
 // kilocode_change - centralized no-mode tool policy
 
-export const NANO_MODE_PRIMARY_TOOLS = ["read_file", "write_to_file", "edit_file", "execute_command", "list_files"] as const
+export const NANO_MODE_PRIMARY_TOOLS = ["read_file", "write_to_file", "apply_diff", "execute_command", "list_files"] as const
 
 export const NANO_MODE_ALLOWED_TOOLS = [
 	...NANO_MODE_PRIMARY_TOOLS,

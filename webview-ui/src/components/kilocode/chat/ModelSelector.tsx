@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react"
+import { useMemo, useState, useEffect, useRef } from "react"
 import { SelectDropdown, DropdownOptionType, ToggleSwitch, StandardTooltip, type DropdownOption } from "@/components/ui"
 import { OPENROUTER_DEFAULT_PROVIDER_NAME, type ProviderSettings } from "@roo-code/types"
 import { vscode } from "@src/utils/vscode"
@@ -166,6 +166,15 @@ export const ModelSelector = ({
 	// kilocode_change start
 	const isGptChatByProvider = provider === "gpt-chat-by"
 	const isAutoModeEnabled = isGptChatByProvider && selectedModelId === "klepa/auto"
+	const lastNonAutoModelIdRef = useRef<string | null>(null)
+
+	useEffect(() => {
+		// Track the last manual (non-auto) model so we can restore it
+		// when user disables auto mode.
+		if (!isAutoModeEnabled && selectedModelId && selectedModelId !== "klepa/auto") {
+			lastNonAutoModelIdRef.current = selectedModelId
+		}
+	}, [isAutoModeEnabled, selectedModelId])
 
 	const updateModelSelection = (modelId: string) => {
 		if (!currentApiConfigName) {
@@ -294,11 +303,20 @@ export const ModelSelector = ({
 			return
 		}
 		if (isAutoModeEnabled) {
-			const firstManualModel = Object.keys(providerModels || {}).find((modelId) => modelId !== "klepa/auto")
-			if (firstManualModel) {
-				updateModelSelection(firstManualModel)
+			const restoreModelId = lastNonAutoModelIdRef.current
+			if (restoreModelId && restoreModelId !== "klepa/auto" && (providerModels as any)?.[restoreModelId]) {
+				updateModelSelection(restoreModelId)
+			} else {
+				// Fallback: pick the first non-auto model.
+				const firstManualModel = Object.keys(providerModels || {}).find((modelId) => modelId !== "klepa/auto")
+				if (firstManualModel) updateModelSelection(firstManualModel)
 			}
 			return
+		}
+
+		// Preserve the current manual model before switching to auto.
+		if (selectedModelId && selectedModelId !== "klepa/auto") {
+			lastNonAutoModelIdRef.current = selectedModelId
 		}
 		updateModelSelection("klepa/auto")
 	}

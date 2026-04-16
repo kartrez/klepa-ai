@@ -3,6 +3,7 @@ import { ModelSelector } from "../ModelSelector"
 import type { ProviderSettings } from "@roo-code/types"
 import { vscode } from "@/utils/vscode"
 import userEvent from "@testing-library/user-event"
+import type { Mock } from "vitest"
 
 vi.mock("@/utils/vscode", () => ({
 	vscode: {
@@ -35,6 +36,8 @@ vi.mock("../../hooks/useSelectedModel", () => ({
 	getSelectedModelId: () => mockGetSelectedModelId(),
 	getModelIdKey: () => "apiModelId",
 }))
+
+const postMessageMock = vscode.postMessage as unknown as Mock
 
 describe("ModelSelector", () => {
 	const baseApiConfiguration: ProviderSettings = {
@@ -377,6 +380,78 @@ describe("ModelSelector", () => {
 				text: "test-profile",
 				apiConfiguration: expect.objectContaining({
 					apiModelId: "klepa/auto",
+				}),
+			}),
+		)
+	})
+
+	test("gpt-chat-by auto toggle off restores previous manual model", async () => {
+		const user = userEvent.setup()
+		postMessageMock.mockClear()
+
+		mockUseProviderModels.mockReturnValue({
+			provider: "gpt-chat-by",
+			providerModels: {
+				"klepa/auto": { displayName: "Auto" },
+				"klepa/free": { displayName: "Free" }, // must be the first manual model for the old bug
+				"openai/gpt-oss-120b": { displayName: "OSS 120B" },
+			},
+			providerDefaultModel: "klepa/auto",
+			isLoading: false,
+			isError: false,
+		})
+		mockUseGroupedModelIds.mockReturnValue({
+			preferredModelIds: [],
+			restModelIds: ["klepa/auto", "klepa/free", "openai/gpt-oss-120b"],
+		})
+
+		mockGetSelectedModelId.mockReturnValue("openai/gpt-oss-120b")
+
+		const { rerender } = render(
+			<ModelSelector
+				currentApiConfigName="test-profile"
+				apiConfiguration={{
+					apiProvider: "gpt-chat-by",
+					apiModelId: "openai/gpt-oss-120b",
+				}}
+				fallbackText="Select a model"
+			/>,
+		)
+
+		await user.click(screen.getByRole("switch", { name: "Toggle auto mode" }))
+
+		expect(vscode.postMessage).toHaveBeenCalledWith(
+			expect.objectContaining({
+				type: "upsertApiConfiguration",
+				text: "test-profile",
+				apiConfiguration: expect.objectContaining({
+					apiModelId: "klepa/auto",
+				}),
+			}),
+		)
+
+		postMessageMock.mockClear()
+		mockGetSelectedModelId.mockReturnValue("klepa/auto")
+
+		rerender(
+			<ModelSelector
+				currentApiConfigName="test-profile"
+				apiConfiguration={{
+					apiProvider: "gpt-chat-by",
+					apiModelId: "klepa/auto",
+				}}
+				fallbackText="Select a model"
+			/>,
+		)
+
+		await user.click(screen.getByRole("switch", { name: "Toggle auto mode" }))
+
+		expect(vscode.postMessage).toHaveBeenCalledWith(
+			expect.objectContaining({
+				type: "upsertApiConfiguration",
+				text: "test-profile",
+				apiConfiguration: expect.objectContaining({
+					apiModelId: "openai/gpt-oss-120b",
 				}),
 			}),
 		)

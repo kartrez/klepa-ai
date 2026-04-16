@@ -147,29 +147,29 @@ Keep changesets concise and feature-oriented as they appear directly in release 
 
 Klepa AI is a fork of [Roo Code](https://github.com/RooVetGit/Roo-Code). We periodically merge upstream changes using scripts in `scripts/kilocode/`.
 
-## kilocode_change Markers
+## klepa_ai_change Markers
 
-To minimize merge conflicts when syncing with upstream, mark Klepa AI-specific changes in shared code with `kilocode_change` comments.
+To minimize merge conflicts when syncing with upstream, mark Klepa AI-specific changes in shared code with `klepa_ai_change` comments.
 
 **Single line:**
 
 ```typescript
-const value = 42 // kilocode_change
+const value = 42 // klepa_ai_change
 ```
 
 **Multi-line:**
 
 ```typescript
-// kilocode_change start
+// klepa_ai_change start
 const foo = 1
 const bar = 2
-// kilocode_change end
+// klepa_ai_change end
 ```
 
 **New files:**
 
 ```typescript
-// kilocode_change - new file
+// klepa_ai_change - new file
 ```
 
 ### When markers are NOT needed

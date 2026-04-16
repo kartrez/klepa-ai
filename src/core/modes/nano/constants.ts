@@ -6,7 +6,6 @@ export const NANO_MODE_ALLOWED_TOOLS = [
 	...NANO_MODE_PRIMARY_TOOLS,
 	"use_mcp_tool",
 	"access_mcp_resource",
-	"ask_followup_question",
 	"attempt_completion",
 ] as const
 

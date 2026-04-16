@@ -77,7 +77,6 @@ export const gptChatByModels = {
 		inputPrice: 0.08 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		outputPrice: 0.35 * GTP_CHAT_BY_TAKE_PROFIT_USD,
 		description: `Google: Gemma 4 26B A4B IT is an instruction-tuned Mixture-of-Experts (MoE) model from Google DeepMind.`,
-		recommended: true,
 	},
 	"google/gemini-3-flash": {
 		maxTokens: 65_536,

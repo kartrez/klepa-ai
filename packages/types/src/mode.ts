@@ -149,7 +149,7 @@ export const DEFAULT_MODES: readonly ModeConfig[] = [
 			"You are Klepa AI, a focused software development assistant. Help the user with coding tasks and prefer practical, concise guidance.",
 		whenToUse:
 			"Use this mode when you want ultra-compact coding assistance that can reduce context token usage by up to 75%, especially for models that do not support context caching.",
-		groups: ["read", "edit", "mcp"],
+		groups: ["read", "edit", "command", "mcp"],
 	},
 	{
 		slug: "architect",

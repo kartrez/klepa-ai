@@ -57,6 +57,62 @@ describe("filterNativeToolsForMode", () => {
 		{
 			type: "function",
 			function: {
+				name: "list_files",
+				description: "List files",
+				parameters: {},
+			},
+		},
+		{
+			type: "function",
+			function: {
+				name: "search_files",
+				description: "Search files",
+				parameters: {},
+			},
+		},
+		{
+			type: "function",
+			function: {
+				name: "edit_file",
+				description: "Edit file",
+				parameters: {},
+			},
+		},
+		{
+			type: "function",
+			function: {
+				name: "use_mcp_tool",
+				description: "Use MCP tool",
+				parameters: {},
+			},
+		},
+		{
+			type: "function",
+			function: {
+				name: "access_mcp_resource",
+				description: "Access MCP resource",
+				parameters: {},
+			},
+		},
+		{
+			type: "function",
+			function: {
+				name: "update_todo_list",
+				description: "Update todo list",
+				parameters: {},
+			},
+		},
+		{
+			type: "function",
+			function: {
+				name: "switch_mode",
+				description: "Switch mode",
+				parameters: {},
+			},
+		},
+		{
+			type: "function",
+			function: {
 				name: "browser_action",
 				description: "Browser action",
 				parameters: {},
@@ -179,6 +235,45 @@ describe("filterNativeToolsForMode", () => {
 		const toolNames = filtered.map((t) => ("function" in t ? t.function.name : ""))
 		expect(toolNames).toContain("ask_followup_question")
 		expect(toolNames).toContain("attempt_completion")
+	})
+
+	it("should include the expanded nano toolset and exclude non-nano tools", () => {
+		const mockMcpHub = {
+			getServers: () => [
+				{
+					name: "test-server",
+					resources: [{ uri: "test://resource", name: "Test Resource" }],
+				},
+			],
+		} as any
+
+		const filtered = filterNativeToolsForMode(
+			mockNativeTools,
+			"nano",
+			undefined,
+			{},
+			undefined,
+			{},
+			undefined,
+			mockMcpHub,
+		)
+		const toolNames = filtered.map((t) => ("function" in t ? t.function.name : ""))
+
+		expect(toolNames).toContain("read_file")
+		expect(toolNames).toContain("list_files")
+		expect(toolNames).toContain("search_files")
+		expect(toolNames).toContain("write_to_file")
+		expect(toolNames).toContain("edit_file")
+		expect(toolNames).toContain("apply_diff")
+		expect(toolNames).toContain("execute_command")
+		expect(toolNames).toContain("use_mcp_tool")
+		expect(toolNames).toContain("access_mcp_resource")
+		expect(toolNames).toContain("update_todo_list")
+		expect(toolNames).toContain("ask_followup_question")
+		expect(toolNames).toContain("attempt_completion")
+
+		expect(toolNames).not.toContain("browser_action")
+		expect(toolNames).not.toContain("switch_mode")
 	})
 
 	it("should exclude codebase_search when codeIndexManager is not configured", () => {

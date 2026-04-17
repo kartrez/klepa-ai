@@ -362,6 +362,17 @@ function MessageItem({
 				break
 			}
 			case "text": {
+				// Gemma-style models may emit only "thought" / "thinking" as text; use reasoning UI (see presentAssistantMessage)
+				if (/^(thought|thinking)$/i.test(messageText.trim())) {
+					return (
+						<ReasoningBlock
+							content=""
+							ts={message.ts}
+							isStreaming={message.partial ?? false}
+							isLast={isLast}
+						/>
+					)
+				}
 				icon = <MessageCircle size={16} />
 				title = t("messages.kiloSaid")
 				content = <SimpleMarkdown content={messageText} />

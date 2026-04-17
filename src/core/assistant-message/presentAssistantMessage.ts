@@ -69,6 +69,22 @@ import { captureAskApproval } from "./kilocode/captureAskApprovalEvent"
  * as it becomes available.
  */
 
+/**
+ * Some models (e.g. Gemma thinking) emit the literal tokens "thought" / "thinking" as plain assistant text.
+ * Treat those as empty reasoning (thinking UI); strip a leading line when real content follows.
+ */
+function normalizeThoughtPlaceholderText(content: string): { kind: "reasoning" } | { kind: "text"; text: string } {
+	const trimmed = content.trim()
+	if (/^(thought|thinking)$/i.test(trimmed)) {
+		return { kind: "reasoning" }
+	}
+	const stripped = content.replace(/^\s*(?:thought|thinking)\s*\n+/i, "")
+	if (stripped !== content) {
+		return { kind: "text", text: stripped }
+	}
+	return { kind: "text", text: content }
+}
+
 export async function presentAssistantMessage(cline: Task) {
 	if (cline.abort) {
 		throw new Error(`[Task#presentAssistantMessage] task ${cline.taskId}.${cline.instanceId} aborted`)
@@ -380,7 +396,12 @@ export async function presentAssistantMessage(cline: Task) {
 				}
 			}
 
-			await cline.say("text", content, undefined, block.partial)
+			const thoughtNorm = normalizeThoughtPlaceholderText(content ?? "")
+			if (thoughtNorm.kind === "reasoning") {
+				await cline.say("reasoning", "", undefined, block.partial)
+				break
+			}
+			await cline.say("text", thoughtNorm.text, undefined, block.partial)
 			break
 		}
 		case "tool_use": {

@@ -1349,7 +1349,18 @@ export const ChatRowContent = ({
 				}
 				case "api_req_finished":
 					return null // we should never see this message type
-				case "text":
+				case "text": {
+					const textBody = message.text ?? ""
+					if (/^(thought|thinking)$/i.test(textBody.trim())) {
+						return (
+							<ReasoningBlock
+								content=""
+								ts={message.ts}
+								isStreaming={isStreaming}
+								isLast={isLast}
+							/>
+						)
+					}
 					return (
 						<div className="group">
 							<div style={headerStyle}>
@@ -1370,6 +1381,7 @@ export const ChatRowContent = ({
 							</div>
 						</div>
 					)
+				}
 				case "user_feedback":
 					return (
 						<div className="group">

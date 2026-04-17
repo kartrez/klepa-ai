@@ -305,6 +305,22 @@ export const gptChatByModels = {
 		description: `GLM-5.1 is Z.ai’s flagship open-source foundation model engineered for complex systems design and long-horizon agent workflows. `,
 		recommended: true,
 	},
+	"anthropic/claude-opus-4.7": {
+		maxTokens: 128_000, // Overridden to 8k if `enableReasoningEffort` is false.
+		contextWindow: 1_000_000, // Default 200K, extendable to 1M with beta flag 'context-1m-2025-08-07'
+		supportsImages: true,
+		supportsPromptCache: true,
+		supportsNativeTools: true,
+		defaultToolProtocol: "native",
+		inputPrice: 5 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		outputPrice: 25 * GTP_CHAT_BY_TAKE_PROFIT_USD,
+		cacheWritesPrice: 6.25,
+		cacheReadsPrice: 0.5,
+		supportsReasoningBudget: true,
+		supportsAdaptiveThinking: true,
+		supportsVerbosity: ["low", "medium", "high", "max"],
+		description: `Anthropic claude opus 4.7. Top performance model`,
+	},
 	"anthropic/claude-opus-4.6": {
 		maxTokens: 128_000, // Overridden to 8k if `enableReasoningEffort` is false.
 		contextWindow: 200_000, // Default 200K, extendable to 1M with beta flag 'context-1m-2025-08-07'

@@ -86,6 +86,7 @@ import { UnauthorizedWarning } from "../kilocode/chat/UnauthorizedWarning"
 import { formatFileSize } from "@/lib/formatting-utils"
 import ChatTimestamps from "./ChatTimestamps"
 import { removeLeadingNonAlphanumeric } from "@/utils/removeLeadingNonAlphanumeric"
+import { isReasoningTimerActive } from "@src/utils/reasoningTimer"
 import { KILOCODE_TOKEN_REQUIRED_ERROR } from "@roo/kilocode/errorUtils"
 import { PromotionWarning } from "../kilocode/chat/PromotionWarning"
 // kilocode_change end
@@ -129,6 +130,8 @@ interface ChatRowProps {
 	isExpanded: boolean
 	isLast: boolean
 	isStreaming: boolean
+	/** When set, reasoning/thinking timer keeps running until this API round completes (server response finished). */
+	activeApiRequestStartTs?: number
 	onToggleExpand: (ts: number) => void
 	onHeightChange: (isTaller: boolean) => void
 	onSuggestionClick?: (suggestion: SuggestionItem, event?: React.MouseEvent) => void
@@ -193,6 +196,7 @@ export const ChatRowContent = ({
 	isExpanded,
 	isLast,
 	isStreaming,
+	activeApiRequestStartTs,
 	onToggleExpand,
 	onSuggestionClick,
 	onFollowUpUnmount,
@@ -1182,7 +1186,7 @@ export const ChatRowContent = ({
 						<ReasoningBlock
 							content={message.text || ""}
 							ts={message.ts}
-							isStreaming={message.partial ?? false}
+							isStreaming={isReasoningTimerActive(message, activeApiRequestStartTs)}
 							isLast={isLast}
 						/>
 					)
@@ -1356,7 +1360,7 @@ export const ChatRowContent = ({
 							<ReasoningBlock
 								content=""
 								ts={message.ts}
-								isStreaming={message.partial ?? false}
+								isStreaming={isReasoningTimerActive(message, activeApiRequestStartTs)}
 								isLast={isLast}
 							/>
 						)

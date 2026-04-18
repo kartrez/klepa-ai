@@ -14,6 +14,7 @@ import { appendImages } from "@src/utils/imageUtils"
 import type { ClineAsk, ClineSayTool, ClineMessage, ExtensionMessage, AudioType } from "@roo-code/types"
 
 import { findLast } from "@roo/array"
+import { getActiveApiRequestStartTs } from "@src/utils/reasoningTimer"
 import { SuggestionItem } from "@roo-code/types"
 import { combineApiRequests } from "@roo/combineApiRequests"
 import { combineCommandSequences } from "@roo/combineCommandSequences"
@@ -167,6 +168,9 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 	}, [messages, currentTaskTodos])
 
 	const modifiedMessages = useMemo(() => combineApiRequests(combineCommandSequences(messages.slice(1))), [messages])
+
+	// Open request: last api_req_started row without cost yet (same signal as streaming / waiting for server).
+	const activeApiRequestStartTs = useMemo(() => getActiveApiRequestStartTs(modifiedMessages), [modifiedMessages])
 
 	// Has to be after api_req_finished are all reduced into api_req_started messages.
 	// kilocode_change start
@@ -1447,6 +1451,7 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 					isLast={index === groupedMessages.length - 1} // Original direct access
 					onHeightChange={handleRowHeightChange}
 					isStreaming={isStreaming}
+					activeApiRequestStartTs={activeApiRequestStartTs}
 					onSuggestionClick={handleSuggestionClickInRow} // This was already stabilized
 					onBatchFileResponse={handleBatchFileResponse}
 					highlighted={highlightedMessageIndex === index} // kilocode_change: add highlight prop
@@ -1482,6 +1487,7 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 			handleSuggestionClickInRow,
 			handleBatchFileResponse,
 			highlightedMessageIndex, // kilocode_change: add highlightedMessageIndex
+			activeApiRequestStartTs,
 			enableCheckpoints, // kilocode_change
 			currentFollowUpTs,
 			isFollowUpAutoApprovalPaused,

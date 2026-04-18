@@ -15,6 +15,8 @@ import type { QueuedMessage } from "../state/atoms/messageQueue"
 import type { ClineMessage, SuggestionItem, FollowUpData } from "@roo-code/types"
 import { safeJsonParse } from "@roo/safeJsonParse"
 import { combineCommandSequences } from "@roo/combineCommandSequences"
+import { combineApiRequests } from "@roo/combineApiRequests"
+import { getActiveApiRequestStartTs, isReasoningTimerActive } from "@src/utils/reasoningTimer"
 import { SimpleMarkdown } from "./SimpleMarkdown"
 import { FollowUpSuggestions } from "./FollowUpSuggestions"
 import { CommandExecutionBlock } from "./CommandExecutionBlock"
@@ -87,6 +89,13 @@ export function MessageList({ sessionId }: MessageListProps) {
 
 	// Combine command and command_output messages into single entries
 	const combinedMessages = useMemo(() => combineCommandSequences(messages), [messages])
+
+	const messagesWithMergedApi = useMemo(() => combineApiRequests(combinedMessages), [combinedMessages])
+
+	const activeApiRequestStartTs = useMemo(
+		() => getActiveApiRequestStartTs(messagesWithMergedApi),
+		[messagesWithMergedApi],
+	)
 
 	// Find the last approval-required ask message (tool/command) in the combined list
 	const lastApprovalAskTs = useMemo(() => {
@@ -227,6 +236,7 @@ export function MessageList({ sessionId }: MessageListProps) {
 					key={msg.ts || index}
 					message={msg}
 					isLast={isLastCombinedMessage}
+					activeApiRequestStartTs={activeApiRequestStartTs}
 					commandExecutionByTs={commandExecutionByTs}
 					onSuggestionClick={handleSuggestionClick}
 					onCopyToInput={handleCopyToInput}
@@ -237,6 +247,7 @@ export function MessageList({ sessionId }: MessageListProps) {
 		},
 		[
 			combinedMessages.length,
+			activeApiRequestStartTs,
 			commandExecutionByTs,
 			handleSuggestionClick,
 			handleCopyToInput,
@@ -313,6 +324,7 @@ function extractFollowUpData(message: ClineMessage): { question: string; suggest
 interface MessageItemProps {
 	message: ClineMessage
 	isLast: boolean
+	activeApiRequestStartTs?: number
 	commandExecutionByTs: Map<number, { exitCode?: number; status?: string; isRunning?: boolean }>
 	onSuggestionClick?: (suggestion: SuggestionItem) => void
 	onCopyToInput?: (suggestion: SuggestionItem) => void
@@ -323,6 +335,7 @@ interface MessageItemProps {
 function MessageItem({
 	message,
 	isLast,
+	activeApiRequestStartTs,
 	commandExecutionByTs,
 	onSuggestionClick,
 	onCopyToInput,
@@ -368,7 +381,7 @@ function MessageItem({
 						<ReasoningBlock
 							content=""
 							ts={message.ts}
-							isStreaming={message.partial ?? false}
+							isStreaming={isReasoningTimerActive(message, activeApiRequestStartTs)}
 							isLast={isLast}
 						/>
 					)
@@ -409,7 +422,7 @@ function MessageItem({
 					<ReasoningBlock
 						content={messageText}
 						ts={message.ts}
-						isStreaming={message.partial ?? false}
+						isStreaming={isReasoningTimerActive(message, activeApiRequestStartTs)}
 						isLast={isLast}
 					/>
 				)

@@ -398,10 +398,14 @@ export async function presentAssistantMessage(cline: Task) {
 
 			const thoughtNorm = normalizeThoughtPlaceholderText(content ?? "")
 			if (thoughtNorm.kind === "reasoning") {
-				await cline.say("reasoning", "", undefined, block.partial)
+				// If `partial` is missing on the block, infer from stream state — otherwise `say()` treats
+				// the message as non-partial and the thinking timer never runs (e.g. Gemma placeholders).
+				const reasoningPartial = block.partial ?? !cline.didCompleteReadingStream
+				await cline.say("reasoning", "", undefined, reasoningPartial)
 				break
 			}
-			await cline.say("text", thoughtNorm.text, undefined, block.partial)
+			const textPartial = block.partial ?? !cline.didCompleteReadingStream
+			await cline.say("text", thoughtNorm.text, undefined, textPartial)
 			break
 		}
 		case "tool_use": {

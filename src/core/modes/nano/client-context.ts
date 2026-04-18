@@ -27,6 +27,14 @@ import { NANO_MINI_SYSTEM_INSTRUCTIONS } from "./nano-system-instructions-mini"
 
 const NO_MODE_SLUG = "nano"
 
+/** Used when `settings` is undefined so native-tool nano merges still satisfy `SystemPromptSettings`. */
+const SYSTEM_PROMPT_SETTINGS_FALLBACK: SystemPromptSettings = {
+	maxConcurrentFileReads: 5,
+	todoListEnabled: true,
+	useAgentRules: false,
+	newTaskRequireTodos: false,
+}
+
 function hasAnyMcpResources(mcpHub: McpHub): boolean {
 	return mcpHub.getServers().some((server) => server.resources && server.resources.length > 0)
 }
@@ -156,10 +164,10 @@ export async function buildNanoModeSystemPrompt(options: BuildNoModeSystemPrompt
 
 	const customInstructionsSettings: SystemPromptSettings | undefined = hasNativeToolsSupport
 		? {
-				...(settings ?? {}),
+				...(settings ?? SYSTEM_PROMPT_SETTINGS_FALLBACK),
 				// nano-native uses a small curated instruction block; keep AGENTS.md/rules opt-out to save tokens.
 				useAgentRules: false,
-		  }
+			}
 		: settings
 
 	const customInstructionsSection = await addCustomInstructions(baseInstructions, globalCustomInstructions || "", cwd, NO_MODE_SLUG, {

@@ -36,7 +36,7 @@ export const ReasoningBlock = ({ content, ts, isStreaming }: ReasoningBlockProps
 		if (isStreaming) {
 			const tick = () => setElapsed(Date.now() - startTimeRef.current)
 			tick()
-			const id = setInterval(tick, 1000)
+			const id = setInterval(tick, 250)
 			return () => clearInterval(id)
 		}
 		setElapsed(Date.now() - startTimeRef.current)
@@ -44,6 +44,8 @@ export const ReasoningBlock = ({ content, ts, isStreaming }: ReasoningBlockProps
 
 	const seconds = Math.floor(elapsed / 1000)
 	const secondsLabel = t("chat:reasoning.seconds", { count: seconds })
+	// Use elapsed, not floor(seconds): after <1s thinking, seconds is 0 but we must keep the timer visible.
+	const showElapsed = isStreaming || elapsed > 0
 
 	const handleToggle = () => {
 		setIsCollapsed(!isCollapsed)
@@ -59,7 +61,7 @@ export const ReasoningBlock = ({ content, ts, isStreaming }: ReasoningBlockProps
 					{/* kilocode_change start */}
 					<span className="text-sm text-vscode-foreground">{t("chat:reasoning.thinking")}</span>
 					{/* kilocode_change end */}
-					{elapsed > 0 && (
+					{showElapsed && (
 						<span className="text-sm text-vscode-descriptionForeground mt-0.5">{secondsLabel}</span>
 					)}
 				</div>

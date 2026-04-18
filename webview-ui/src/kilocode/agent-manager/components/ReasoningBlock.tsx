@@ -25,7 +25,7 @@ export const ReasoningBlock: React.FC<ReasoningBlockProps> = ({ content, ts, isS
 		if (isStreaming) {
 			const tick = () => setElapsed(Date.now() - startTimeRef.current)
 			tick()
-			const id = setInterval(tick, 1000)
+			const id = setInterval(tick, 250)
 			return () => clearInterval(id)
 		}
 		setElapsed(Date.now() - startTimeRef.current)
@@ -33,6 +33,7 @@ export const ReasoningBlock: React.FC<ReasoningBlockProps> = ({ content, ts, isS
 
 	const seconds = Math.floor(elapsed / 1000)
 	const secondsLabel = t("messages.thinkingSeconds", { count: seconds })
+	const showElapsed = isStreaming || elapsed > 0
 
 	const handleToggle = () => {
 		setIsCollapsed(!isCollapsed)
@@ -44,7 +45,7 @@ export const ReasoningBlock: React.FC<ReasoningBlockProps> = ({ content, ts, isS
 				<div className="am-reasoning-title">
 					<Lightbulb size={16} />
 					<span className="font-bold">{t("messages.thinking")}</span>
-					{elapsed > 0 && <span className="am-reasoning-elapsed">{secondsLabel}</span>}
+					{showElapsed && <span className="am-reasoning-elapsed">{secondsLabel}</span>}
 				</div>
 				<ChevronUp size={16} className={cn("am-reasoning-chevron", isCollapsed && "am-collapsed")} />
 			</div>

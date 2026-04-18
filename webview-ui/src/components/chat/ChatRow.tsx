@@ -1182,7 +1182,7 @@ export const ChatRowContent = ({
 						<ReasoningBlock
 							content={message.text || ""}
 							ts={message.ts}
-							isStreaming={isStreaming}
+							isStreaming={message.partial ?? false}
 							isLast={isLast}
 						/>
 					)
@@ -1356,7 +1356,7 @@ export const ChatRowContent = ({
 							<ReasoningBlock
 								content=""
 								ts={message.ts}
-								isStreaming={isStreaming}
+								isStreaming={message.partial ?? false}
 								isLast={isLast}
 							/>
 						)

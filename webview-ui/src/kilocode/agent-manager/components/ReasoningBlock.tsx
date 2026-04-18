@@ -11,20 +11,25 @@ interface ReasoningBlockProps {
 	isLast: boolean
 }
 
-export const ReasoningBlock: React.FC<ReasoningBlockProps> = ({ content, ts: _ts, isStreaming, isLast }) => {
+export const ReasoningBlock: React.FC<ReasoningBlockProps> = ({ content, ts, isStreaming, isLast: _isLast }) => {
 	const { t } = useTranslation("agentManager")
 	const [isCollapsed, setIsCollapsed] = useState(true) // Default collapsed
-	const startTimeRef = useRef<number>(Date.now())
+	const startTimeRef = useRef<number>(ts)
 	const [elapsed, setElapsed] = useState<number>(0)
 
 	useEffect(() => {
-		if (isLast && isStreaming) {
+		startTimeRef.current = ts
+	}, [ts])
+
+	useEffect(() => {
+		if (isStreaming) {
 			const tick = () => setElapsed(Date.now() - startTimeRef.current)
 			tick()
 			const id = setInterval(tick, 1000)
 			return () => clearInterval(id)
 		}
-	}, [isLast, isStreaming])
+		setElapsed(Date.now() - startTimeRef.current)
+	}, [isStreaming])
 
 	const seconds = Math.floor(elapsed / 1000)
 	const secondsLabel = t("messages.thinkingSeconds", { count: seconds })

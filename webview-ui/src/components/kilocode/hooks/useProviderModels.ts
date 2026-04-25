@@ -60,7 +60,6 @@ import {
 	inceptionDefaultModelId,
 	minimaxModels,
 	minimaxDefaultModelId,
-	gptChatByModels,
 	gptChatByDefaultModelId,
 	internationalZAiModels,
 	internationalZAiDefaultModelId,
@@ -180,7 +179,7 @@ export const getModelsByProvider = ({
 		}
 		case "gpt-chat-by": {
 			return {
-				models: gptChatByModels,
+				models: routerModels["gpt-chat-by"] ?? {},
 				defaultModel: gptChatByDefaultModelId,
 			}
 		}
@@ -411,6 +410,7 @@ export const useProviderModels = (apiConfiguration?: ProviderSettings) => {
 	const { kilocodeDefaultModel } = useExtensionState()
 
 	const routerModels = useRouterModels({
+		gptChatByApiKey: apiConfiguration?.gptChatByApiKey,
 		openRouterBaseUrl: apiConfiguration?.openRouterBaseUrl,
 		openRouterApiKey: apiConfiguration?.apiKey,
 		kilocodeOrganizationId: apiConfiguration?.kilocodeOrganizationId ?? "personal",

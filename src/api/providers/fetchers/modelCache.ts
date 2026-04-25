@@ -46,6 +46,7 @@ import { getChutesModels } from "./chutes"
 import { getNanoGptModels } from "./nano-gpt" //kilocode_change
 import { getPoeModels } from "./poe" // kilocode_change
 import { getZenmuxModels } from "./zenmux"
+import { getGptChatByModels } from "./gpt-chat-by"
 
 const memoryCache = new NodeCache({ stdTTL: 5 * 60, checkperiod: 5 * 60 })
 
@@ -82,6 +83,9 @@ async function fetchModelsFromProvider(options: GetModelsOptions): Promise<Model
 
 	let models: ModelRecord
 	switch (provider) {
+		case "gpt-chat-by":
+			models = await getGptChatByModels({ baseUrl: options.baseUrl })
+			break
 		case "openrouter":
 			// kilocode_change start: base url and bearer token
 			models = await getOpenRouterModels({
@@ -246,8 +250,8 @@ export const getModels = async (options: GetModelsOptions): Promise<ModelRecord>
 		if (modelCount > 0) {
 			memoryCache.set(provider, models)
 
-			// kilocode_change start: prevent eternal caching of kilocode models
-			if (provider !== "kilocode") {
+			// kilocode_change start: prevent eternal caching of dynamic providers
+			if (provider !== "kilocode" && provider !== "gpt-chat-by") {
 				await writeModels(provider, models).catch((err) =>
 					console.error(`[MODEL_CACHE] Error writing ${provider} models to file cache:`, err),
 				)
@@ -318,10 +322,14 @@ export const refreshModels = async (options: GetModelsOptions): Promise<ModelRec
 			// Update memory cache first
 			memoryCache.set(provider, models)
 
-			// Atomically write to disk (safeWriteJson handles atomic writes)
-			await writeModels(provider, models).catch((err) =>
-				console.error(`[refreshModels] Error writing ${provider} models to disk:`, err),
-			)
+			// kilocode_change start: keep highly dynamic providers out of disk cache
+			if (provider !== "kilocode" && provider !== "gpt-chat-by") {
+				// Atomically write to disk (safeWriteJson handles atomic writes)
+				await writeModels(provider, models).catch((err) =>
+					console.error(`[refreshModels] Error writing ${provider} models to disk:`, err),
+				)
+			}
+			// kilocode_change end
 
 			return models
 		} catch (error) {
@@ -424,8 +432,8 @@ export function getModelsFromCache(provider: ProviderName): ModelRecord | undefi
 		return memoryModels
 	}
 
-	// kilocode_change start: prevent eternal caching of kilocode models
-	if (provider === "kilocode") {
+	// kilocode_change start: prevent eternal caching of dynamic providers
+	if (provider === "kilocode" || provider === "gpt-chat-by") {
 		return undefined
 	}
 	// kilocode_change end

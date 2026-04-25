@@ -47,6 +47,7 @@ export const DEFAULT_CONSECUTIVE_MISTAKE_LIMIT = 3
  */
 
 export const dynamicProviders = [
+	"gpt-chat-by",
 	"openrouter",
 	"vercel-ai-gateway",
 	"huggingface",
@@ -151,7 +152,6 @@ export const providerNames = [
 	"claude-code",
 	"doubao",
 	"deepseek",
-	"gpt-chat-by",
 	"featherless",
 	"fireworks",
 	"gemini",

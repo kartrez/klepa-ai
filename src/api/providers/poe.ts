@@ -48,7 +48,10 @@ export class PoeHandler extends RouterProvider implements SingleCompletionHandle
 	}
 
 	public override async fetchModel() {
-		this.models = await getModels({ provider: this.name, apiKey: this.client.apiKey })
+		this.models = await getModels({
+			provider: this.name,
+			apiKey: this.client.apiKey,
+		} as Parameters<typeof getModels>[0])
 		return this.getModel()
 	}
 

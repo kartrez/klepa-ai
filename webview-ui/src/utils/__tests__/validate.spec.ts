@@ -78,6 +78,7 @@ describe("Model Validation Functions", () => {
 		"io-intelligence": {},
 		"vercel-ai-gateway": {},
 		huggingface: {},
+		"gpt-chat-by": {},
 		oca: {}, // kilocode_change
 		// kilocode_change start
 		apertis: {},

@@ -53,6 +53,7 @@ const getRouterModels = async (provider?: string) =>
 
 // kilocode_change start
 type RouterModelsQueryKey = {
+	gptChatByApiKey?: string
 	openRouterBaseUrl?: string
 	openRouterApiKey?: string
 	lmStudioBaseUrl?: string

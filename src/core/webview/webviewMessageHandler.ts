@@ -952,6 +952,7 @@ export const webviewMessageHandler = async (
 			const routerModels: Record<RouterName, ModelRecord> = providerFilter
 				? ({} as Record<RouterName, ModelRecord>)
 				: {
+						"gpt-chat-by": {},
 						// kilocode_change start
 						ovhcloud: {},
 						inception: {},
@@ -999,6 +1000,12 @@ export const webviewMessageHandler = async (
 
 			// Base candidates (only those handled by this aggregate fetcher)
 			const candidates: { key: RouterName; options: GetModelsOptions }[] = [
+				{
+					key: "gpt-chat-by",
+					options: {
+						provider: "gpt-chat-by",
+					},
+				},
 				{
 					key: "openrouter",
 					options: { provider: "openrouter", apiKey: openRouterApiKey, baseUrl: openRouterBaseUrl },
@@ -1163,6 +1170,11 @@ export const webviewMessageHandler = async (
 
 			const results = await Promise.allSettled(
 				modelFetchPromises.map(async ({ key, options }) => {
+					// kilocode_change start: gpt-chat.by models are highly dynamic, always bypass cache
+					if (key === "gpt-chat-by") {
+						await flushModels(options, true)
+					}
+					// kilocode_change end
 					const models = await safeGetModels(options)
 					return { key, models } // The key is `ProviderName` here.
 				}),

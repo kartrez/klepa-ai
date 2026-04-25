@@ -55,7 +55,11 @@ export class UnboundHandler extends RouterProvider implements SingleCompletionHa
 	}
 
 	public override async fetchModel() {
-		this.models = await getModels({ provider: this.name, apiKey: this.client.apiKey, baseUrl: this.client.baseURL })
+		this.models = await getModels({
+			provider: this.name,
+			apiKey: this.client.apiKey,
+			baseUrl: this.client.baseURL,
+		} as Parameters<typeof getModels>[0])
 		return this.getModel()
 	}
 

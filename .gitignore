@@ -75,5 +75,6 @@ qdrant_storage/
 .secrets
 # Architect plans
 ./plans/
+.ai
 
 roo-cli-*.tar.gz*

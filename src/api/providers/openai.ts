@@ -32,7 +32,7 @@ import { handleOpenAIError } from "./utils/openai-error-handler"
 export class OpenAiHandler extends BaseProvider implements SingleCompletionHandler {
 	protected options: ApiHandlerOptions
 	protected client: OpenAI
-	private readonly providerName = "OpenAI"
+	protected providerName = "OpenAI"
 
 	constructor(options: ApiHandlerOptions) {
 		super()
@@ -195,6 +195,13 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 			const activeToolCallIds = new Set<string>()
 
 			for await (const chunk of stream) {
+				// kilocode_change start: Handle streaming errors from OpenRouter-compatible providers
+				if ("error" in chunk && (chunk as any).error) {
+					const error = (chunk as any).error
+					const message = typeof error.message === "string" ? error.message : JSON.stringify(error)
+					throw handleOpenAIError(new Error(message), this.providerName)
+				}
+				// kilocode_change end
 				const delta = chunk.choices?.[0]?.delta ?? {}
 				const finishReason = chunk.choices?.[0]?.finish_reason
 
@@ -462,6 +469,13 @@ export class OpenAiHandler extends BaseProvider implements SingleCompletionHandl
 		const activeToolCallIds = new Set<string>()
 
 		for await (const chunk of stream) {
+			// kilocode_change start: Handle streaming errors from OpenRouter-compatible providers
+			if ("error" in chunk && (chunk as any).error) {
+				const error = (chunk as any).error
+				const message = typeof error.message === "string" ? error.message : JSON.stringify(error)
+				throw handleOpenAIError(new Error(message), this.providerName)
+			}
+			// kilocode_change end
 			const delta = chunk.choices?.[0]?.delta
 			const finishReason = chunk.choices?.[0]?.finish_reason
 

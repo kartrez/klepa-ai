@@ -8,6 +8,8 @@ import { getModelParams } from "../transform/model-params"
 import { OpenAiHandler } from "./openai"
 
 export class GptChatByHandler extends OpenAiHandler {
+	protected providerName = "gpt-chat.by"
+
 	constructor(options: ApiHandlerOptions) {
 		super({
 			...options,

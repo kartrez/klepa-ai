@@ -5260,33 +5260,39 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			)
 			const lastApiReq = lastApiReqIndex !== -1 ? this.clineMessages[lastApiReqIndex] : undefined
 
-			const updateRetryMeta = (delayRemaining: number) => {
+			const updateRetryText = (delayRemaining: number) => {
 				if (!lastApiReq) return
-				lastApiReq.metadata = {
-					...lastApiReq.metadata,
-					kiloCode: {
-						...lastApiReq.metadata?.kiloCode,
-						retry: {
-							attempt: retryAttempt + 1,
-							delayRemaining,
-							errorStatus: error?.status,
-							errorMessage: error?.message || "Unknown error",
-						},
-					},
+				let data: Record<string, any> = {}
+				try {
+					if (lastApiReq.text) {
+						data = JSON.parse(lastApiReq.text)
+					}
+				} catch {
+					// ignore parse errors
 				}
+				data.retry = {
+					attempt: retryAttempt + 1,
+					delayRemaining,
+					errorStatus: error?.status,
+					errorMessage: error?.message || "Unknown error",
+				}
+				lastApiReq.text = JSON.stringify(data)
 				this.updateClineMessage(lastApiReq)
 			}
 
-			const clearRetryMeta = () => {
+			const clearRetryText = () => {
 				if (!lastApiReq) return
-				if (lastApiReq.metadata?.kiloCode?.retry) {
-					lastApiReq.metadata = {
-						...lastApiReq.metadata,
-						kiloCode: {
-							...lastApiReq.metadata.kiloCode,
-							retry: undefined,
-						},
+				let data: Record<string, any> = {}
+				try {
+					if (lastApiReq.text) {
+						data = JSON.parse(lastApiReq.text)
 					}
+				} catch {
+					// ignore parse errors
+				}
+				if (data.retry) {
+					delete data.retry
+					lastApiReq.text = JSON.stringify(data)
 					this.updateClineMessage(lastApiReq)
 				}
 			}
@@ -5295,15 +5301,15 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			for (let i = finalDelay; i > 0; i--) {
 				// Check abort flag during countdown to allow early exit
 				if (this.abort) {
-					clearRetryMeta()
+					clearRetryText()
 					throw new Error(`[Task#${this.taskId}] Aborted during retry countdown`)
 				}
 
-				updateRetryMeta(i)
+				updateRetryText(i)
 				await delay(1000)
 			}
 
-			clearRetryMeta()
+			clearRetryText()
 		} catch (err) {
 			console.error("Exponential backoff failed:", err)
 		}

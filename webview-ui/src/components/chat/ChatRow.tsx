@@ -378,7 +378,14 @@ export const ChatRowContent = ({
 						/>
 					</div>
 				)
-				const retryInfo = message.metadata?.kiloCode?.retry
+				const retryInfo = (() => {
+					try {
+						const data = message.text ? JSON.parse(message.text) : {}
+						return data.retry
+					} catch {
+						return undefined
+					}
+				})()
 				const isRetrying = retryInfo && retryInfo.delayRemaining > 0
 				const isApiReqSuccessful =
 					apiReqCancelReason === undefined &&

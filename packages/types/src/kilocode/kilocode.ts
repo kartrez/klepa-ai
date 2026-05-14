@@ -46,18 +46,8 @@ export const commitRangeSchema = z.object({
 
 export type CommitRange = z.infer<typeof commitRangeSchema>
 
-export const retryInfoSchema = z.object({
-	attempt: z.number(),
-	delayRemaining: z.number(),
-	errorStatus: z.number().optional(),
-	errorMessage: z.string().optional(),
-})
-
-export type RetryInfo = z.infer<typeof retryInfoSchema>
-
 export const kiloCodeMetaDataSchema = z.object({
 	commitRange: commitRangeSchema.optional(),
-	retry: retryInfoSchema.optional(),
 })
 
 export type KiloCodeMetaData = z.infer<typeof kiloCodeMetaDataSchema>

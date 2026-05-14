@@ -131,7 +131,6 @@ export class ApplyPatchTool extends BaseTool<"apply_patch"> {
 			task.consecutiveMistakeCount++
 			task.recordToolError("apply_patch")
 			const errorMessage = `File already exists: ${relPath}. Use Update File instead.`
-			await task.say("error", errorMessage)
 			pushToolResult(formatResponse.toolError(errorMessage))
 			return
 		}
@@ -222,7 +221,6 @@ export class ApplyPatchTool extends BaseTool<"apply_patch"> {
 			task.consecutiveMistakeCount++
 			task.recordToolError("apply_patch")
 			const errorMessage = `File not found: ${relPath}. Cannot delete a non-existent file.`
-			await task.say("error", errorMessage)
 			pushToolResult(formatResponse.toolError(errorMessage))
 			return
 		}
@@ -254,7 +252,6 @@ export class ApplyPatchTool extends BaseTool<"apply_patch"> {
 			await fs.unlink(absolutePath)
 		} catch (error) {
 			const errorMessage = `Failed to delete file '${relPath}': ${error instanceof Error ? error.message : String(error)}`
-			await task.say("error", errorMessage)
 			pushToolResult(formatResponse.toolError(errorMessage))
 			return
 		}
@@ -280,7 +277,6 @@ export class ApplyPatchTool extends BaseTool<"apply_patch"> {
 			task.consecutiveMistakeCount++
 			task.recordToolError("apply_patch")
 			const errorMessage = `File not found: ${relPath}. Cannot update a non-existent file.`
-			await task.say("error", errorMessage)
 			pushToolResult(formatResponse.toolError(errorMessage))
 			return
 		}
@@ -365,7 +361,6 @@ export class ApplyPatchTool extends BaseTool<"apply_patch"> {
 				task.consecutiveMistakeCount++
 				task.recordToolError("apply_patch")
 				const errorMessage = `Cannot move file to write-protected path: ${change.movePath}`
-				await task.say("error", errorMessage)
 				pushToolResult(formatResponse.toolError(errorMessage))
 				await task.diffViewProvider.reset()
 				return
@@ -377,7 +372,6 @@ export class ApplyPatchTool extends BaseTool<"apply_patch"> {
 				task.consecutiveMistakeCount++
 				task.recordToolError("apply_patch")
 				const errorMessage = `Cannot move file to path outside workspace: ${change.movePath}`
-				await task.say("error", errorMessage)
 				pushToolResult(formatResponse.toolError(errorMessage))
 				await task.diffViewProvider.reset()
 				return

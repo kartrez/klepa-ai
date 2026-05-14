@@ -131,7 +131,6 @@ export class ReadFileTool extends BaseTool<"read_file"> {
 			task.consecutiveMistakeCount++
 			task.recordToolError("read_file")
 			const errorMsg = `Too many files requested. You attempted to read ${fileEntries.length} files, but the concurrent file reads limit is ${maxConcurrentFileReads}. Please read files in batches of ${maxConcurrentFileReads} or fewer.`
-			await task.say("error", errorMsg)
 			const errorResult = useNative ? `Error: ${errorMsg}` : `<files><error>${errorMsg}</error></files>`
 			pushToolResult(errorResult)
 			return
@@ -170,7 +169,6 @@ export class ReadFileTool extends BaseTool<"read_file"> {
 								xmlContent: `<file><path>${relPath}</path><error>Error reading file: ${errorMsg}</error></file>`,
 								nativeContent: `File: ${relPath}\nError: Error reading file: ${errorMsg}`,
 							})
-							await task.say("error", `Error reading file ${relPath}: ${errorMsg}`)
 							hasRangeError = true
 							break
 						}
@@ -182,7 +180,6 @@ export class ReadFileTool extends BaseTool<"read_file"> {
 								xmlContent: `<file><path>${relPath}</path><error>Error reading file: ${errorMsg}</error></file>`,
 								nativeContent: `File: ${relPath}\nError: Error reading file: ${errorMsg}`,
 							})
-							await task.say("error", `Error reading file ${relPath}: ${errorMsg}`)
 							hasRangeError = true
 							break
 						}
@@ -362,7 +359,6 @@ export class ReadFileTool extends BaseTool<"read_file"> {
 							xmlContent: `<file><path>${relPath}</path><error>Error reading file: ${errorMsg}</error></file>`,
 							nativeContent: `File: ${relPath}\nError: Error reading file: ${errorMsg}`,
 						})
-						await task.say("error", `Error reading file ${relPath}: ${errorMsg}`)
 						continue
 					}
 
@@ -409,7 +405,6 @@ export class ReadFileTool extends BaseTool<"read_file"> {
 									xmlContent: `<file><path>${relPath}</path><error>Error reading image file: ${errorMsg}</error></file>`,
 									nativeContent: `File: ${relPath}\nError: Error reading image file: ${errorMsg}`,
 								})
-								await task.say("error", `Error reading image file ${relPath}: ${errorMsg}`)
 								continue
 							}
 						}
@@ -444,7 +439,6 @@ export class ReadFileTool extends BaseTool<"read_file"> {
 									xmlContent: `<file><path>${relPath}</path><error>Error extracting text: ${errorMsg}</error></file>`,
 									nativeContent: `File: ${relPath}\nError: Error extracting text: ${errorMsg}`,
 								})
-								await task.say("error", `Error extracting text from ${relPath}: ${errorMsg}`)
 								continue
 							}
 						} else {
@@ -617,7 +611,6 @@ export class ReadFileTool extends BaseTool<"read_file"> {
 						xmlContent: `<file><path>${relPath}</path><error>Error reading file: ${errorMsg}</error></file>`,
 						nativeContent: `File: ${relPath}\nError: Error reading file: ${errorMsg}`,
 					})
-					await task.say("error", `Error reading file ${relPath}: ${errorMsg}`)
 				}
 			}
 
@@ -705,7 +698,6 @@ export class ReadFileTool extends BaseTool<"read_file"> {
 				})
 			}
 
-			await task.say("error", `Error reading file ${relPath}: ${errorMsg}`)
 
 			// Mark that a tool failed in this turn
 			task.didToolFailInCurrentTurn = true

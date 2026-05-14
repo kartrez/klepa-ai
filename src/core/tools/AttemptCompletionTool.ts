@@ -87,7 +87,6 @@ export class AttemptCompletionTool extends BaseTool<"attempt_completion"> {
 		if (task.didToolFailInCurrentTurn) {
 			const errorMsg = t("common:errors.attempt_completion_tool_failed")
 
-			await task.say("error", errorMsg)
 			pushToolResult(formatResponse.toolError(errorMsg))
 			return
 		}

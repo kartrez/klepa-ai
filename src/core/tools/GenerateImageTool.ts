@@ -73,7 +73,6 @@ export class GenerateImageTool extends BaseTool<"generate_image"> {
 
 			const inputImageExists = await fileExistsAtPath(inputImageFullPath)
 			if (!inputImageExists) {
-				await task.say("error", `Input image not found: ${getReadablePath(task.cwd, inputImagePath)}`)
 				task.didToolFailInCurrentTurn = true
 				pushToolResult(
 					formatResponse.toolError(`Input image not found: ${getReadablePath(task.cwd, inputImagePath)}`),
@@ -159,7 +158,6 @@ export class GenerateImageTool extends BaseTool<"generate_image"> {
 
 		if (imageProvider === "gpt-chat-by" && !state?.apiConfiguration.gptChatByApiKey) {
 			const errorMessage = t("tools:generateImage.openRouterApiKeyRequired")
-			await task.say("error", errorMessage)
 			pushToolResult(formatResponse.toolError(errorMessage))
 			return
 		}
@@ -207,7 +205,6 @@ export class GenerateImageTool extends BaseTool<"generate_image"> {
 			)
 
 			if (!result.success) {
-				await task.say("error", result.error || "Failed to generate image")
 				task.didToolFailInCurrentTurn = true
 				pushToolResult(formatResponse.toolError(result.error || "Failed to generate image"))
 				return
@@ -215,7 +212,6 @@ export class GenerateImageTool extends BaseTool<"generate_image"> {
 
 			if (!result.imageData) {
 				const errorMessage = "No image data received"
-				await task.say("error", errorMessage)
 				task.didToolFailInCurrentTurn = true
 				pushToolResult(formatResponse.toolError(errorMessage))
 				return
@@ -224,7 +220,6 @@ export class GenerateImageTool extends BaseTool<"generate_image"> {
 			const base64Match = result.imageData.match(/^data:image\/(png|jpeg|jpg);base64,(.+)$/)
 			if (!base64Match) {
 				const errorMessage = "Invalid image format received"
-				await task.say("error", errorMessage)
 				task.didToolFailInCurrentTurn = true
 				pushToolResult(formatResponse.toolError(errorMessage))
 				return

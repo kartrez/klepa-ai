@@ -159,6 +159,7 @@
 		"cancelled": "API Request Cancelled",
 		"streamingFailed": "API Streaming Failed",
 		"rateLimitWait": "Rate limiting",
+		"retrying": "Attempt {{attempt}} failed, retrying in {{seconds}}s...",
 		"errorTitle": "Provider Error {{code}}",
 		"errorMessage": {
 			"docs": "Docs",

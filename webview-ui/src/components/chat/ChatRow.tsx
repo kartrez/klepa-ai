@@ -314,6 +314,7 @@ export const ChatRowContent = ({
 	const errorColor = "var(--vscode-errorForeground)"
 	const successColor = "var(--vscode-charts-green)"
 	const cancelledColor = "var(--vscode-descriptionForeground)"
+	const warningColor = "var(--vscode-editorWarningForeground)"
 
 	const [icon, title] = useMemo(() => {
 		switch (type) {
@@ -377,12 +378,16 @@ export const ChatRowContent = ({
 						/>
 					</div>
 				)
+				const retryInfo = message.metadata?.kiloCode?.retry
+				const isRetrying = retryInfo && retryInfo.delayRemaining > 0
 				const isApiReqSuccessful =
 					apiReqCancelReason === undefined &&
 					apiRequestFailedMessage === undefined &&
 					(cost !== null && cost !== undefined ? true : usageMissing === true)
 				return [
-					apiReqCancelReason !== null && apiReqCancelReason !== undefined ? (
+					isRetrying ? (
+						getIconSpan("warning", warningColor)
+					) : apiReqCancelReason !== null && apiReqCancelReason !== undefined ? (
 						apiReqCancelReason === "user_cancelled" ? (
 							getIconSpan("error", cancelledColor)
 						) : (
@@ -399,7 +404,14 @@ export const ChatRowContent = ({
 					) : (
 						getIconSpan("arrow-swap", normalColor)
 					),
-					apiReqCancelReason !== null && apiReqCancelReason !== undefined ? (
+					isRetrying ? (
+						<span style={{ color: warningColor }}>
+							{t("chat:apiRequest.retrying", {
+								attempt: retryInfo.attempt,
+								seconds: retryInfo.delayRemaining,
+							})}
+						</span>
+					) : apiReqCancelReason !== null && apiReqCancelReason !== undefined ? (
 						apiReqCancelReason === "user_cancelled" ? (
 							<span style={{ color: normalColor, fontWeight: "bold" }}>
 								{t("chat:apiRequest.cancelled")}
@@ -1259,69 +1271,7 @@ export const ChatRowContent = ({
 						</>
 					)
 				case "api_req_retry_delayed":
-					let body = t(`chat:apiRequest.failed`)
-					let retryInfo, rawError, code, docsURL
-					if (message.text !== undefined) {
-						// Check for Claude Code authentication error first
-						if (message.text.includes("Not authenticated with Claude Code")) {
-							body = t("chat:apiRequest.errorMessage.claudeCodeNotAuthenticated")
-							docsURL = "roocode://settings?provider=claude-code"
-						} else {
-							// Try to show richer error message for that code, if available
-							const potentialCode = parseInt(message.text.substring(0, 3))
-							if (!isNaN(potentialCode) && potentialCode >= 400) {
-								code = potentialCode
-								const stringForError = `chat:apiRequest.errorMessage.${code}`
-								if (i18n.exists(stringForError)) {
-									body = t(stringForError)
-									// Fill this out in upcoming PRs
-									// Do not remove this
-									// switch(code) {
-									// 	case ERROR_CODE:
-									// 		docsURL = ???
-									// 		break;
-									// }
-								} else {
-									body = t("chat:apiRequest.errorMessage.unknown")
-									docsURL =
-										"mailto:support@roocode.com?subject=Unknown API Error&body=[Please include full error details]"
-								}
-							} else if (message.text.indexOf("Connection error") === 0) {
-								body = t("chat:apiRequest.errorMessage.connection")
-							} else {
-								// Non-HTTP-status-code error message - store full text as errorDetails
-								body = t("chat:apiRequest.errorMessage.unknown")
-								docsURL = "https://gpt-chat.by"
-							}
-						}
-
-						// This isn't pretty, but since the retry logic happens at a lower level
-						// and the message object is just a flat string, we need to extract the
-						// retry information using this "tag" as a convention
-						const retryTimerMatch = message.text.match(/<retry_timer>(.*?)<\/retry_timer>/)
-						const retryTimer = retryTimerMatch && retryTimerMatch[1] ? parseInt(retryTimerMatch[1], 10) : 0
-						rawError = message.text.replace(/<retry_timer>(.*?)<\/retry_timer>/, "").trim()
-						retryInfo = retryTimer > 0 && (
-							<p
-								className={cn(
-									"mt-2 font-light text-xs  text-vscode-descriptionForeground cursor-default flex items-center gap-1 transition-all duration-1000",
-									retryTimer === 0 ? "opacity-0 max-h-0" : "max-h-2 opacity-100",
-								)}>
-								<Repeat2 className="size-3" strokeWidth={1.5} />
-								<span>{retryTimer}s</span>
-							</p>
-						)
-					}
-					return (
-						<ErrorRow
-							type="api_req_retry_delayed"
-							code={code}
-							message={body}
-							docsURL={docsURL}
-							additionalContent={retryInfo}
-							errorDetails={rawError}
-						/>
-					)
+					return null
 				case "api_req_rate_limit_wait": {
 					const isWaiting = message.partial === true
 

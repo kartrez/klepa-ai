@@ -791,11 +791,6 @@ export async function presentAssistantMessage(cline: Task) {
 				}
 				const errorString = `Error ${action}: ${JSON.stringify(serializeError(error))}`
 
-				await cline.say(
-					"error",
-					`Error ${action}:\n${error.message ?? JSON.stringify(serializeError(error), null, 2)}`,
-				)
-
 				pushToolResult(formatResponse.toolError(errorString, toolProtocol))
 			}
 
@@ -1262,7 +1257,6 @@ export async function presentAssistantMessage(cline: Task) {
 									const message = `Custom tool "${block.name}" argument validation failed: ${parseParamsError.message}`
 									console.error(message)
 									cline.consecutiveMistakeCount++
-									await cline.say("error", message)
 									pushToolResult(formatResponse.toolError(message, toolProtocol))
 									break
 								}
@@ -1293,7 +1287,6 @@ export async function presentAssistantMessage(cline: Task) {
 					const errorMessage = `Unknown tool "${block.name}". This tool does not exist. Please use one of the available tools.`
 					cline.consecutiveMistakeCount++
 					cline.recordToolError(block.name as ToolName, errorMessage)
-					await cline.say("error", t("tools:unknownToolError", { toolName: block.name }))
 					// Push tool_result directly for native protocol WITHOUT setting didAlreadyUseTool
 					// This prevents the stream from being interrupted with "Response interrupted by tool use result"
 					if (toolProtocol === TOOL_PROTOCOL.NATIVE && toolCallId) {

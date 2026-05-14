@@ -98,7 +98,6 @@ export class SearchReplaceTool extends BaseTool<"search_replace"> {
 				task.consecutiveMistakeCount++
 				task.recordToolError("search_replace")
 				const errorMessage = `File not found: ${relPath}. Cannot perform search and replace on a non-existent file.`
-				await task.say("error", errorMessage)
 				pushToolResult(formatResponse.toolError(errorMessage, toolProtocol))
 				return
 			}
@@ -112,7 +111,6 @@ export class SearchReplaceTool extends BaseTool<"search_replace"> {
 				task.consecutiveMistakeCount++
 				task.recordToolError("search_replace")
 				const errorMessage = `Failed to read file '${relPath}'. Please verify file permissions and try again.`
-				await task.say("error", errorMessage)
 				pushToolResult(formatResponse.toolError(errorMessage, toolProtocol))
 				return
 			}

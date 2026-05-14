@@ -130,7 +130,6 @@ export class UseMcpToolTool extends BaseTool<"use_mcp_tool"> {
 				} catch (error) {
 					task.consecutiveMistakeCount++
 					task.recordToolError("use_mcp_tool")
-					await task.say("error", t("mcp:errors.invalidJsonArgument", { toolName: params.tool_name }))
 					task.didToolFailInCurrentTurn = true
 
 					pushToolResult(
@@ -179,7 +178,6 @@ export class UseMcpToolTool extends BaseTool<"use_mcp_tool"> {
 
 				task.consecutiveMistakeCount++
 				task.recordToolError("use_mcp_tool")
-				await task.say("error", t("mcp:errors.serverNotFound", { serverName, availableServers }))
 				task.didToolFailInCurrentTurn = true
 
 				pushToolResult(formatResponse.unknownMcpServerError(serverName, availableServersArray))

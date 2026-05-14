@@ -2089,12 +2089,13 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				text: `<task>\n${task}\n</task>`,
 			},
 			...imageBlocks,
-		]).catch((error) => {
+		]).catch(async (error) => {
 			// Swallow loop rejection when the task was intentionally abandoned/aborted
 			// during delegation or user cancellation to prevent unhandled rejections.
 			if (this.abandoned === true || this.abortReason === "user_cancelled") {
 				return
 			}
+			await this.say("error", error.message ?? JSON.stringify(error, null, 2))
 			throw error
 		})
 	}
@@ -2395,7 +2396,10 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 		await this.overwriteApiConversationHistory(modifiedApiConversationHistory)
 
 		// Task resuming from history item.
-		await this.initiateTaskLoop(newUserContent)
+		await this.initiateTaskLoop(newUserContent).catch(async (error) => {
+			await this.say("error", error.message ?? JSON.stringify(error, null, 2))
+			throw error
+		})
 	}
 
 	/**
@@ -2653,7 +2657,10 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 
 		// Continue task loop - pass empty array to signal no new user content needed
 		// The initiateTaskLoop will handle this by skipping user message addition
-		await this.initiateTaskLoop([])
+		await this.initiateTaskLoop([]).catch(async (error) => {
+			await this.say("error", error.message ?? JSON.stringify(error, null, 2))
+			throw error
+		})
 	}
 
 	// Task Loop
@@ -5245,34 +5252,58 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				return
 			}
 
-			// Build header text; fall back to error message if none provided
-			let headerText
-			if (error.status) {
-				// Include both status code (for ChatRow parsing) and detailed message (for error details)
-				// Format: "<status>\n<message>" allows ChatRow to extract status via parseInt(text.substring(0,3))
-				// while preserving the full error message in errorDetails for debugging
-				const errorMessage = error?.message || "Unknown error"
-				headerText = `${error.status}\n${errorMessage}`
-			} else if (error?.message) {
-				headerText = error.message
-			} else {
-				headerText = "Unknown error"
+			// Attach retry info to the last api_req_started message so the UI can show
+			// a non-intrusive warning + countdown inside the existing API request row.
+			const lastApiReqIndex = findLastIndex(
+				this.clineMessages,
+				(m) => m.type === "say" && m.say === "api_req_started",
+			)
+			const lastApiReq = lastApiReqIndex !== -1 ? this.clineMessages[lastApiReqIndex] : undefined
+
+			const updateRetryMeta = (delayRemaining: number) => {
+				if (!lastApiReq) return
+				lastApiReq.metadata = {
+					...lastApiReq.metadata,
+					kiloCode: {
+						...lastApiReq.metadata?.kiloCode,
+						retry: {
+							attempt: retryAttempt + 1,
+							delayRemaining,
+							errorStatus: error?.status,
+							errorMessage: error?.message || "Unknown error",
+						},
+					},
+				}
+				this.updateClineMessage(lastApiReq)
 			}
 
-			headerText = headerText ? `${headerText}\n` : ""
+			const clearRetryMeta = () => {
+				if (!lastApiReq) return
+				if (lastApiReq.metadata?.kiloCode?.retry) {
+					lastApiReq.metadata = {
+						...lastApiReq.metadata,
+						kiloCode: {
+							...lastApiReq.metadata.kiloCode,
+							retry: undefined,
+						},
+					}
+					this.updateClineMessage(lastApiReq)
+				}
+			}
 
 			// Show countdown timer with exponential backoff
 			for (let i = finalDelay; i > 0; i--) {
 				// Check abort flag during countdown to allow early exit
 				if (this.abort) {
+					clearRetryMeta()
 					throw new Error(`[Task#${this.taskId}] Aborted during retry countdown`)
 				}
 
-				await this.say("api_req_retry_delayed", `${headerText}<retry_timer>${i}</retry_timer>`, undefined, true)
+				updateRetryMeta(i)
 				await delay(1000)
 			}
 
-			await this.say("api_req_retry_delayed", headerText, undefined, false)
+			clearRetryMeta()
 		} catch (err) {
 			console.error("Exponential backoff failed:", err)
 		}
@@ -5655,6 +5686,9 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			...formatResponse.imageBlocks(normalizedImages),
 		])
 
-		await this.initiateTaskLoop(newUserContent)
+		await this.initiateTaskLoop(newUserContent).catch(async (error) => {
+			await this.say("error", error.message ?? JSON.stringify(error, null, 2))
+			throw error
+		})
 	}
 }

@@ -120,7 +120,6 @@ export async function deleteFileTool(
 			cline.consecutiveMistakeCount++
 			cline.recordToolError("delete_file")
 			const errorMsg = `File or directory does not exist: ${relativePath}`
-			await cline.say("error", errorMsg)
 			pushToolResult(formatResponse.toolError(errorMsg))
 			return
 		}
@@ -146,7 +145,6 @@ export async function deleteFileTool(
 			cline.consecutiveMistakeCount++
 			cline.recordToolError("delete_file")
 			const errorMsg = formatResponse.rooIgnoreError(relativePath)
-			await cline.say("error", errorMsg)
 			pushToolResult(formatResponse.toolError(errorMsg))
 			return
 		}
@@ -158,7 +156,6 @@ export async function deleteFileTool(
 			cline.consecutiveMistakeCount++
 			cline.recordToolError("delete_file")
 			const errorMsg = `Cannot delete write-protected file: ${relativePath}`
-			await cline.say("error", errorMsg)
 			pushToolResult(formatResponse.toolError(errorMsg))
 			return
 		}
@@ -169,7 +166,6 @@ export async function deleteFileTool(
 			cline.consecutiveMistakeCount++
 			cline.recordToolError("delete_file")
 			const errorMsg = `Cannot delete files outside workspace. Path: ${relativePath}`
-			await cline.say("error", errorMsg)
 			pushToolResult(formatResponse.toolError(errorMsg))
 			return
 		}
@@ -212,7 +208,6 @@ export async function deleteFileTool(
 				if (error instanceof DirectoryDeletionBlockedError) {
 					cline.consecutiveMistakeCount++
 					cline.recordToolError("delete_file")
-					await cline.say("error", error.reason)
 					pushToolResult(formatResponse.toolError(error.reason))
 					return
 				}

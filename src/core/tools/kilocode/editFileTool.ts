@@ -144,7 +144,6 @@ export async function editFileTool(
 			cline.consecutiveMistakeCount++
 			cline.recordToolError("fast_edit_file")
 			const error = `Failed to apply edit using Fast Apply. Please disable the Fast Apply experimental feature if this error persists. ${morphApplyResult.error}`
-			cline.say("error", error)
 			pushToolResult(formatResponse.toolError(error))
 			return
 		}

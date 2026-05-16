@@ -314,8 +314,10 @@ function getSelectedModel({
 			return { id, info }
 		}
 		case "gpt-chat-by": {
-			const id = apiConfiguration.apiModelId ?? gptChatByDefaultModelId
-			const info = gptChatByModels[id as keyof typeof gptChatByModels]
+			const id = getValidatedModelId(apiConfiguration.apiModelId, routerModels["gpt-chat-by"], gptChatByDefaultModelId)
+			const routerInfo = routerModels["gpt-chat-by"]?.[id]
+			const staticInfo = gptChatByModels[id as keyof typeof gptChatByModels]
+			const info = routerInfo ?? staticInfo
 			return { id, info }
 		}
 		case "doubao": {

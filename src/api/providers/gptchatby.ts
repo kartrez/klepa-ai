@@ -18,6 +18,9 @@ export class GptChatByHandler extends OpenAiHandler {
 			openAiBaseUrl: "https://gpt-chat.by/api",
 			openAiStreamingEnabled: true,
 			includeMaxTokens: true,
+			openAiHeaders: {
+				"X-Traffic-Source" : "Klepa-AI"
+			}
 		})
 	}
 

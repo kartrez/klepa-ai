@@ -2,6 +2,11 @@ import { z } from "zod"
 
 import { type ModelInfo, gptChatByModels } from "@roo-code/types"
 
+const architectureSchema = z.object({
+	inputModalities: z.array(z.string()).nullish(),
+	outputModalities: z.array(z.string()).nullish(),
+})
+
 const gptChatByModelSchema = z.object({
 	name: z.string(),
 	maxTokens: z.number().nullable().optional(),
@@ -16,6 +21,8 @@ const gptChatByModelSchema = z.object({
 	description: z.string().optional(),
 	isFree: z.boolean().optional(),
 	recommended: z.boolean().optional(),
+	architecture: architectureSchema.optional(),
+	supportedParameters: z.array(z.string()).optional(),
 })
 
 const gptChatByModelsResponseSchema = z.array(gptChatByModelSchema)
@@ -64,6 +71,9 @@ export async function getGptChatByModels(options?: { baseUrl?: string }): Promis
 				description: model.description ?? staticInfo?.description,
 				isFree: model.isFree ?? staticInfo?.isFree,
 				recommended: model.recommended ?? staticInfo?.recommended,
+				inputModality: model.architecture?.inputModalities ?? staticInfo?.inputModalities,
+				outputModality: model.architecture?.outputModalities ?? staticInfo?.outputModalities,
+				supportedParameters: model.supportedParameters ?? staticInfo?.supportedParameters,
 			}
 		}
 

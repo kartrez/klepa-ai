@@ -3020,7 +3020,7 @@ export const webviewMessageHandler = async (
 					"Content-Type": "application/json",
 				}
 
-				const url = "https://gpt-chat.by/api/copy-code/balance"
+				const url = "https://api.gpt-chat.by/api/copy-code/balance"
 				const response = await axios.get(url, { headers })
 				provider.postMessageToWebview({
 					type: "balanceDataResponse", // New response type
@@ -3050,15 +3050,15 @@ export const webviewMessageHandler = async (
 					Authorization: `Bearer ${gptChatByApiKey}`,
 					"Content-Type": "application/json",
 				}
-				let url = `https://gpt-chat.by/api/copy-code/balance/top-up?amount=${credits}`
+				let url = `https://api.gpt-chat.by/api/copy-code/balance/top-up?amount=${credits}`
 				if (period === 0) {
-					url = `https://gpt-chat.by/api/copy-code/activate-trial`
+					url = `https://api.gpt-chat.by/api/copy-code/activate-trial`
 				}
 				if (period === 1) {
-					url = `https://gpt-chat.by/api/copy-code/balance/top-up?supply=COPI_CODE_SUBSCRIBE`
+					url = `https://api.gpt-chat.by/api/copy-code/balance/top-up?supply=COPI_CODE_SUBSCRIBE`
 				}
 				if (period === 12) {
-					url = `https://gpt-chat.by/api/copy-code/balance/top-up?supply=COPI_CODE_SUBSCRIBE_YEAR`
+					url = `https://api.gpt-chat.by/api/copy-code/balance/top-up?supply=COPI_CODE_SUBSCRIBE_YEAR`
 				}
 
 				const response = await axios.get(url, { headers })

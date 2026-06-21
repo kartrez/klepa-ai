@@ -192,7 +192,7 @@ export class GenerateImageTool extends BaseTool<"generate_image"> {
 			// Use Klepa AI Cloud provider (supports both chat completions and images API)
 			// Use OpenRouter provider (only supports chat completions API)
 			const handler = new OpenRouterHandler({
-				openRouterBaseUrl : "https://gpt-chat.by/api"
+				openRouterBaseUrl : "https://api.gpt-chat.by/api"
 			} as ApiHandlerOptions)
 			result = await handler.generateImage(
 				prompt,

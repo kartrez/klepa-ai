@@ -27,7 +27,7 @@ const gptChatByModelSchema = z.object({
 
 const gptChatByModelsResponseSchema = z.array(gptChatByModelSchema)
 
-const DEFAULT_BASE_URL = "https://gpt-chat.by/api"
+const DEFAULT_BASE_URL = "https://api.gpt-chat.by/api"
 
 export async function getGptChatByModels(options?: { baseUrl?: string }): Promise<Record<string, ModelInfo>> {
 	const baseUrl = options?.baseUrl ?? DEFAULT_BASE_URL

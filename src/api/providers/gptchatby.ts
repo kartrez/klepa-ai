@@ -15,7 +15,7 @@ export class GptChatByHandler extends OpenAiHandler {
 			...options,
 			openAiApiKey: options.gptChatByApiKey ?? "not-provided",
 			openAiModelId: options.apiModelId ?? gptChatByDefaultModelId,
-			openAiBaseUrl: "https://gpt-chat.by/api",
+			openAiBaseUrl: "https://api.gpt-chat.by/api",
 			openAiStreamingEnabled: true,
 			includeMaxTokens: true,
 			openAiHeaders: {

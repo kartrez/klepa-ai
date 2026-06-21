@@ -19,7 +19,7 @@ export class GptChatByHandler extends OpenAiHandler {
 			openAiStreamingEnabled: true,
 			includeMaxTokens: true,
 			openAiHeaders: {
-				"X-Traffic-Source" : "Klepa-AI"
+				"X-Traffic-Source" : "Klepa-AI (v-0.3.9)"
 			}
 		})
 	}

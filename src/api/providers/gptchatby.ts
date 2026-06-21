@@ -1,6 +1,7 @@
 import { gptChatByDefaultModelId, gptChatByModels, NATIVE_TOOL_DEFAULTS } from "@roo-code/types"
 
 import type { ApiHandlerOptions } from "../../shared/api"
+import { Package } from "../../shared/package"
 
 import type { ApiStreamUsageChunk } from "../transform/stream"
 import { getModelParams } from "../transform/model-params"
@@ -19,7 +20,7 @@ export class GptChatByHandler extends OpenAiHandler {
 			openAiStreamingEnabled: true,
 			includeMaxTokens: true,
 			openAiHeaders: {
-				"X-Traffic-Source" : "Klepa-AI (v-0.3.9)"
+				"X-Traffic-Source": `Klepa-AI v${Package.version}`,
 			}
 		})
 	}

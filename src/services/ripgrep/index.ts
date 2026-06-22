@@ -6,7 +6,7 @@ import * as vscode from "vscode"
 
 import { RooIgnoreController } from "../../core/ignore/RooIgnoreController"
 import { fileExistsAtPath } from "../../utils/fs"
-import { checkBunPath } from "./index.kilocode" // kilocode_change
+import { checkBunPath, checkSystemRipgrep, getRipgrepPlatformDir } from "./index.kilocode" // kilocode_change
 import "../../utils/path" // Import to enable String.prototype.toPosix()
 /*
 This file provides functionality to perform regex searches on files using ripgrep.
@@ -90,12 +90,24 @@ export async function getBinPath(vscodeAppRoot: string): Promise<string | undefi
 		return (await fileExistsAtPath(fullPath)) ? fullPath : undefined
 	}
 
+	// kilocode_change start
+	const platformDir = getRipgrepPlatformDir()
+	const universalBinFolder = `bin/${platformDir}`
+	// kilocode_change end
+
 	return (
+		// kilocode_change start - VS Code 1.122+ @vscode/ripgrep-universal layout
+		(await checkPath(`node_modules/@vscode/ripgrep-universal/${universalBinFolder}`)) ||
+		(await checkPath(`node_modules.asar.unpacked/@vscode/ripgrep-universal/${universalBinFolder}`)) ||
+		(await checkPath(`node_modules/@vscode/ripgrep/bin/${platformDir}`)) ||
+		(await checkPath(`node_modules.asar.unpacked/@vscode/ripgrep/bin/${platformDir}`)) ||
+		// kilocode_change end
 		(await checkPath("node_modules/@vscode/ripgrep/bin/")) ||
 		(await checkPath("node_modules/vscode-ripgrep/bin")) ||
 		(await checkPath("node_modules.asar.unpacked/vscode-ripgrep/bin/")) ||
 		(await checkPath("node_modules.asar.unpacked/@vscode/ripgrep/bin/")) ||
-		(await checkBunPath(vscodeAppRoot, binName)) // kilocode_change
+		(await checkBunPath(vscodeAppRoot, binName)) || // kilocode_change
+		(await checkSystemRipgrep(binName)) // kilocode_change
 	)
 }
 

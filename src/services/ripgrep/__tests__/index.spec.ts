@@ -7,6 +7,14 @@ import { fileExistsAtPath } from "../../../utils/fs" // kilocode_change
 vi.mock("../../../utils/fs", () => ({
 	fileExistsAtPath: vi.fn(),
 }))
+
+vi.mock("../index.kilocode", async () => {
+	const actual = await vi.importActual<typeof import("../index.kilocode")>("../index.kilocode")
+	return {
+		...actual,
+		checkSystemRipgrep: vi.fn(async () => undefined),
+	}
+})
 // kilocode_change end
 describe("Ripgrep line truncation", () => {
 	// The default MAX_LINE_LENGTH is 500 in the implementation
@@ -67,6 +75,32 @@ describe("getBinPath", () => {
 	it("should find ripgrep in traditional node_modules/@vscode/ripgrep/bin/", async () => {
 		const vscodeAppRoot = "/path/to/vscode"
 		const expectedPath = path.join(vscodeAppRoot, "node_modules/@vscode/ripgrep/bin/", binName)
+
+		mockFileExists.mockImplementation(async (filePath: string) => filePath === expectedPath)
+
+		const result = await getBinPath(vscodeAppRoot)
+		expect(result).toBe(expectedPath)
+	})
+
+	it("should find ripgrep in VS Code 1.122+ ripgrep-universal layout", async () => {
+		const vscodeAppRoot = "/path/to/vscode"
+		const platformDir = `${process.platform}-${process.arch}`
+		const expectedPath = path.join(
+			vscodeAppRoot,
+			`node_modules/@vscode/ripgrep-universal/bin/${platformDir}`,
+			binName,
+		)
+
+		mockFileExists.mockImplementation(async (filePath: string) => filePath === expectedPath)
+
+		const result = await getBinPath(vscodeAppRoot)
+		expect(result).toBe(expectedPath)
+	})
+
+	it("should find ripgrep in platform-specific legacy @vscode/ripgrep/bin subfolder", async () => {
+		const vscodeAppRoot = "/path/to/vscode"
+		const platformDir = `${process.platform}-${process.arch}`
+		const expectedPath = path.join(vscodeAppRoot, `node_modules/@vscode/ripgrep/bin/${platformDir}`, binName)
 
 		mockFileExists.mockImplementation(async (filePath: string) => filePath === expectedPath)
 

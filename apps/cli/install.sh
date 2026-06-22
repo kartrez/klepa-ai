@@ -118,6 +118,40 @@ get_version() {
     info "Latest version: $VERSION"
 }
 
+# Ripgrep platform directory for @vscode/ripgrep-universal (VS Code 1.122+)
+get_ripgrep_platform_dir() {
+    echo "$PLATFORM"
+}
+
+# Find ripgrep binary — legacy path or VS Code 1.122+ ripgrep-universal layout
+find_ripgrep_binary() {
+    _base="$1"
+    _legacy="$_base/node_modules/@vscode/ripgrep/bin/rg"
+    _universal="$_base/node_modules/@vscode/ripgrep-universal/bin/$(get_ripgrep_platform_dir)/rg"
+
+    if [ -f "$_legacy" ]; then
+        echo "$_legacy"
+        return 0
+    fi
+
+    if [ -f "$_universal" ]; then
+        echo "$_universal"
+        return 0
+    fi
+
+    return 1
+}
+
+# Extensions expect ripgrep at node_modules/@vscode/ripgrep/bin/rg
+install_ripgrep_to_legacy_path() {
+    _src="$1"
+    _dest_dir="$INSTALL_DIR/node_modules/@vscode/ripgrep/bin"
+
+    mkdir -p "$_dest_dir"
+    cp "$_src" "$_dest_dir/rg"
+    chmod +x "$_dest_dir/rg"
+}
+
 # Download and extract
 download_and_install() {
     TARBALL="roo-cli-${PLATFORM}.tar.gz"
@@ -170,9 +204,10 @@ Available at: https://github.com/$REPO/releases"
     
     # Save ripgrep binary before npm install (npm install will overwrite node_modules)
     RIPGREP_BIN=""
-    if [ -f "$INSTALL_DIR/node_modules/@vscode/ripgrep/bin/rg" ]; then
+    RIPGREP_SOURCE=$(find_ripgrep_binary "$INSTALL_DIR" || true)
+    if [ -n "$RIPGREP_SOURCE" ] && [ -f "$RIPGREP_SOURCE" ]; then
         RIPGREP_BIN="$TMP_DIR/rg"
-        cp "$INSTALL_DIR/node_modules/@vscode/ripgrep/bin/rg" "$RIPGREP_BIN"
+        cp "$RIPGREP_SOURCE" "$RIPGREP_BIN"
     fi
     
     # Install npm dependencies
@@ -186,11 +221,13 @@ Available at: https://github.com/$REPO/releases"
     }
     cd - > /dev/null
     
-    # Restore ripgrep binary after npm install
-    if [ -n "$RIPGREP_BIN" ] && [ -f "$RIPGREP_BIN" ]; then
-        mkdir -p "$INSTALL_DIR/node_modules/@vscode/ripgrep/bin"
-        cp "$RIPGREP_BIN" "$INSTALL_DIR/node_modules/@vscode/ripgrep/bin/rg"
-        chmod +x "$INSTALL_DIR/node_modules/@vscode/ripgrep/bin/rg"
+    # Restore ripgrep binary to legacy path after npm install
+    RIPGREP_SOURCE=$(find_ripgrep_binary "$INSTALL_DIR" || true)
+    if [ -z "$RIPGREP_SOURCE" ] && [ -n "$RIPGREP_BIN" ] && [ -f "$RIPGREP_BIN" ]; then
+        RIPGREP_SOURCE="$RIPGREP_BIN"
+    fi
+    if [ -n "$RIPGREP_SOURCE" ] && [ -f "$RIPGREP_SOURCE" ]; then
+        install_ripgrep_to_legacy_path "$RIPGREP_SOURCE"
     fi
     
     # Make executable

@@ -72,7 +72,7 @@
 		"fuse.js": "^7.1.0",
 		"fzf": "^0.5.2",
 		"get-folder-size": "^5.0.0",
-		"google-auth-library": "^10.5.0",
+		"google-auth-library": "^10.7.0",
 		"gray-matter": "^4.0.3",
 		"i18next": "^25.7.4",
 		"ignore": "^7.0.5",

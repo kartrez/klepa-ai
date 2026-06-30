@@ -734,7 +734,7 @@
 		"puppeteer-chromium-resolver": "^24.0.0",
 		"puppeteer-core": "^24.37.5",
 		"quick-lru": "^7.0.0",
-		"reconnecting-eventsource": "^1.6.4",
+		"reconnecting-eventsource": "^1.6.5",
 		"safe-stable-stringify": "^2.5.0",
 		"sanitize-filename": "^1.6.3",
 		"say": "^0.16.0",
